@@ -30,7 +30,7 @@ data:
       type: RollingUpdate
 
     extraArgs:
-      workers: 4
+      workers: "4"
       staticPrefix: /mlflow
 
     resources:
