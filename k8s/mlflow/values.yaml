@@ -80,9 +80,8 @@ data:
         host: "postgres-cluster-rw.postgres.svc.cluster.local"
         port: 5432
         user: "mlflow"
-        driver: ""
         database: "mlflow"
-        password: ""
+        password: "mysupersecretpassword"
       databaseMigration: true
       databaseConnectionCheck: true
 

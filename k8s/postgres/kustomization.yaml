@@ -8,3 +8,4 @@ resources:
 - values.yaml
 - cluster.yaml
 - dbs.yaml
+- mlflow-db-secret.yaml

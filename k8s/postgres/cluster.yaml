@@ -13,6 +13,12 @@ spec:
   logLevel: info
   maxSyncReplicas: 0
   minSyncReplicas: 0
+  managed:
+    roles:
+    - name: mlflow
+      ensure: present
+      passwordSecret:
+        name: mlflow-db-secret
   storage:
     size: 10Gi
     storageClass: local-path
