@@ -8,6 +8,11 @@ metadata:
 spec:
   instances: 1
   imagePullPolicy: IfNotPresent
+  bootstrap:
+    initdb: {}
+  logLevel: info
+  maxSyncReplicas: 0
+  minSyncReplicas: 0
   storage:
     size: 10Gi
     storageClass: local-path
@@ -20,6 +25,13 @@ spec:
       volumeMode: Filesystem
       accessModes:
         - ReadWriteOnce
+  replicationSlots:
+    highAvailability:
+      enabled: true
+      slotPrefix: _cnpg_
+    synchronizeReplicas:
+      enabled: true
+    updateInterval: 30
   resources:
     requests:
       cpu: 250m
