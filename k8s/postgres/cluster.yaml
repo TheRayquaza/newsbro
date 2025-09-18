@@ -10,7 +10,7 @@ spec:
   imagePullPolicy: IfNotPresent
   storage:
     size: 10Gi
-    storageClass: standard
+    storageClass: local-path
     resizeInUseVolumes: true
   resources:
     requests:

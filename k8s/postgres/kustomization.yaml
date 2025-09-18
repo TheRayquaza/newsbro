@@ -6,3 +6,4 @@ resources:
 - helm-chart.yaml
 - helm-release.yaml
 - values.yaml
+- cluster.yaml
