@@ -1,0 +1,122 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: mlflow-values
+  namespace: mlflow
+data:
+  values.yaml: |
+    log:
+      level: info
+      enabled: true
+
+    image:
+      tag: ""
+      pullPolicy: IfNotPresent
+      repository: burakince/mlflow
+
+    ingress:
+      enabled: true
+      className: "traefik"
+
+    service:
+      name: http
+      port: 5000
+      type: ClusterIP
+      enabled: true
+      containerPort: 5000
+      containerPortName: mlflow
+
+    strategy:
+      type: RollingUpdate
+
+    extraArgs:
+      workers: 4
+      staticPrefix: /mlflow
+
+    resources:
+      limits:
+        cpu: 500m
+        memory: 2Gi
+      requests:
+        cpu: 200m
+        memory: 1Gi
+
+    telemetry:
+      enabled: true
+
+    autoscaling:
+      enabled: false
+      maxReplicas: 5
+      minReplicas: 1
+
+    artifactRoot:
+      s3:
+        #path: ""
+        bucket: "mflow"
+        enabled: true
+        awsAccessKeyId: "minio"
+        awsSecretAccessKey: "minio123"
+
+      defaultArtifactRoot: ./mlruns
+      proxiedArtifactStorage: false
+      defaultArtifactsDestination: ./mlartifacts
+
+    backendStore:
+      postgres:
+        enabled: true
+        host: "postgres-cluster-rw.postgres.svc.cluster.local"
+        port: 5432
+        user: "mlflow"
+        driver: ""
+        enabled: false
+        database: "mlflow"
+        password: ""
+      databaseMigration: true
+      defaultSqlitePath: ":memory:"
+      databaseConnectionCheck: false
+
+    extraEnvVars:
+      AWS_DEFAULT_REGION: "us-east-1"
+      MLFLOW_S3_IGNORE_TLS: true
+      MLFLOW_S3_ENDPOINT_URL: "http://minio-svc.minio.svc.cluster.local:9000"
+
+    replicaCount: 1
+
+    livenessProbe:
+      periodSeconds: 30
+      timeoutSeconds: 3
+      failureThreshold: 5
+      initialDelaySeconds: 10
+
+    readinessProbe:
+      periodSeconds: 30
+      timeoutSeconds: 3
+      failureThreshold: 5
+      initialDelaySeconds: 10
+
+    serviceAccount:
+      name: ""
+      create: true
+      automount: true
+
+    serviceMonitor:
+      labels:
+        release: prometheus
+      enabled: false
+      timeout: 10s
+      interval: 30s
+      namespace: monitoring
+      telemetryPath: /metrics
+      useServicePort: false
+
+    securityContext:
+      runAsUser: 1000
+      runAsNonRoot: true
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+
+    podSecurityContext:
+      fsGroup: 2000
+      runAsUser: 1000
+      runAsGroup: 3000
+      fsGroupChangePolicy: OnRootMismatch

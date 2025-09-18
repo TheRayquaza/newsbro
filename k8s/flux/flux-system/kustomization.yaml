@@ -6,3 +6,4 @@ resources:
 - minio.yaml
 #- capacitor.yaml
 - postgres.yaml
+- mlflow.yaml
