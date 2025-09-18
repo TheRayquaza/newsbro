@@ -6,12 +6,20 @@ metadata:
   name: postgres-cluster
   namespace: postgres
 spec:
-  instances: 3
+  instances: 1
   imagePullPolicy: IfNotPresent
   storage:
     size: 10Gi
     storageClass: local-path
     resizeInUseVolumes: true
+    pvcTemplate:
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: local-path
+      volumeMode: Filesystem
+      accessModes:
+        - ReadWriteOnce
   resources:
     requests:
       cpu: 250m
