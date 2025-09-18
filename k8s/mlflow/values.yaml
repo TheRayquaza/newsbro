@@ -9,6 +9,19 @@ data:
       level: info
       enabled: true
 
+
+    strategy:
+      type: Recreate
+
+    extraVolumes:
+      - name: mlflow-volume
+        persistentVolumeClaim:
+          claimName: mlflow-pvc
+
+    extraVolumeMounts:
+      - name: mlflow-volume
+        mountPath: /mlflow
+
     image:
       tag: ""
       pullPolicy: IfNotPresent
@@ -17,6 +30,11 @@ data:
     ingress:
       enabled: true
       className: "traefik"
+      hosts:
+        - host: mlflow.localhost
+          paths:
+            - path: /
+              pathType: Prefix
 
     service:
       name: http
@@ -31,7 +49,7 @@ data:
 
     extraArgs:
       workers: "4"
-      staticPrefix: /mlflow
+      # staticPrefix: /mlflow # we should use this if we want to serve mlflow under /mlflow path
 
     resources:
       limits:
@@ -45,11 +63,19 @@ data:
       enabled: true
 
     autoscaling:
-      enabled: false
-      maxReplicas: 5
-      minReplicas: 1
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 10
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 70
 
     artifactRoot:
+      proxiedArtifactStorage: true
       s3:
         #path: ""
         bucket: "mflow"
@@ -76,9 +102,20 @@ data:
       databaseConnectionCheck: false
 
     extraEnvVars:
+      # S3 Configuration
       AWS_DEFAULT_REGION: "us-east-1"
       MLFLOW_S3_IGNORE_TLS: true
       MLFLOW_S3_ENDPOINT_URL: "http://minio-svc.minio.svc.cluster.local:9000"
+
+      # Database Connection Pooling
+      MLFLOW_SQLALCHEMYSTORE_POOL_SIZE: "10"  # SQLAlchemy connection pool size
+      MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW: "20"  # SQLAlchemy max overflow connections
+      MLFLOW_SQLALCHEMYSTORE_POOL_RECYCLE: "3600"  # SQLAlchemy pool recycle time
+
+      # Logging and Monitoring
+      MLFLOW_LOGGING_LEVEL: "INFO"  # MLflow logging level
+      MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: "true"  # Enable system metrics logging
+      MLFLOW_SYSTEM_METRICS_SAMPLING_INTERVAL: "1.0"  # System metrics sampling interval
 
     replicaCount: 1
 
