@@ -6,7 +6,7 @@ metadata:
   name: helm-chart
   namespace: postgres
 spec:
-  chart: postgres
+  chart: cnpg
   version: 0.26.0
   sourceRef:
     kind: HelmRepository
