@@ -55,16 +55,10 @@ data:
     mode: distributed
 
     buckets:
-      - name: parking-events
+      - name: mlflow
         policy: none
         purge: false
-      - name: alert-events
-        policy: none
-        purge: false
-      - name: datalake
-        policy: none
-        purge: false
-      - name: json-data
+      - name: papers
         policy: none
         purge: false
 

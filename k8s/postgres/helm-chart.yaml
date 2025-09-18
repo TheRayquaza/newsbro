@@ -1,0 +1,15 @@
+---
+# https://fluxcd.io/flux/components/source/helmcharts
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmChart
+metadata:
+  name: helm-chart
+  namespace: postgres
+spec:
+  chart: postgres
+  version: 0.26.0
+  sourceRef:
+    kind: HelmRepository
+    name: helm-repo
+  interval: 10m0s
+  reconcileStrategy: ChartVersion
