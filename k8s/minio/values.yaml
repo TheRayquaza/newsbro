@@ -78,8 +78,8 @@ data:
       hosts:
         - minio.localhost
 
-    metrics:
-      serviceMonitor:
-        includeNode: true
-        enabled: true
-        namespace: minio
+    # metrics:
+    #   serviceMonitor:
+    #     includeNode: true
+    #     enabled: true
+    #     namespace: minio
