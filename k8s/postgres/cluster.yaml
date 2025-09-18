@@ -1,0 +1,22 @@
+---
+# https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-ClusterSpec
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-cluster
+  namespace: postgres
+spec:
+  instances: 3
+  imagePullPolicy: IfNotPresent
+  storage:
+    size: 10Gi
+    storageClass: standard
+    resizeInUseVolumes: true
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  imageName: ghcr.io/cloudnative-pg/postgresql:13.6
