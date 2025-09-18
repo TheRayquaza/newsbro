@@ -5,4 +5,4 @@ resources:
 - helm-repo.yaml
 - helm-chart.yaml
 - helm-release.yaml
-
+- values.yaml
