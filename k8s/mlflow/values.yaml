@@ -9,19 +9,6 @@ data:
       level: info
       enabled: true
 
-
-    strategy:
-      type: Recreate
-
-    extraVolumes:
-      - name: mlflow-volume
-        persistentVolumeClaim:
-          claimName: mlflow-pvc
-
-    extraVolumeMounts:
-      - name: mlflow-volume
-        mountPath: /mlflow
-
     image:
       tag: ""
       pullPolicy: IfNotPresent
@@ -94,12 +81,10 @@ data:
         port: 5432
         user: "mlflow"
         driver: ""
-        enabled: false
         database: "mlflow"
         password: ""
       databaseMigration: true
-      defaultSqlitePath: ":memory:"
-      databaseConnectionCheck: false
+      databaseConnectionCheck: true
 
     extraEnvVars:
       # S3 Configuration
