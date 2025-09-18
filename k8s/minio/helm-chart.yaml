@@ -1,4 +1,5 @@
 ---
+# https://fluxcd.io/flux/components/source/helmcharts
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmChart
 metadata:
@@ -10,7 +11,5 @@ spec:
   sourceRef:
     kind: HelmRepository
     name: helm-repo
-  interval: 1m0s
+  interval: 10m
   reconcileStrategy: ChartVersion
-  valuesFiles:
-    - values.yaml

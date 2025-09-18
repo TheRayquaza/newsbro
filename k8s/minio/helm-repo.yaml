@@ -6,7 +6,7 @@ metadata:
   name: helm-repo
   namespace: minio
 spec:
-  interval: 5m0s
+  interval: 10m0s
   type: default
   url: https://charts.min.io/
   provider: generic
