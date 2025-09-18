@@ -19,5 +19,5 @@ spec:
   valuesFrom:
     - kind: ConfigMap
       name: postgres-values
-      namespace: postgres
+      #namespace: postgres
       valuesKey: values.yaml
