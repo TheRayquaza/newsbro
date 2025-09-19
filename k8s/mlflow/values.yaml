@@ -10,9 +10,9 @@ data:
       enabled: true
 
     image:
-      tag: "3.3.2"
+      tag: ""
       pullPolicy: IfNotPresent
-      repository: bitnami/mlflow
+      repository: burakince/mlflow
 
     ingress:
       enabled: true
@@ -91,7 +91,7 @@ data:
         user: "mlflow"
         database: "mlflow"
         password: "mysupersecretpassword"
-      databaseMigration: true
+      #databaseMigration: true
       databaseConnectionCheck: true
 
     extraEnvVars:
