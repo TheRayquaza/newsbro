@@ -12,7 +12,7 @@ data:
     image:
       tag: ""
       pullPolicy: IfNotPresent
-      repository: burakince/mlflow
+      repository: therayquaza/mlflow
 
     ingress:
       enabled: true
