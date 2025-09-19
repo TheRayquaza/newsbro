@@ -17,6 +17,7 @@ spec:
     roles:
     - name: mlflow
       ensure: present
+      login: true
       passwordSecret:
         name: mlflow-db-secret
   storage:
