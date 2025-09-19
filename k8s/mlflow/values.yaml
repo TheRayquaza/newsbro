@@ -30,7 +30,7 @@ data:
 
     extraVolumeMounts:
       - name: mlflow-volume
-        mountPath: /mlflow
+        mountPath: /tmp
 
     service:
       name: http
