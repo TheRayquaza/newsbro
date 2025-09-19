@@ -10,9 +10,9 @@ data:
       enabled: true
 
     image:
-      tag: "v3.4.0"
+      tag: "3.3.2"
       pullPolicy: IfNotPresent
-      repository: ghcr.io/mlflow/mlflow
+      repository: bitnami/mlflow
 
     ingress:
       enabled: true
