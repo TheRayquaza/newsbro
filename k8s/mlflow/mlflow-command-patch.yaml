@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+  namespace: mlflow
+spec:
+  template:
+    spec:
+      containers:
+      - name: mlflow
+        command:
+          - python
+          - -m
+          - mlflow
