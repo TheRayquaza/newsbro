@@ -23,6 +23,15 @@ data:
             - path: /
               pathType: Prefix
 
+    extraVolumes:
+      - name: mlflow-volume
+        persistentVolumeClaim:
+          claimName: mlflow-pvc
+
+    extraVolumeMounts:
+      - name: mlflow-volume
+        mountPath: /mlflow
+
     service:
       name: http
       port: 5000
