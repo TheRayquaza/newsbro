@@ -1,0 +1,153 @@
+package controllers
+
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"net/http"
+
+	"repo_account/src/api/dto"
+	"repo_account/src/domain/services"
+
+	"github.com/gin-gonic/gin"
+)
+
+type AuthController struct {
+	authService *services.AuthService
+}
+
+func NewAuthController(authService *services.AuthService) *AuthController {
+	return &AuthController{
+		authService: authService,
+	}
+}
+
+// @Summary Register a new user
+// @Description Register a new user with email and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param registerRequest body dto.RegisterRequest true "Register Request"
+// @Success 201
+// @Failure 400
+// @Router /auth/register [post]
+func (ac *AuthController) Register(c *gin.Context) {
+	var req dto.RegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := ac.authService.Register(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, response)
+}
+
+// @Summary Login a user
+// @Description Login a user with email and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param loginRequest body dto.LoginRequest true "Login Request"
+// @Success 200
+// @Failure 401
+// @Router /auth/login [post]
+func (ac *AuthController) Login(c *gin.Context) {
+	var req dto.LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := ac.authService.Login(&req)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// @Summary Refresh JWT token
+// @Description Refresh JWT token using refresh token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 401
+// @Router /auth/refresh [post]
+func (ac *AuthController) RefreshToken(c *gin.Context) {
+	var req dto.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := ac.authService.RefreshToken(req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// @Summary OAuth Login
+// @Description Redirect to OAuth provider for login
+// @Tags Auth
+// @Produce json
+// @Success 200
+// @Failure 503
+// @Router /auth/oauth/login [get]
+func (ac *AuthController) OAuthLogin(c *gin.Context) {
+	// Generate state parameter for CSRF protection
+	stateBytes := make([]byte, 16)
+	rand.Read(stateBytes)
+	state := hex.EncodeToString(stateBytes)
+
+	// Store state in session/cache in production
+	c.SetCookie("oauth_state", state, 600, "/", "", false, true)
+
+	authURL := ac.authService.GetOAuthURL(state)
+	if authURL == "" {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "OAuth not configured"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"auth_url": authURL})
+}
+
+// @Summary OAuth Callback
+// @Description Handle OAuth provider callback
+// @Tags Auth
+// @Produce json
+// @Param code query string true "Authorization Code"
+// @Param state query string true "State Parameter"
+// @Success 200
+// @Failure 400
+// @Router /auth/oauth/callback [get]
+func (ac *AuthController) OAuthCallback(c *gin.Context) {
+	code := c.Query("code")
+	state := c.Query("state")
+
+	// Verify state parameter
+	storedState, err := c.Cookie("oauth_state")
+	if err != nil || storedState != state {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid state parameter"})
+		return
+	}
+
+	// Clear state cookie
+	c.SetCookie("oauth_state", "", -1, "/", "", false, true)
+
+	response, err := ac.authService.HandleOAuthCallback(code)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
