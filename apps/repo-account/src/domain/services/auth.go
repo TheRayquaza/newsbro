@@ -26,8 +26,11 @@ type AuthService struct {
 }
 
 type JWTClaims struct {
-	UserID uint   `json:"user_id"`
-	Email  string `json:"email"`
+	UserID    uint   `json:"user_id"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Username  string `json:"username"`
 	jwt.RegisteredClaims
 }
 
@@ -110,9 +113,9 @@ func (s *AuthService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 	return s.generateTokens(&user)
 }
 
-func (s *AuthService) RefreshToken(refreshToken string) (*dto.LoginResponse, error) {
-	var token models.RefreshToken
-	if err := s.db.Preload("User").Where("token = ? AND expires_at > ?", refreshToken, time.Now()).First(&token).Error; err != nil {
+func (s *AuthService) RefreshToken(user *models.User) (*dto.LoginResponse, error) {
+	var token *models.RefreshToken
+	if err := s.db.Preload("User").Where("user_id = ? AND expires_at > ?", user.ID, time.Now()).First(&token).Error; err != nil {
 		return nil, errors.New("invalid refresh token")
 	}
 
@@ -120,6 +123,7 @@ func (s *AuthService) RefreshToken(refreshToken string) (*dto.LoginResponse, err
 	s.db.Delete(&token)
 
 	return s.generateTokens(&token.User)
+
 }
 
 func (s *AuthService) generateTokens(user *models.User) (*dto.LoginResponse, error) {
@@ -152,12 +156,15 @@ func (s *AuthService) generateTokens(user *models.User) (*dto.LoginResponse, err
 
 func (s *AuthService) GenerateAccessToken(user *models.User) (string, error) {
 	claims := JWTClaims{
-		UserID: user.ID,
-		Email:  user.Email,
+		UserID:    user.ID,
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Username:  user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    "your-api",
+			Issuer:    "repo-account",
 			Subject:   fmt.Sprintf("%d", user.ID),
 		},
 	}
@@ -247,10 +254,12 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 	}
 
 	var claims struct {
-		Email     string `json:"email"`
-		Name      string `json:"name"`
-		Subject   string `json:"sub"`
-		Preferred string `json:"preferred_username"`
+		Email      string `json:"email"`
+		Name       string `json:"name"`
+		Subject    string `json:"sub"`
+		GivenName  string `json:"given_name"`
+		FamilyName string `json:"family_name"`
+		Iss        string `json:"iss"`
 	}
 
 	if err := idToken.Claims(&claims); err != nil {
@@ -259,16 +268,17 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 
 	// Find or create user
 	var user models.User
-	err = s.db.Where("oidc_subject = ?", claims.Subject).First(&user).Error
+	err = s.db.Where("email = ?", claims.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// Create new user
 			user = models.User{
-				Email:       claims.Email,
-				Username:    claims.Preferred,
-				FirstName:   claims.Name,
-				OIDCSubject: &claims.Subject,
-				IsActive:    true,
+				Email:     claims.Email,
+				Username:  claims.Subject,
+				FirstName: claims.GivenName,
+				LastName:  claims.FamilyName,
+				Issuer:    &claims.Iss,
+				IsActive:  true,
 			}
 			if err := s.db.Create(&user).Error; err != nil {
 				return nil, err
