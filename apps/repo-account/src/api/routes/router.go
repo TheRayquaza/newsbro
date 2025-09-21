@@ -6,9 +6,9 @@ import (
 	"repo_account/src/config"
 	"repo_account/src/domain/services"
 
-	docs "repo_account/docs"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	docs "repo_account/docs"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,6 +33,9 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 		c.JSON(200, gin.H{"status": "healthy"})
 	})
 
+	// OAuth routes for EPITA
+	router.GET("/complete/epita", authController.OAuthCallback)
+
 	// Swagger
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
@@ -44,7 +47,7 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 		{
 			auth.POST("/register", authController.Register)
 			auth.POST("/login", authController.Login)
-			auth.POST("/refresh", authController.RefreshToken)
+			auth.POST("/refresh", middleware.AuthMiddleware(authService), authController.RefreshToken)
 			auth.GET("/oauth/login", authController.OAuthLogin)
 			auth.GET("/callback", authController.OAuthCallback)
 		}
@@ -58,6 +61,7 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 			{
 				users.GET("/profile", userController.GetProfile)
 				users.PUT("/profile", userController.UpdateProfile)
+				//users.DELETE("/profile", userController.DeleteProfile)
 				users.GET("/", userController.GetUsers) // Admin only in production
 			}
 		}
