@@ -26,7 +26,9 @@ func NewUserController(userService *services.UserService) *UserController {
 // @Produce json
 // @Success 200 {object} models.User
 // @Failure 401
-// @Router /user/profile [get]
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /users/profile [get]
 func (uc *UserController) GetProfile(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
@@ -46,7 +48,9 @@ func (uc *UserController) GetProfile(c *gin.Context) {
 // @Success 200 {object} models.User
 // @Failure 400
 // @Failure 401
-// @Router /user/profile [put]
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /users/profile [put]
 func (uc *UserController) UpdateProfile(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
@@ -63,7 +67,7 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 	// Remove sensitive fields from updates
 	delete(updates, "id")
 	delete(updates, "password")
-	delete(updates, "oidc_subject")
+	delete(updates, "username")
 
 	updatedUser, err := uc.userService.UpdateUser(user.(*models.User).ID, updates)
 	if err != nil {
@@ -74,6 +78,39 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedUser)
 }
 
+// @Summary Delete user profile
+// @Description Delete the profile of the authenticated user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Success 204
+// @Failure 400
+// @Failure 401
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /users/profile [DELETE]
+/*
+func (uc *UserController) DeleteProfile(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+
+	usr, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
+		return
+	}
+
+	if err := uc.userService.DeleteUser(usr); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+*/
+
 // @Summary Get all users
 // @Description Get a list of all users (admin only)
 // @Tags User
@@ -82,6 +119,8 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 // @Param offset query int false "Offset" default(0)
 // @Success 200 {array} models.User
 // @Failure 403
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /users [get]
 func (uc *UserController) GetUsers(c *gin.Context) {
 	limit := 10

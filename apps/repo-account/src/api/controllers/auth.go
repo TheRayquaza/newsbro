@@ -7,6 +7,7 @@ import (
 
 	"repo_account/src/api/dto"
 	"repo_account/src/domain/services"
+	"repo_account/src/data/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -78,15 +79,23 @@ func (ac *AuthController) Login(c *gin.Context) {
 // @Produce json
 // @Success 200
 // @Failure 401
+// @Failure 500
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /auth/refresh [post]
 func (ac *AuthController) RefreshToken(c *gin.Context) {
-	var req dto.RefreshTokenRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
 
-	response, err := ac.authService.RefreshToken(req.RefreshToken)
+	usr, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
+		return
+	}
+
+	response, err := ac.authService.RefreshToken(usr)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -117,7 +126,7 @@ func (ac *AuthController) OAuthLogin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"auth_url": authURL})
+	c.Redirect(http.StatusFound, authURL)
 }
 
 // @Summary OAuth Callback

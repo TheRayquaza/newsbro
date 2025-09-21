@@ -115,6 +115,13 @@ paths:
       consumes:
       - application/json
       description: Refresh JWT token using refresh token
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -122,6 +129,8 @@ paths:
           description: OK
         "401":
           description: Unauthorized
+        "500":
+          description: Internal Server Error
       summary: Refresh JWT token
       tags:
       - Auth
@@ -147,9 +156,52 @@ paths:
       summary: Register a new user
       tags:
       - Auth
-  /user/profile:
+  /users:
+    get:
+      description: Get a list of all users (admin only)
+      parameters:
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo_account_src_data_models.User'
+            type: array
+        "403":
+          description: Forbidden
+      security:
+      - JWT: []
+      summary: Get all users
+      tags:
+      - User
+  /users/profile:
     get:
       description: Get the profile of the authenticated user
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -159,6 +211,8 @@ paths:
             $ref: '#/definitions/repo_account_src_data_models.User'
         "401":
           description: Unauthorized
+      security:
+      - JWT: []
       summary: Get user profile
       tags:
       - User
@@ -174,6 +228,12 @@ paths:
         schema:
           additionalProperties: true
           type: object
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -185,35 +245,9 @@ paths:
           description: Bad Request
         "401":
           description: Unauthorized
+      security:
+      - JWT: []
       summary: Update user profile
-      tags:
-      - User
-  /users:
-    get:
-      description: Get a list of all users (admin only)
-      parameters:
-      - default: 10
-        description: Limit
-        in: query
-        name: limit
-        type: integer
-      - default: 0
-        description: Offset
-        in: query
-        name: offset
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/repo_account_src_data_models.User'
-            type: array
-        "403":
-          description: Forbidden
-      summary: Get all users
       tags:
       - User
 swagger: "2.0"

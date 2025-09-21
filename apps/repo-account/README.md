@@ -62,7 +62,8 @@ godoc -http=:6060
 
 ## Generate swagger
 go install github.com/swaggo/swag/cmd/swag@latest
-swag init
+# nix-shell -p go-swag # or this
+swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 ```
 
 ## Variables
