@@ -29,7 +29,7 @@ spec:
         - name: pull-secret
       containers:
         - name: repo-account
-          image: ...
+          image: ghcr.io/TheRayquaza/arxivist/repo-account:1.0.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -50,7 +50,7 @@ spec:
               cpu: "250m"
           livenessProbe:
             httpGet:
-              path: /liveness
+              path: /health
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10
