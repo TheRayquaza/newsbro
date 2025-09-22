@@ -5,10 +5,11 @@ from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+import json
 
 def preprocessing():
     
-    print("STARTING PREPROCESSING")
+    print("STARTING PREPROCESSING\n")
     papers = pd.read_csv('../data/arXiv-DataFrame.csv')
 
     print("Dropping columns : ['Unnamed: 0', 'id']")
@@ -40,6 +41,13 @@ def preprocessing():
     # -------------------------------
     max_category_count = 100
     papers = truncate_group(papers, 'Primary Category', max_category_count)
+
+    print("Changing Categories' Names")
+    with open("../data/map_category.json", "r") as f:
+        category_map = json.load(f)
+
+    papers["Category"] = papers["Primary Category"].map(category_map).fillna("Other")
+
 
     print("Creating Text Embeddings : Title + Summary")
     

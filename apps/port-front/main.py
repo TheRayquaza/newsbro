@@ -5,6 +5,17 @@ from preprocessing import preprocessing
 import re
 import os
 
+# Import the new recommendation system
+import sys
+sys.path.append("../")
+
+from models.models import create_default_engine, RecommendationEngine
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Configure page
 st.set_page_config(
     page_title="Academic Paper Search",
@@ -180,10 +191,26 @@ st.markdown("""
         color: #666;
         margin-top: 4px;
     }
+
+    /* Model selector styling */
+    .model-info {
+        background: #f0f8ff;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #b3d9ff;
+        margin: 8px 0;
+        font-size: 0.85em;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Load data and similarity matrix
+# Initialize recommendation engine
+@st.cache_resource
+def initialize_recommendation_engine():
+    """Initialize and return the recommendation engine"""
+    return create_default_engine()
+
+# Load data and initialize models
 @st.cache_data
 def load_data():
     recompute = False
@@ -210,7 +237,30 @@ def load_data():
 
     return similarity_matrix, papers
 
+@st.cache_resource
+def setup_models(_engine, _papers, _similarity_matrix):
+    """Setup and train the recommendation models"""
+    try:
+        # Train the similarity matrix model
+        _engine.fit(_papers, model_name="Similarity Matrix", similarity_matrix=_similarity_matrix)
+        
+        # Try to train content-based model if available
+        try:
+            if "Content-Based TF-IDF" in _engine.get_available_models():
+                with st.spinner("Training content-based model..."):
+                    _engine.fit(_papers, model_name="Content-Based TF-IDF")
+        except Exception as e:
+            logger.warning(f"Could not train content-based model: {e}")
+        
+        return _engine
+    except Exception as e:
+        logger.error(f"Error setting up models: {e}")
+        return _engine
+
+# Load data and setup models
 similarity_matrix, papers = load_data()
+recommendation_engine = initialize_recommendation_engine()
+recommendation_engine = setup_models(recommendation_engine, papers, similarity_matrix)
 
 def get_search_suggestions(query):
     """Get search suggestions based on query"""
@@ -237,8 +287,8 @@ def get_search_suggestions(query):
     suggestions.extend([f"👤 {author}" for author in unique_authors])
     
     # Search in categories
-    if 'Primary Category' in papers.columns:
-        cat_matches = papers[papers['Primary Category'].str.lower().str.contains(query, na=False, regex=False)]['Primary Category'].unique().tolist()
+    if 'Category' in papers.columns:
+        cat_matches = papers[papers['Category'].str.lower().str.contains(query, na=False, regex=False)]['Category'].unique().tolist()
         suggestions.extend([f"🏷️ {cat}" for cat in cat_matches[:2]])
     
     return suggestions[:8]  # Limit to 8 suggestions
@@ -261,7 +311,7 @@ def search_papers(query, papers_df):
         term_mask = (
             papers_df['Title'].str.lower().str.contains(term, na=False, regex=False) |
             papers_df['Author'].str.lower().str.contains(term, na=False, regex=False) |
-            papers_df['Primary Category'].str.lower().str.contains(term, na=False, regex=False) |
+            papers_df['Category'].str.lower().str.contains(term, na=False, regex=False) |
             papers_df['Category'].str.lower().str.contains(term, na=False, regex=False)
         )
         
@@ -281,11 +331,17 @@ def search_papers(query, papers_df):
     
     return papers_df[combined_mask]
 
-def recommend_articles(article_index, top_n=6):
-    """Get recommended articles based on similarity"""
-    similarity_scores = similarity_matrix[article_index]
-    similar_indices = similarity_scores.argsort()[::-1][1:top_n+1]
-    return papers.iloc[similar_indices]
+def recommend_articles(paper_index, top_n=6, model_name=None):
+    """Get recommended articles using the recommendation engine"""
+    try:
+        if model_name:
+            return recommendation_engine.recommend(paper_index, top_n, model_name=model_name)
+        else:
+            return recommendation_engine.recommend(paper_index, top_n)
+    except Exception as e:
+        logger.error(f"Error getting recommendations: {e}")
+        # Fallback to showing random papers
+        return papers.sample(n=min(top_n, len(papers)))
 
 def format_authors(authors):
     """Format author names nicely"""
@@ -325,14 +381,21 @@ def display_paper_card(paper, show_recommendations=True, paper_index=None):
     
     # Categories
     categories_html = ""
-    if 'Primary Category' in paper and pd.notna(paper['Primary Category']):
-        categories_html = f'<span class="category-badge">{paper["Primary Category"]}</span>'
+    if 'Category' in paper and pd.notna(paper['Category']):
+        categories_html = f'<span class="category-badge">{paper["Category"]}</span>'
+    
+    # Show similarity score if available
+    similarity_html = ""
+    if isinstance(paper, pd.Series) and 'similarity_score' in paper and pd.notna(paper['similarity_score']):
+        score = float(paper['similarity_score'])
+        similarity_html = f'<div style="font-size: 0.8em; color: #666; margin-top: 8px;">📊 Similarity: {score:.3f}</div>'
     
     card_html = f"""
     <div class="paper-card">
         {title_html}
         {authors_html}
         {categories_html}
+        {similarity_html}
     </div>
     """
     
@@ -366,36 +429,72 @@ if 'selected_paper_idx' not in st.session_state:
     st.session_state.selected_paper_idx = 0
 if 'search_query' not in st.session_state:
     st.session_state.search_query = ''
+if 'selected_model' not in st.session_state:
+    st.session_state.selected_model = recommendation_engine.active_model.name if recommendation_engine.active_model else "Similarity Matrix"
 
 # Header
 import base64
 
 def get_base64_image(img_path):
-    with open(img_path, "rb") as f:
-        data = f.read()   # read inside the 'with'
-    return base64.b64encode(data).decode()
+    try:
+        with open(img_path, "rb") as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except FileNotFoundError:
+        return None
 
-img_base64 = get_base64_image("../img/Albert.png")
+img_base64 = get_base64_image("./img/Albert.png")
 
-st.markdown(f"""
-<div class="main-header">
-    <div style="display: flex; align-items: center; justify-content: center; gap: 30px;">
-        <img src="data:image/png;base64,{img_base64}" 
-             style="height:200px; border-radius:50%;">
-        <div style="text-align: left;">
-            <h1>🎓 Academic Paper Discovery Platform</h1>
-            <p style="font-size: 16px; opacity: 0.9;">
-                Discover and explore research papers with AI-powered recommendations
-            </p>
-            <p style="font-size: 25px; opacity: 1; margin: 5px 0;">
-                with Albert the ScientificPapersBro
-            </p>
+# Header with conditional image
+if img_base64:
+    st.markdown(f"""
+    <div class="main-header">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 30px;">
+            <img src="data:image/png;base64,{img_base64}" 
+                 style="height:200px; border-radius:50%;">
+            <div style="text-align: left;">
+                <h1>🎓 Academic Paper Discovery Platform</h1>
+                <p style="font-size: 16px; opacity: 0.9;">
+                    Discover and explore research papers with AI-powered recommendations
+                </p>
+                <p style="font-size: 25px; opacity: 1; margin: 5px 0;">
+                    with Albert the ScientificPapersBro
+                </p>
+            </div>
         </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <div class="main-header">
+        <h1>🎓 Academic Paper Discovery Platform</h1>
+        <p style="font-size: 18px; opacity: 0.9;">
+            Discover and explore research papers with AI-powered recommendations
+        </p>
+        <p style="font-size: 28px; opacity: 1; margin: 10px 0;">
+            with Albert the ScientificPapersBro
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
+# Model selection section
+st.markdown("### 🤖 Recommendation Model")
+available_models = recommendation_engine.get_available_models()
 
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    selected_model = st.selectbox(
+        "Choose Recommendation Model",
+        available_models,
+        index=available_models.index(st.session_state.selected_model) if st.session_state.selected_model in available_models else 0,
+        key="model_selector"
+    )
+    
+    if selected_model != st.session_state.selected_model:
+        st.session_state.selected_model = selected_model
+        recommendation_engine.set_active_model(selected_model)
+        st.rerun()
 
 # Search section
 st.markdown('<div class="search-section">', unsafe_allow_html=True)
@@ -454,10 +553,10 @@ if st.session_state.search_query:
         display_paper_grid(display_results, items_per_row=3)
         
         # Show more button if there are more results
-        if len(results) > 8:
+        if len(results) > 12:
             col1, col2, col3 = st.columns([1, 1, 1])
             with col2:
-                if st.button(f"📄 Show {min(8, len(results) - 8)} more papers", use_container_width=True):
+                if st.button(f"📄 Show {min(12, len(results) - 12)} more papers", use_container_width=True):
                     # This would typically implement pagination
                     pass
 
@@ -484,10 +583,17 @@ if st.session_state.show_recommendations:
     selected_paper = papers.iloc[st.session_state.selected_paper_idx]
     
     st.markdown("### 🎯 Similar Papers")
-    st.info(f"📌 Based on: **{selected_paper['Title'][:80]}{'...' if len(selected_paper['Title']) > 80 else ''}**")
+    
+    # Show which model is being used
+    active_model_name = recommendation_engine.active_model.name
+    st.info(f"📌 Based on: **{selected_paper['Title'][:80]}{'...' if len(selected_paper['Title']) > 80 else ''}**  \n🤖 Using: **{active_model_name}**")
     
     with st.spinner("🤖 Finding similar papers..."):
-        recommendations = recommend_articles(st.session_state.selected_paper_idx, top_n=9)  # Changed from 6 to 9
+        try:
+            recommendations = recommend_articles(st.session_state.selected_paper_idx, top_n=9)
+        except Exception as e:
+            st.error(f"Error generating recommendations: {e}")
+            recommendations = papers.sample(n=9)  # Fallback
     
     display_paper_grid(recommendations, show_recommendations=False, items_per_row=3)    
     
@@ -497,7 +603,7 @@ if st.session_state.show_recommendations:
             st.session_state.show_recommendations = False
             st.rerun()
 
-# Simplified sidebar
+# Enhanced sidebar
 with st.sidebar:
     st.markdown("### 📊 Statistics")
     
@@ -508,8 +614,8 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
     
-    if 'Primary Category' in papers.columns:
-        unique_categories = papers['Primary Category'].nunique()
+    if 'Category' in papers.columns:
+        unique_categories = papers['Category'].nunique()
         st.markdown(f"""
         <div class="stat-card">
             <div class="stat-number">{unique_categories}</div>
@@ -520,9 +626,19 @@ with st.sidebar:
     st.markdown("### 🎛️ Filters")
     
     # Simple category filter
-    if 'Primary Category' in papers.columns:
-        categories = ['All Categories'] + sorted(papers['Primary Category'].dropna().unique().tolist()[:10])  # Limit to top 10
+    if 'Category' in papers.columns:
+        categories = ['All Categories'] + sorted(papers['Category'].dropna().unique().tolist()[:10])  # Limit to top 10
         selected_category = st.selectbox("Research Area", categories)
+    
+    st.markdown("### 🤖 Model Details")
+    
+    # Show current model info
+    current_model_info = recommendation_engine.get_model_info(st.session_state.selected_model)
+    st.markdown(f"""
+    **Active Model:** {current_model_info['name']}  
+    **Status:** {'✅ Ready' if current_model_info['is_trained'] else '❌ Not Ready'}  
+    **Description:** {current_model_info['description']}
+    """)
     
     st.markdown("### 🚀 Quick Actions")
     
@@ -539,8 +655,9 @@ with st.sidebar:
 
 # Clean footer
 st.markdown("---")
-st.markdown("""
+st.markdown(f"""
 <div style="text-align: center; color: #666; padding: 20px;">
     <p>🎓 <strong>Academic Paper Discovery Platform</strong> • Powered by AI</p>
+    <p style="font-size: 0.8em;">Current Model: {st.session_state.selected_model} | Papers: {len(papers):,}</p>
 </div>
 """, unsafe_allow_html=True)
