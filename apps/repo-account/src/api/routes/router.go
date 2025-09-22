@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"fmt"
-
 	"repo_account/src/api/controllers"
 	"repo_account/src/api/middleware"
 	"repo_account/src/config"
