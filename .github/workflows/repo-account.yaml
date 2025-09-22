@@ -55,12 +55,13 @@ jobs:
         run: docker compose up -d
       - name: Run API + Tests
         working-directory: ./apps/repo-account
-        if: always()
         run: |
+          set +e  # ignore errors for the whole block
           ./bin/api &
           API_PID=$!
-          go test -v ./... || true
-          kill -9 ${API_PID}
+          go test -v ./...
+          kill -9 ${API_PID} || true
+          set -e
       - name: Stop dependencies
         working-directory: ./apps/repo-account
         run: docker compose down
