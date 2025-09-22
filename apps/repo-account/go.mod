@@ -1,6 +1,8 @@
 module repo_account
 
-go 1.25
+go 1.24.0
+
+toolchain go1.24.7
 
 require (
 	github.com/coreos/go-oidc/v3 v3.6.0

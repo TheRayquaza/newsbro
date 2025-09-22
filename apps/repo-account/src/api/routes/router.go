@@ -30,7 +30,18 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
+		if err := userService.db.Ping(); err != nil {
+			c.JSON(500, gin.H{"status": "unhealthy"})
+		}
 		c.JSON(200, gin.H{"status": "healthy"})
+	})
+
+	// Readiness check
+	router.GET("/readiness", func(c *gin.Context) {
+		if err := userService.db.Ping(); err != nil {
+			c.JSON(500, gin.H{"status": "unhealthy"})
+		}
+		c.JSON(200, gin.H{"status": "ready"})
 	})
 
 	// OAuth routes for EPITA
