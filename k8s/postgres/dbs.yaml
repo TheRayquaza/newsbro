@@ -11,3 +11,16 @@ spec:
   owner: mlflow
   ensure: present
   extensions: []
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: repo-account-db
+  namespace: postgres
+spec:
+  cluster:
+    name: postgres-cluster
+  name: repo-account
+  owner: repo-account
+  ensure: present
+  extensions: []

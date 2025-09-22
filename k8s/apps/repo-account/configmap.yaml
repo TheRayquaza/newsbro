@@ -1,0 +1,7 @@
+apiVersion: 1
+kind: ConfigMap
+metadata:
+  name: repo-account-config
+  namespace: apps
+data:
+  DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
