@@ -6,3 +6,4 @@ metadata:
 data:
   DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
   GIN_MODE: release
+  PORT: "8080"
