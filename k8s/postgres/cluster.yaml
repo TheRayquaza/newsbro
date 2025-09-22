@@ -20,6 +20,11 @@ spec:
       login: true
       passwordSecret:
         name: mlflow-db-secret
+    - name: repo-account
+      ensure: present
+      login: true
+      passwordSecret:
+        name: repo-account-db-secret
   storage:
     size: 10Gi
     storageClass: local-path
