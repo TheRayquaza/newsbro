@@ -13,7 +13,7 @@ type User struct {
 	Password  string         `json:"-" gorm:"not null"`
 	FirstName string         `json:"first_name"`
 	LastName  string         `json:"last_name"`
-	Issuer    *string        `json:"-" gorm:"uniqueIndex"`
+	Issuer    *string        `json:"-"`
 	IsActive  bool           `json:"is_active" gorm:"default:true"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
