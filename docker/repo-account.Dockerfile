@@ -7,9 +7,10 @@ RUN go mod download
 COPY . .
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main src/cmd/main.go
 
-FROM scratch
-WORKDIR /app
+FROM gcr.io/distroless/base-debian12:nonroot
 
+WORKDIR /app
 COPY --from=builder /app/main .
+USER nonroot:nonroot
 
 CMD ["./main"]
