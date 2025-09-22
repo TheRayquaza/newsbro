@@ -8,3 +8,4 @@ resources:
 - postgres.yaml
 - mlflow.yaml
 - qdrant.yaml
+- apps.yaml

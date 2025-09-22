@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: repo-account
+  namespace: apps
+  labels:
+    app: repo-account
+    type: backends
+spec:
+  # replicas: 1 # managed by hpa
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: repo-account
+  template:
+    metadata:
+      labels:
+        app: repo-account
+        monitoring: "enabled"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090" 
+    spec:
+      imagePullSecrets:
+        - name: pull-secret
+      containers:
+        - name: repo-account
+          image: ...
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9090
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: apps-config
+            - secretRef:
+                name: redis-secrets
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "125m"
+            limits:
+              memory: "1Gi"
+              cpu: "250m"
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10

@@ -1,0 +1,27 @@
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: repo-account
+  namespace: apps
+  labels:
+    app: repo-account
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /api/v1/users
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-account
+                port:
+                  number: 8080
+          - path: /api/v1/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-account
+                port:
+                  number: 8080
