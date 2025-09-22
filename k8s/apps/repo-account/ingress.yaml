@@ -26,3 +26,10 @@ spec:
                 name: repo-account
                 port:
                   number: 80
+          - path: /complete/epita
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-account
+                port:
+                  number: 80
