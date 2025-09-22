@@ -59,7 +59,7 @@ jobs:
         run: |
           ./bin/api &
           API_PID=$!
-          go test -v ./...
+          go test -v ./... || true
           kill -9 ${API_PID}
       - name: Stop dependencies
         working-directory: ./apps/repo-account

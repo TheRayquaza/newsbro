@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"repo_account/src/api/dto"
-	"repo_account/src/domain/services"
 	"repo_account/src/data/models"
+	"repo_account/src/domain/services"
 
 	"github.com/gin-gonic/gin"
 )
