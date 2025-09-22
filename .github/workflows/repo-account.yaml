@@ -55,6 +55,7 @@ jobs:
         run: docker compose up -d
       - name: Run API + Tests
         working-directory: ./apps/repo-account
+        if: always()
         run: |
           ./bin/api &
           API_PID=$!
