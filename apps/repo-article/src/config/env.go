@@ -8,9 +8,9 @@ import (
 )
 
 type Config struct {
-	Port             string
-	DatabaseURL      string
-	JWTSecret        string
+	Port        string
+	DatabaseURL string
+	JWTSecret   string
 }
 
 func Load() *Config {
@@ -26,7 +26,7 @@ func Load() *Config {
 			getEnv("DATABASE_HOST", "localhost:5432"),
 			getEnv("DATABASE_NAME", "repo_account"),
 		),
-		JWTSecret:        getEnv("JWT_SECRET", "your-secret-key"),
+		JWTSecret: getEnv("JWT_SECRET", "your-secret-key"),
 	}
 }
 
