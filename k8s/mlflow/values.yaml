@@ -73,8 +73,7 @@ data:
     artifactRoot:
       proxiedArtifactStorage: true
       s3:
-        #path: ""
-        bucket: "mflow"
+        bucket: "mlflow"
         enabled: true
         awsAccessKeyId: "minio"
         awsSecretAccessKey: "minio123"
