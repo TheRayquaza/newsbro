@@ -1,21 +1,24 @@
-from models import BaseRecommendationModel
+from .BaseRecommendationModel import BaseRecommendationModel
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 
 class TfidfModel(BaseRecommendationModel):
     
+    def __init__(self, name="TF-IDF Model", description="TF-IDF based content similarity"):
+        super().__init__(name=name, description=description)
+        self.vectorizer = None
+        self.tfidf_matrix = None
+        self.similarity_matrix = None
+        self.news_df = None
+
     def fit(self, news_df: pd.DataFrame, **kwargs):
         """Train the TF-IDF recommendation model"""
         self.news_df = news_df.copy()
-        # Combine title and abstract as content
-        self.news_df['content'] = self.news_df['title'] + " " + self.news_df['abstract']
         
-        # Fit TF-IDF vectorizer
         self.vectorizer = TfidfVectorizer(stop_words='english')
         self.tfidf_matrix = self.vectorizer.fit_transform(self.news_df['content'])
         
-        # Compute similarity matrix
         self.similarity_matrix = cosine_similarity(self.tfidf_matrix, self.tfidf_matrix)
         
         self.is_trained = True
