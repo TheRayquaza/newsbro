@@ -93,7 +93,7 @@ data:
       # S3 Configuration
       AWS_DEFAULT_REGION: "us-east-1"
       MLFLOW_S3_IGNORE_TLS: true
-      MLFLOW_S3_ENDPOINT_URL: "http://minio-svc.minio.svc.cluster.local:9000"
+      MLFLOW_S3_ENDPOINT_URL: "http://minio.minio.svc.cluster.local:9000"
 
       # Database Connection Pooling
       MLFLOW_SQLALCHEMYSTORE_POOL_SIZE: "10"  # SQLAlchemy connection pool size
