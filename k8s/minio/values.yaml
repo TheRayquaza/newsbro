@@ -63,7 +63,11 @@ data:
         purge: false
 
     ingress:
-      enabled: false
+      enabled: true
+      ingressClassName: traefik
+      path: /
+      hosts:
+        - minio-svc.localhost
 
     consoleIngress:
       enabled: true
