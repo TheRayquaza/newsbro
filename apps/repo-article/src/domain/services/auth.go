@@ -6,9 +6,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 	"repo_article/src/domain/entities"
+	"repo_article/src/config"
 )
 
-type AuthService struct{}
+type AuthService struct{
+	cfg *config.Config
+}
 
 type JWTClaims struct {
 	UserID    uint   `json:"user_id"`
@@ -19,17 +22,23 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewAuthService() *AuthService {
-	return &AuthService{}
+func NewAuthService(cfg *config.Config) *AuthService {
+	return &AuthService{
+		cfg: cfg,
+	}
 }
 
 func (s *AuthService) ValidateToken(tokenStr string) (*entities.User, error) {
+	fmt.Println("Validating token:", tokenStr)
 	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		fmt.Printf("Parsed token: %+v\n", token)
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return nil, nil
+		return []byte(s.cfg.JWTSecret), nil
 	})
+
+	fmt.Printf("Error after parsing: %+v\n", err)
 
 	if err != nil {
 		return nil, err

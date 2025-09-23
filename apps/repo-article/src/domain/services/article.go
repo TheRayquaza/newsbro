@@ -41,6 +41,15 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 		Abstract:    req.Abstract,
 		Link:        req.Link,
 	}
+	if req.ID != 0 {
+		var existing models.Article
+		if err := as.Db.First(&existing, "id = ?", req.ID).Error; err == nil {
+			return nil, fmt.Errorf("article with id %s already exists", req.ID)
+		} else if err != gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("failed to check existing article: %w", err)
+		}
+		article.ID = req.ID
+	}
 
 	if err := as.Db.Create(article).Error; err != nil {
 		return nil, fmt.Errorf("failed to create article: %w", err)

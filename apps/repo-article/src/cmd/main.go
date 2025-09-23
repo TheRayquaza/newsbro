@@ -20,7 +20,7 @@ func main() {
 
 	// Initialize services
 	articleService := services.NewArticleService(db)
-	authService := services.NewAuthService()
+	authService := services.NewAuthService(cfg)
 
 	// Setup routes
 	router := routes.SetupRouter(cfg, articleService, authService)
