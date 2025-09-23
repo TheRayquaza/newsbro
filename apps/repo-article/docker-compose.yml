@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: repo_account
+      POSTGRES_DB: repo_article
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
     ports:

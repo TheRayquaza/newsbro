@@ -11,10 +11,6 @@ type Config struct {
 	Port             string
 	DatabaseURL      string
 	JWTSecret        string
-	OIDCIssuerURL    string
-	OIDCClientID     string
-	OIDCClientSecret string
-	OIDCRedirectURL  string
 }
 
 func Load() *Config {
@@ -31,10 +27,6 @@ func Load() *Config {
 			getEnv("DATABASE_NAME", "repo_account"),
 		),
 		JWTSecret:        getEnv("JWT_SECRET", "your-secret-key"),
-		OIDCIssuerURL:    getEnv("OIDC_ISSUER_URL", ""),
-		OIDCClientID:     getEnv("OIDC_CLIENT_ID", ""),
-		OIDCClientSecret: getEnv("OIDC_CLIENT_SECRET", ""),
-		OIDCRedirectURL:  getEnv("OIDC_REDIRECT_URL", "http://localhost:8080/auth/callback"),
 	}
 }
 
