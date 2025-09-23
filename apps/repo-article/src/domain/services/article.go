@@ -44,7 +44,7 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 	if req.ID != 0 {
 		var existing models.Article
 		if err := as.Db.First(&existing, "id = ?", req.ID).Error; err == nil {
-			return nil, fmt.Errorf("article with id %s already exists", req.ID)
+			return nil, fmt.Errorf("article with id %d already exists", req.ID)
 		} else if err != gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("failed to check existing article: %w", err)
 		}

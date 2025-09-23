@@ -260,7 +260,7 @@ func (ac *ArticleController) GetCategories(c *gin.Context) {
 // @Router /articles/subcategories [get]
 func (ac *ArticleController) GetSubcategories(c *gin.Context) {
 	category := c.Query("category")
-	
+
 	subcategories, err := ac.articleService.GetSubcategories(category)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

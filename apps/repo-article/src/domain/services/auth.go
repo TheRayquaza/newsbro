@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 
-	"repo_article/src/domain/entities"
 	"repo_article/src/config"
+	"repo_article/src/domain/entities"
 )
 
-type AuthService struct{
+type AuthService struct {
 	cfg *config.Config
 }
 
