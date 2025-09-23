@@ -60,7 +60,7 @@ data:
 
     autoscaling:
       enabled: true
-      minReplicas: 2
+      minReplicas: 1
       maxReplicas: 10
       metrics:
         - type: Resource
@@ -78,10 +78,6 @@ data:
         enabled: true
         awsAccessKeyId: "minio"
         awsSecretAccessKey: "minio123"
-
-      defaultArtifactRoot: ./mlruns
-      proxiedArtifactStorage: false
-      defaultArtifactsDestination: ./mlartifacts
 
     backendStore:
       postgres:
