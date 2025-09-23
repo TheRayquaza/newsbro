@@ -19,13 +19,13 @@ class BaseRecommendationModel(ABC):
         self.model_version = None
     
     @abstractmethod
-    def fit(self, papers_df: pd.DataFrame, **kwargs) -> None:
+    def fit(self, news_df: pd.DataFrame, **kwargs) -> None:
         """Train the recommendation model"""
         pass
     
     @abstractmethod
-    def recommend(self, paper_index: int, top_n: int = 6, **kwargs) -> pd.DataFrame:
-        """Get recommendations for a given paper"""
+    def recommend(self, news_index: int, top_n: int = 6, **kwargs) -> pd.DataFrame:
+        """Get recommendations for a given news"""
         pass
     
     def get_info(self) -> Dict[str, str]:
