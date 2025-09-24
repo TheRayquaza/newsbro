@@ -1,0 +1,62 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: InferenceService
+metadata:
+  name: sbert
+  namespace: ml
+spec:
+  predictor:
+    containers:
+      - name: kserve-container
+        image: same3000/newsbro-sbert:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          # Identify this model to the server
+          - name: MODEL_NAME
+            value: "sbert_model"
+          - name: MODEL_URI
+            value: "s3://mlflow/7/models/m-6211bef7193f408c953ef163e4e98717/artifacts"
+          # MinIO / S3
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: minio-s3-creds
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: minio-s3-creds
+                key: AWS_SECRET_ACCESS_KEY
+          - name: AWS_DEFAULT_REGION
+            valueFrom:
+              secretKeyRef:
+                name: minio-s3-creds
+                key: AWS_DEFAULT_REGION
+          - name: AWS_S3_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: minio-s3-creds
+                key: AWS_S3_ENDPOINT
+          - name: AWS_S3_USE_HTTPS
+            valueFrom:
+              secretKeyRef:
+                name: minio-s3-creds
+                key: AWS_S3_USE_HTTPS
+          - name: AWS_S3_VERIFY_SSL
+            valueFrom:
+              secretKeyRef:
+                name: minio-s3-creds
+                key: AWS_S3_VERIFY_SSL
+          - name: MLFLOW_S3_ENDPOINT_URL
+            valueFrom:
+              secretKeyRef:
+                name: minio-s3-creds
+                key: MLFLOW_S3_ENDPOINT_URL
+        ports:
+          - containerPort: 8080
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "4Gi"

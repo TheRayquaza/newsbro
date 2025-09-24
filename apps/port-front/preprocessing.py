@@ -10,94 +10,71 @@ import json
 def preprocessing():
     
     print("STARTING PREPROCESSING\n")
-    papers = pd.read_csv('../data/arXiv-DataFrame.csv')
 
-    print("Dropping columns : ['Unnamed: 0', 'id']")
-    papers.drop(columns=['Unnamed: 0', 'id'], inplace=True, errors='ignore')
+    print("Loading news and behaviors Dataframes")
+    col_names = ["impression_id", "user_id", "time", "history", "impressions"]
+    behaviors = pd.read_csv("../data/behaviors.tsv", sep="\t", names=col_names, quoting=3)
 
-    papers.drop_duplicates(keep='first', inplace=True)
-    print("Dropping duplicates")
-
-
-    papers[papers.duplicated(keep=False)] \
-        .sort_values(['Title', 'Author'])
-
-    print("Reducing data")
-
-    # -------------------------------
-    # 1. Limit authors to max 20 papers
-    # -------------------------------
-    max_author_count = 20
-
-    def truncate_group(df, group_col, max_count):
-        truncated_df = df.groupby(group_col).head(max_count)
-        print(f"After truncating {group_col}: {len(truncated_df)} rows")
-        return truncated_df
-
-    papers = truncate_group(papers, 'Author', max_author_count)
-
-    # -------------------------------
-    # 2. Limit categories to max 100 papers
-    # -------------------------------
-    max_category_count = 100
-    papers = truncate_group(papers, 'Primary Category', max_category_count)
-
-    print("Changing Categories' Names")
-    with open("../data/map_category.json", "r") as f:
-        category_map = json.load(f)
-
-    papers["Category"] = papers["Primary Category"].map(category_map).fillna("Other")
-
-
-    print("Creating Text Embeddings : Title + Summary")
+    col_names = ["id", "category", "subcategory", "title", "abstract", "link", "title_entities", "abstract_entities"]
+    news = pd.read_csv("../data/news.tsv", sep="\t", names=col_names, quoting=3)
     
-    # Combine Title and Summary
-    papers['text'] = papers['Title'].fillna('') + " " + papers['Summary'].fillna('')
-
-    try:
-        # Try to load existing embeddings
-        text_embeddings = np.load('../data/text_embeddings.npy')
-        if not isinstance(text_embeddings, np.ndarray):
-            raise ValueError("Loaded embeddings are not a NumPy array. Recomputing embeddings.")
-    except (FileNotFoundError, ValueError):
-        # If file doesn't exist or is invalid, compute embeddings
-        model = SentenceTransformer('all-MiniLM-L6-v2') 
-        text_embeddings = model.encode(papers['text'].tolist(), show_progress_bar=True)
-        np.save('../data/text_embeddings.npy', text_embeddings)
+    print("Loading entity and relation vectors")
+    """
+    def load_vec_file(path):
+        embeddings = {}
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                parts = line.strip().split()
+                if len(parts) <= 2:
+                    continue
+                key = parts[0]
+                vec = np.array(list(map(float, parts[1:])))
+                embeddings[key] = vec
+        return embeddings
     
-    print("Creating Categorical Embeddings : Author + Primary Category + Category")
-    categorical_cols = ['Author', 'Primary Category', 'Category']
-
-    try:
-        # Try to load existing categorical embeddings
-        cat_embeddings = np.load('../data/cat_embeddings.npy', allow_pickle=True)
-        if not isinstance(cat_embeddings, np.ndarray):
-            raise ValueError("Loaded embeddings are not a NumPy array. Recomputing embeddings.")
-    except (FileNotFoundError, ValueError):
-        # If file doesn't exist or is invalid, compute embeddings
-        encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
-        cat_embeddings = encoder.fit_transform(papers[categorical_cols].fillna(''))
-        np.save('../data/cat_embeddings.npy', cat_embeddings)
-
-    combined_embeddings = np.hstack([text_embeddings, cat_embeddings])
+    #entity_embeddings = load_vec_file("../data/entity_embedding.vec")
+    #relation_embeddings = load_vec_file("../data/relation_embedding.vec")
+    """
+    print("Reducing the dataset")
     
-    print("Creating Similarity Matrix")
-    try:
-        # Try to load existing similarity matrix
-        similarity_matrix = np.load('../data/similarity_matrix.npy', allow_pickle=True)
-        if not isinstance(cat_embeddings, np.ndarray):
-            raise ValueError("Loaded similarity matrix is not a NumPy array. Recomputing similarity matrix.")
-    except (FileNotFoundError, ValueError):
-        similarity_matrix = cosine_similarity(combined_embeddings)
-        np.save('../data/similarity_matrix.npy', similarity_matrix)
-    
-    file_path = "../data/papers.csv"
+    # --- Step 1: Stratified sampling by category/subcategory ---
+    sample_size = 5000
+    news = news.groupby(['category', 'subcategory'], group_keys=False).apply(
+        lambda x: x.sample(frac=sample_size/len(news), random_state=42)
+    )
+    news = news.reset_index(drop=True)
+    valid_news_ids = set(news['id'])
 
-    if not os.path.exists(file_path):
-        papers.to_csv(file_path, index=False)
-        print(f"✅ Saved DataFrame to {file_path}")
-    else:
-        print(f"⚡ File {file_path} already exists, not overwriting.")
+    # --- Step 2: Filter histories and impressions ---
+    def filter_history(history_str, valid_ids):
+        if pd.isna(history_str) or history_str == "":
+            return ""
+        return " ".join([nid for nid in history_str.split() if nid in valid_ids])
+
+    def filter_impressions(impressions_str, valid_ids):
+        if pd.isna(impressions_str) or impressions_str == "":
+            return ""
+        return " ".join([pair for pair in impressions_str.split() if pair.split("-")[0] in valid_ids])
+
+    behaviors['history'] = behaviors['history'].apply(lambda x: filter_history(x, valid_news_ids))
+    behaviors['impressions'] = behaviors['impressions'].apply(lambda x: filter_impressions(x, valid_news_ids))
+
+    # --- Step 3: Remove behaviors with no impressions left ---
+    behaviors = behaviors[behaviors['impressions'] != ""]
+    
+    print("Dropping unused columns and null values")
+    news = news.dropna(subset=['abstract'])
+
+    columns_to_drop = ['category', 'subcategory', 'title_entities', 'abstract_entities']
+    news = news.drop(columns=columns_to_drop, errors='ignore')
+    
+    behaviors = behaviors.dropna(subset=['history'])
+    
+    news['content'] = news['title'] + " " + news['abstract']
+    news = news.reset_index(drop=True)
+    
+    news.to_csv('../data/news_cleaned.csv')
+    behaviors.to_csv('../data/behaviors_cleaned.csv')
     
     print("FINISHING PREPROCESSING")
 
