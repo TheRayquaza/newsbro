@@ -1,0 +1,22 @@
+---
+# https://fluxcd.io/flux/components/helm/helmreleases/
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: external-secrets
+  namespace: external-secrets
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      chart: external-secrets
+      version: 0.30.0
+      sourceRef:
+        kind: HelmRepository
+        name: helm-repo
+        namespace: external-secrets
+  valuesFrom:
+    - kind: ConfigMap
+      name: external-secrets-values
+      #namespace: external-secrets
+      valuesKey: values.yaml
