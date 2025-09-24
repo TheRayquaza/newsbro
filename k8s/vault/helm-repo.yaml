@@ -1,0 +1,12 @@
+---
+# https://fluxcd.io/flux/components/source/helmrepositories/
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: helm-repo
+  namespace: vault
+spec:
+  interval: 10m0s
+  type: default
+  url: https://helm.releases.hashicorp.com
+  provider: generic
