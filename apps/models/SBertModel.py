@@ -7,9 +7,9 @@ import mlflow
 import pandas as pd
 
 load_dotenv()
+
 mlflow.autolog()
 mlflow.set_tracking_uri("http://mlflow.localhost:8080")
-
 mlflow.set_experiment("sbert_experiment")
 
 class SBertModel(BaseRecommendationModel):
