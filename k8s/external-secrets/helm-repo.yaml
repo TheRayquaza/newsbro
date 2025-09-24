@@ -1,0 +1,12 @@
+---
+# https://fluxcd.io/flux/components/source/helmrepositories/
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: helm-repo
+  namespace: external-secrets
+spec:
+  interval: 10m0s
+  type: default
+  url:  https://charts.external-secrets.io
+  provider: generic

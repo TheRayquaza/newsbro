@@ -9,3 +9,5 @@ resources:
 - mlflow.yaml
 - qdrant.yaml
 - apps.yaml
+- external-secrets.yaml
+- vault.yaml
