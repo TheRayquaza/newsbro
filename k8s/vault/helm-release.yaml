@@ -1,5 +1,4 @@
 ---
-# https://fluxcd.io/flux/components/helm/helmreleases/
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -9,7 +8,7 @@ spec:
   interval: 5m0s
   chart:
     spec:
-      chart: hashicorp/vault
+      chart: vault
       version: 0.30.1
       sourceRef:
         kind: HelmRepository
@@ -18,5 +17,4 @@ spec:
   valuesFrom:
     - kind: ConfigMap
       name: vault-values
-      #namespace: vault
       valuesKey: values.yaml
