@@ -4,7 +4,7 @@ resources:
 - gotk-components.yaml
 - gotk-sync.yaml
 - minio.yaml
-#- capacitor.yaml
+- capacitor.yaml
 - postgres.yaml
 - mlflow.yaml
 - qdrant.yaml

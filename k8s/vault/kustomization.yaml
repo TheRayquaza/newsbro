@@ -6,3 +6,6 @@ resources:
 - helm-chart.yaml
 - helm-release.yaml
 - values.yaml
+- service-account.yaml
+- cluster-role-binding.yaml
+- vault-auth-token.yaml
