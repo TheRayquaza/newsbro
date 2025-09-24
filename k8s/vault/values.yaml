@@ -52,7 +52,7 @@ data:
         enabled: true
         ingressClassName: traefik
         hosts:
-          - host: vault.example.com
+          - host: vault.localhost
             paths:
               - /
         tls: []   # configure if you want HTTPS from traefik
