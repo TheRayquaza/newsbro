@@ -10,7 +10,6 @@ load_dotenv()
 
 mlflow.autolog()
 mlflow.set_tracking_uri("http://mlflow.localhost:8080")
-mlflow.set_experiment("tfidf_experiment")
 
 class TfidfModel(BaseRecommendationModel):
     
@@ -23,6 +22,7 @@ class TfidfModel(BaseRecommendationModel):
 
     def fit(self, news_df: pd.DataFrame, **kwargs):
         """Train the TF-IDF recommendation model"""
+        mlflow.set_experiment("tfidf_experiment_2")
         self.news_df = news_df.copy()
         
         with mlflow.start_run(run_name="TF-IDF Model Training"):

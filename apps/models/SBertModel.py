@@ -10,7 +10,6 @@ load_dotenv()
 
 mlflow.autolog()
 mlflow.set_tracking_uri("http://mlflow.localhost:8080")
-mlflow.set_experiment("sbert_experiment")
 
 class SBertModel(BaseRecommendationModel):
     
@@ -23,6 +22,7 @@ class SBertModel(BaseRecommendationModel):
 
     def fit(self, news_df: pd.DataFrame, **kwargs):
         """Train the recommendation model with MLflow tracking"""
+        mlflow.set_experiment("sbert_experiment_2")
         print("Training S-BERT model...")
 
         with mlflow.start_run(run_name="SBERT Training"):
