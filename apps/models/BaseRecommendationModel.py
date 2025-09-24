@@ -1,7 +1,7 @@
 import pandas as pd
+import logging
 from abc import ABC, abstractmethod
 from typing import Dict
-import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
