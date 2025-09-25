@@ -1,0 +1,21 @@
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: capacitor
+  namespace: flux-system
+  labels:
+    app: capacitor
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: capacitor.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: capacitor-next
+                port:
+                  number: 80

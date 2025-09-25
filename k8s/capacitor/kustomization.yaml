@@ -5,3 +5,4 @@ resources:
   - repository.yaml
   - service-account.yaml
   - secrets.yaml
+  - ingress.yaml
