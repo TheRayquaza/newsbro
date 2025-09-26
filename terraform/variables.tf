@@ -1,3 +1,16 @@
+## Vault
+
+variable "vault_token" {
+  type = string
+  sensitive = true
+}
+
+variable "vault_address" {
+  type = string
+}
+
+## Capacitor
+
 variable "capacitor_license_key" {
   type = string
     sensitive = true
@@ -27,11 +40,9 @@ variable "capacitor_registry_yaml" {
   type = string
 }
 
-variable "vault_token" {
+## Cloudflare
+
+variable "cloudflare_token" {
   type = string
   sensitive = true
-}
-
-variable "vault_address" {
-  type = string
 }

@@ -14,3 +14,15 @@ module "capacitor" {
     "registry.yaml" = var.capacitor_registry_yaml
   }
 }
+
+module "cloudflare" {
+  source       = "./modules/vault-secrets"
+  vault_address = var.vault_address
+  vault_token   = var.vault_token
+  mount_path    = "kv"
+  secret_path   = "cloudflare"
+
+  secrets = {
+    CLOUDFLARE_API_TOKEN = var.cloudflare_token
+  }
+}
