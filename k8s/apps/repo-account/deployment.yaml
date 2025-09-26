@@ -40,7 +40,7 @@ spec:
             - configMapRef:
                 name: repo-account-config
             - secretRef:
-                name: oidc-secret
+                name: oidc-secrets
             - secretRef:
                 name: repo-account-secrets
           resources:
