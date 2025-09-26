@@ -5,5 +5,6 @@ metadata:
   namespace: apps
 data:
   DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
+  DATABASE_NAME: "repo-account"
   GIN_MODE: release
   PORT: "8080"
