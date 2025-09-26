@@ -1,5 +1,4 @@
 ---
-# https://fluxcd.io/flux/components/helm/helmreleases/
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -18,5 +17,4 @@ spec:
   valuesFrom:
     - kind: ConfigMap
       name: cert-manager-values
-      #namespace: cert-manager
       valuesKey: values.yaml

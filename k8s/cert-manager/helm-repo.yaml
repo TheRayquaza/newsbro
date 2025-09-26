@@ -8,5 +8,5 @@ metadata:
 spec:
   interval: 10m0s
   type: default
-  url: oci://quay.io/jetstack/charts/cert-manager
+  url: https://charts.jetstack.io # jetstack repo
   provider: generic
