@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: newsbro-wildcard-tls
+  namespace: app
+spec:
+  secretName: newsbro-apps-tls
+  issuerRef:
+    name: letsencrypt-dns01
+    kind: ClusterIssuer
+  dnsNames:
+    - account.newsbro.cc
+    # add more for each service

@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - repo-account
   - pull-secrets.yaml
+  - certificate.yaml
 
 configMapGenerator:
   - name: oidc-config

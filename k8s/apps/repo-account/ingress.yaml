@@ -6,10 +6,40 @@ metadata:
   namespace: apps
   labels:
     app: repo-account
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
   ingressClassName: traefik
+  tls:
+  - hosts:
+    - account.newsbro.cc
+    secretName: newsbro-wildcard-tls
   rules:
     - host: localhost
+      http:
+        paths:
+          - path: /api/v1/users
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-account
+                port:
+                  number: 80
+          - path: /api/v1/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-account
+                port:
+                  number: 80
+          - path: /complete/epita
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-account
+                port:
+                  number: 80
+    - host: account.newsbro.cc
       http:
         paths:
           - path: /api/v1/users
