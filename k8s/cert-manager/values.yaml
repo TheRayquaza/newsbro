@@ -27,8 +27,6 @@ data:
       leaderElection:
         namespace: "kube-system"
 
-    installCRDs: true
-
     crds:
       enabled: true
       keep: true
@@ -123,19 +121,7 @@ data:
       # Timeout for 'kubectl check api' command.
       timeout: 1m
 
-      # Job backoffLimit
       backoffLimit: 4
-
-      # Optional additional annotations to add to the startupapicheck Job.
-      # +docs:property
-      jobAnnotations:
-        helm.sh/hook: post-install
-        helm.sh/hook-weight: "1"
-        helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-
-      # Optional additional annotations to add to the startupapicheck Pods.
-      # +docs:property
-      # podAnnotations: {}
 
       extraEnv: []
 
