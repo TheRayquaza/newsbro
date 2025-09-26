@@ -7,7 +7,7 @@ metadata:
   name: postgres
   namespace: postgres
 spec:
-  interval: 5m
+  interval: 10m0s
   chart:
     spec:
       chart: cloudnative-pg
@@ -19,5 +19,4 @@ spec:
   valuesFrom:
     - kind: ConfigMap
       name: postgres-values
-      #namespace: postgres
       valuesKey: values.yaml

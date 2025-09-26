@@ -6,7 +6,7 @@ metadata:
   name: external-secrets
   namespace: external-secrets
 spec:
-  interval: 5m0s
+  interval: 10m0s
   chart:
     spec:
       chart: external-secrets
@@ -18,5 +18,4 @@ spec:
   valuesFrom:
     - kind: ConfigMap
       name: external-secrets-values
-      #namespace: external-secrets
       valuesKey: values.yaml

@@ -7,17 +7,10 @@ data:
   values.yaml: |
     # https://artifacthub.io/packages/helm/bitnami/minio?modal=values
     auth:
-      rootUser: admin
-      rootPassword: minio123456
+      existingSecret: minio-root-secret
 
-    users:
-      - accessKey: console
-        secretKey: console123
-        policy: consoleAdmin
-
-      - accessKey: minio
-        secretKey: minio123
-        policy: consoleAdmin
+    usersExistingSecrets:
+      - centralized-minio-users
 
     persistence:
       enabled: true
@@ -50,8 +43,6 @@ data:
       runAsGroup: 1001
       fsGroup: 1001
 
-    # https://artifacthub.io/packages/helm/bitnami/minio?modal=values&path=defaultBuckets
-    # defaultBuckets: "datalake,json-data,parking-events" this is standalone only 
     mode: distributed
 
     buckets:

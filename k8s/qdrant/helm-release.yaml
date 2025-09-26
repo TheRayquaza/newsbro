@@ -6,7 +6,7 @@ metadata:
   name: qdrant
   namespace: qdrant
 spec:
-  interval: 5m
+  interval: 10m0s
   chart:
     spec:
       chart: qdrant

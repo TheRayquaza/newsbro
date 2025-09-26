@@ -80,40 +80,19 @@ data:
           # -- This is for setting up the key for AWS_SECRET_ACCESS_KEY secret. If it's set, awsSecretAccessKey will be ignored.
           #keyOfSecretAccessKey: ""
 
-    # auth:
-    #   # -- Specifies if you want to enable mlflow authentication. auth and ldapAuth can't be enabled at same time.
-    #   enabled: false
-    #   # -- Mlflow admin user username
-    #   adminUsername: ""
-    #   # -- Mlflow admin user password
-    #   adminPassword: ""
-    #   # -- Specifies if you want to use an existing admin credentials secret for auth. If it's set, adminUsername and adminPassword will be ignored.
-    #   existingAdminSecret:
-    #     # -- The name of the existing admin credentials secret.
-    #     name: ""
-    #     # -- The key of the admin username in the existing admin credentials secret.
-    #     usernameKey: "username"
-    #     # -- The key of the admin password in the existing admin credentials secret.
-    #     passwordKey: "password"
-
     backendStore:
       postgres:
         enabled: true
         host: "postgres-cluster-rw.postgres.svc.cluster.local"
         port: 5432
-        user: "mlflow"
         database: "mlflow"
-        password: "mysupersecretpassword"
         driver: "psycopg2"
       databaseMigration: true
       databaseConnectionCheck: true
-      # existingDatabaseSecret:
-      #   # -- The name of the existing database secret.
-      #   name: ""
-      #   # -- The key of the username in the existing database secret.
-      #   usernameKey: "username"
-      #   # -- The key of the password in the existing database secret.
-      #   passwordKey: "password"
+      existingDatabaseSecret:
+        name: "mlflow-db-secret"
+        usernameKey: "username"
+        passwordKey: "password"
 
     extraEnvVars:
       # S3 Configuration
