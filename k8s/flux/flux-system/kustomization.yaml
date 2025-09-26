@@ -11,3 +11,4 @@ resources:
 - apps.yaml
 - external-secrets.yaml
 - vault.yaml
+- cert-manager.yaml
