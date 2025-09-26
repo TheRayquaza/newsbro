@@ -38,8 +38,6 @@ spec:
               name: metrics
           envFrom:
             - configMapRef:
-                name: oidc-config
-            - configMapRef:
                 name: repo-account-config
             - secretRef:
                 name: oidc-secret

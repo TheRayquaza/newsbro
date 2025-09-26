@@ -40,7 +40,6 @@ data:
 
     extraArgs:
       workers: "4"
-      # staticPrefix: /mlflow # we should use this if we want to serve mlflow under /mlflow path
 
     resources:
       limits:
@@ -70,15 +69,10 @@ data:
       s3:
         bucket: "mlflow"
         enabled: true
-        awsAccessKeyId: "minio"
-        awsSecretAccessKey: "minio123"
-        #existingSecret:
-          # -- This is for setting up the AWS IAM user secrets existing secret name.
-          #name: ""
-          # -- This is for setting up the key for AWS_ACCESS_KEY_ID secret. If it's set, awsAccessKeyId will be ignored.
-          #keyOfAccessKeyId: ""
-          # -- This is for setting up the key for AWS_SECRET_ACCESS_KEY secret. If it's set, awsSecretAccessKey will be ignored.
-          #keyOfSecretAccessKey: ""
+        existingSecret:
+          name: "mlflow-s3-secret"
+          keyOfAccessKeyId: "username"
+          keyOfSecretAccessKey: "password"
 
     backendStore:
       postgres:
