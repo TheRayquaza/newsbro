@@ -37,7 +37,7 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, au
 	})
 
 	// Readiness check
-	router.GET("/readiness", func(c *gin.Context) {
+	router.GET("/ready", func(c *gin.Context) {
 		if err := articleService.Db.Raw("SELECT 1").Error; err != nil {
 			c.JSON(500, gin.H{"status": "unhealthy", "reason": err})
 			return

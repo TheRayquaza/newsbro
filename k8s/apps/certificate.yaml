@@ -10,4 +10,5 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - account.newsbro.cc
+    - article.newsbro.cc
     # add more for each service

@@ -1,0 +1,51 @@
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: repo-article
+  namespace: apps
+  labels:
+    app: repo-article
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - article.newsbro.cc
+    secretName: newsbro-wildcard-tls
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /api/v1/article
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-article
+                port:
+                  number: 80
+          - path: /api/v1/feedback
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-article
+                port:
+                  number: 80
+    - host: article.newsbro.cc
+      http:
+        paths:
+          - path: /api/v1/article
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-article
+                port:
+                  number: 80
+          - path: /api/v1/feedback
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-article
+                port:
+                  number: 80
