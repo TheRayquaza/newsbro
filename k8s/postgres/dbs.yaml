@@ -24,3 +24,16 @@ spec:
   owner: repo-account
   ensure: present
   extensions: []
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: repo-article-db
+  namespace: postgres
+spec:
+  cluster:
+    name: postgres-cluster
+  name: repo-article
+  owner: repo-article
+  ensure: present
+  extensions: []

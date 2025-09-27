@@ -31,6 +31,11 @@ spec:
       login: true
       passwordSecret:
         name: repo-account-db-secret
+    - name: repo-article
+      ensure: present
+      login: true
+      passwordSecret:
+        name: repo-article-db-secret
   storage:
     size: 10Gi
     storageClass: local-path
