@@ -2,20 +2,32 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
 	Port        string
 	DatabaseURL string
 	JWTSecret   string
+	Admins	  	[]string
 }
+
 
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
+	}
+
+	admins := strings.Split(getEnv("ADMINS", ""), ",")
+	filtered := make([]string, 0, len(admins))
+	for _, a := range admins {
+		if trimmed := strings.TrimSpace(a); trimmed != "" {
+			filtered = append(filtered, trimmed)
+		}
 	}
 
 	return &Config{
@@ -26,7 +38,8 @@ func Load() *Config {
 			getEnv("DATABASE_HOST", "localhost:5432"),
 			getEnv("DATABASE_NAME", "repo_account"),
 		),
-		JWTSecret: getEnv("JWT_SECRET", "your-secret-key"),
+		JWTSecret: getEnv("JWT_SECRET", ""),
+		Admins:    filtered,
 	}
 }
 

@@ -57,13 +57,13 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, au
 			// Article routes
 			articles := protected.Group("/articles")
 			{
-				articles.POST("", articleController.CreateArticle)
 				articles.GET("", articleController.GetArticles)
 				articles.GET("/categories", articleController.GetCategories)
 				articles.GET("/subcategories", articleController.GetSubcategories)
 				articles.GET("/:id", articleController.GetArticle)
-				articles.PUT("/:id", articleController.UpdateArticle)
-				articles.DELETE("/:id", articleController.DeleteArticle)
+				articles.POST("", middleware.AdminMiddleware(authService), articleController.CreateArticle)
+				articles.PUT("/:id", middleware.AdminMiddleware(authService), articleController.UpdateArticle)
+				articles.DELETE("/:id", middleware.AdminMiddleware(authService), articleController.DeleteArticle)
 			}
 		}
 	}

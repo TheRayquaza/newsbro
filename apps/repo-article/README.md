@@ -75,3 +75,4 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 | DATABASE_HOST        | `localhost:5432`                      |
 | DATABASE_NAME        | `repo_article`                        |
 | JWT_SECRET           | `your-secret-key`                     |
+| ADMINS               | `user@xxx.com,user2@yyy.com`          |

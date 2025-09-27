@@ -29,16 +29,12 @@ func NewAuthService(cfg *config.Config) *AuthService {
 }
 
 func (s *AuthService) ValidateToken(tokenStr string) (*entities.User, error) {
-	fmt.Println("Validating token:", tokenStr)
 	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		fmt.Printf("Parsed token: %+v\n", token)
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(s.cfg.JWTSecret), nil
 	})
-
-	fmt.Printf("Error after parsing: %+v\n", err)
 
 	if err != nil {
 		return nil, err
