@@ -5,16 +5,12 @@ metadata:
   namespace: postgres
 data:
   values.yaml: |
-    global:
-      imageRegistry: ""
-      imagePullSecrets: []
-
     replicaCount: 1
 
     image:
       registry: docker.io
       repository: dpage/pgadmin4
-      tag: ""
+      tag: "9.8.0"
       pullPolicy: IfNotPresent
     imagePullSecrets: []
 
@@ -44,12 +40,6 @@ data:
         maxSurge: 0
         maxUnavailable: 1
 
-    preferences:
-      enabled: false
-      existingConfigMap: ""
-      data:
-        misc:user_interface:theme: dark
-
     networkPolicy:
       enabled: true
 
@@ -65,15 +55,8 @@ data:
               pathType: Prefix
       tls: []
 
-    extraConfigmapMounts: []
-    extraSecretMounts: []
-    extraVolumeMounts: []
-
     secretKeys:
       pgadminPasswordKey: password
-
-    envVarsFromConfigMaps: []
-    envVarsFromSecrets: []
 
     persistentVolume:
       enabled: true
@@ -96,29 +79,4 @@ data:
       enabled: false
       allowPrivilegeEscalation: false
 
-    livenessProbe:
-      initialDelaySeconds: 30
-      periodSeconds: 20
-      timeoutSeconds: 5
-      failureThreshold: 3
-
-    readinessProbe:
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      timeoutSeconds: 3
-      failureThreshold: 3
-
-    startupProbe:
-      failureThreshold: 30
-      periodSeconds: 2
-
-    containerPorts:
-      http: 80
-
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
+    resources: {}
