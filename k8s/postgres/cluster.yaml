@@ -15,6 +15,12 @@ spec:
   minSyncReplicas: 0
   managed:
     roles:
+    - name: admin
+      ensure: present
+      login: true
+      superuser: true
+      passwordSecret:
+        name: admin-db-secret
     - name: mlflow
       ensure: present
       login: true
