@@ -5,6 +5,7 @@ namespace: apps
 resources:
   - namespace.yaml
   - repo-account
+  - repo-article
   - pull-secrets.yaml
   - certificate.yaml
   - oidc-secrets.yaml

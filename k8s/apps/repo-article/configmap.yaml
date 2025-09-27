@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: repo-article-config
+  namespace: apps
+data:
+  DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
+  DATABASE_NAME: "repo-article"
+  GIN_MODE: release
+  PORT: "8080"
+  ADMINS: "mateo@forge.epita.fr,maxim.bocquillion@epita.fr,samy.yacef@epita.fr"
