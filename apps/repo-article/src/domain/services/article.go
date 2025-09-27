@@ -2,33 +2,21 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"repo_article/src/api/dto"
 	"repo_article/src/data/models"
 	"strings"
 
-	//"github.com/IBM/sarama"
 	"gorm.io/gorm"
 )
 
 type ArticleService struct {
 	Db *gorm.DB
-	//kafkaProducer sarama.SyncProducer
 }
-
-/*
-// KafkaMessage represents the message structure sent to Kafka
-type KafkaMessage struct {
-	Action    string          `json:"action"`
-	Article   *models.Article `json:"article"`
-	Timestamp time.Time       `json:"timestamp"`
-	UserID    uint            `json:"user_id,omitempty"`
-}
-*/
 
 func NewArticleService(db *gorm.DB) *ArticleService {
 	return &ArticleService{
 		Db: db,
-		//kafkaProducer: nil,
 	}
 }
 
@@ -44,14 +32,15 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 	if req.ID != 0 {
 		var existing models.Article
 		if err := as.Db.First(&existing, "id = ?", req.ID).Error; err == nil {
-			return nil, fmt.Errorf("article with id %d already exists", req.ID)
+			return nil, dto.NewConflict(fmt.Sprintf("article with id %d already exists", req.ID))
 		} else if err != gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("failed to check existing article: %w", err)
+			return nil, dto.NewNotFound(fmt.Sprintf("failed to check existing article: %s", err))
 		}
 		article.ID = req.ID
 	}
 
 	if err := as.Db.Create(article).Error; err != nil {
+		log.Printf("failed to create article: %s", err)
 		return nil, fmt.Errorf("failed to create article: %w", err)
 	}
 
@@ -73,14 +62,18 @@ func (as *ArticleService) GetArticleByID(id uint) (*models.Article, error) {
 	return &article, nil
 }
 
-// GetArticles retrieves articles with filtering and pagination
 func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]models.Article, int64, error) {
+	if filters.Limit < 0 {
+		return nil, 0, dto.NewBadRequest("limit must be >= 0")
+	}
+	if filters.Offset < 0 {
+		return nil, 0, dto.NewBadRequest("offset must be >= 0")
+	}
+
 	var articles []models.Article
 	var total int64
-
 	query := as.Db.Model(&models.Article{})
 
-	// Apply filters
 	if filters.Category != "" {
 		query = query.Where("category = ?", filters.Category)
 	}
@@ -94,12 +87,10 @@ func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]models.Art
 		query = query.Where("LOWER(title) LIKE ? OR LOWER(abstract) LIKE ?", searchTerm, searchTerm)
 	}
 
-	// Count total records
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count articles: %w", err)
 	}
 
-	// Apply pagination and order
 	if err := query.Order("created_at DESC").
 		Limit(filters.Limit).
 		Offset(filters.Offset).
@@ -110,12 +101,11 @@ func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]models.Art
 	return articles, total, nil
 }
 
-// UpdateArticle updates an existing article
 func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, userID uint) (*models.Article, error) {
 	var article models.Article
 	if err := as.Db.First(&article, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("article with id %d not found", id)
+			return nil, dto.NewNotFound(fmt.Sprintf("article with id %d not found", id))
 		}
 		return nil, fmt.Errorf("failed to get article: %w", err)
 	}
@@ -142,7 +132,7 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 		return nil, fmt.Errorf("failed to update article: %w", err)
 	}
 
-	// Reload the article to get updated data
+	// Reload the article
 	if err := as.Db.First(&article, id).Error; err != nil {
 		return nil, fmt.Errorf("failed to reload updated article: %w", err)
 	}
@@ -153,12 +143,11 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 	return &article, nil
 }
 
-// DeleteArticle soft deletes an article
 func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
 	var article models.Article
 	if err := as.Db.First(&article, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf("article with id %d not found", id)
+			return dto.NewNotFound(fmt.Sprintf("article with id %d not found", id))
 		}
 		return fmt.Errorf("failed to get article: %w", err)
 	}
@@ -184,7 +173,6 @@ func (as *ArticleService) GetCategories() ([]string, error) {
 	return categories, nil
 }
 
-// GetSubcategories retrieves subcategories for a given category
 func (as *ArticleService) GetSubcategories(category string) ([]string, error) {
 	var subcategories []string
 	query := as.Db.Model(&models.Article{}).Distinct("subcategory")
@@ -196,42 +184,6 @@ func (as *ArticleService) GetSubcategories(category string) ([]string, error) {
 	if err := query.Pluck("subcategory", &subcategories).Error; err != nil {
 		return nil, fmt.Errorf("failed to get subcategories: %w", err)
 	}
+
 	return subcategories, nil
 }
-
-/*
-// publishToKafka publishes article events to Kafka
-func (as *ArticleService) publishToKafka(action string, article *models.Article, userID uint) {
-	if as.kafkaProducer == nil {
-		log.Println("Kafka producer not available, skipping message")
-		return
-	}
-
-	message := KafkaMessage{
-		Action:    action,
-		Article:   article,
-		Timestamp: time.Now(),
-		UserID:    userID,
-	}
-
-	messageBytes, err := json.Marshal(message)
-	if err != nil {
-		log.Printf("Failed to marshal Kafka message: %v", err)
-		return
-	}
-
-	kafkaMessage := &sarama.ProducerMessage{
-		Topic: "articles",
-		Key:   sarama.StringEncoder(fmt.Sprintf("article_%d", article.ID)),
-		Value: sarama.ByteEncoder(messageBytes),
-	}
-
-	partition, offset, err := as.kafkaProducer.SendMessage(kafkaMessage)
-	if err != nil {
-		log.Printf("Failed to send message to Kafka: %v", err)
-		return
-	}
-
-	log.Printf("Message sent to Kafka - Topic: articles, Partition: %d, Offset: %d", partition, offset)
-}
-*/

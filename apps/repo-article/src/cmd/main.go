@@ -21,9 +21,10 @@ func main() {
 	// Initialize services
 	articleService := services.NewArticleService(db)
 	authService := services.NewAuthService(cfg)
+	feedbackService := services.NewFeedbackService(db)
 
 	// Setup routes
-	router := routes.SetupRouter(cfg, articleService, authService)
+	router := routes.SetupRouter(cfg, articleService, authService, feedbackService)
 
 	// Start server
 	log.Printf("Server starting on port %s", cfg.Port)

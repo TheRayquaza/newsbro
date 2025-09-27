@@ -13,9 +13,8 @@ type Config struct {
 	Port        string
 	DatabaseURL string
 	JWTSecret   string
-	Admins	  	[]string
+	Admins      []string
 }
-
 
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
