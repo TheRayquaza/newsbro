@@ -7,6 +7,7 @@ import (
 	"repo_article/src/api/dto"
 	"repo_article/src/domain/entities"
 	"repo_article/src/domain/services"
+	//"repo_article/src/data/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -52,7 +53,14 @@ func (ac *ArticleController) CreateArticle(c *gin.Context) {
 
 	article, err := ac.articleService.CreateArticle(&req, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		switch err.(type) {
+		case *dto.ErrConflict:
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		case *dto.ErrNotFound:
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -114,7 +122,7 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 		return
 	}
 
-	// Set defaults if not provided
+	// Set defaults
 	if filters.Limit <= 0 {
 		filters.Limit = 10
 	}
@@ -124,7 +132,12 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 
 	articles, total, err := ac.articleService.GetArticles(&filters)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		switch err.(type) {
+		case *dto.ErrBadRequest:
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -176,11 +189,14 @@ func (ac *ArticleController) UpdateArticle(c *gin.Context) {
 
 	article, err := ac.articleService.UpdateArticle(uint(id), &req, userID)
 	if err != nil {
-		if err.Error() == "article with id "+idParam+" not found" {
+		switch err.(type) {
+		case *dto.ErrNotFound:
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
+		case *dto.ErrConflict:
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -218,11 +234,12 @@ func (ac *ArticleController) DeleteArticle(c *gin.Context) {
 
 	err = ac.articleService.DeleteArticle(uint(id), userID)
 	if err != nil {
-		if err.Error() == "article with id "+idParam+" not found" {
+		switch err.(type) {
+		case *dto.ErrNotFound:
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -263,7 +280,12 @@ func (ac *ArticleController) GetSubcategories(c *gin.Context) {
 
 	subcategories, err := ac.articleService.GetSubcategories(category)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		switch err.(type) {
+		case *dto.ErrBadRequest:
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 

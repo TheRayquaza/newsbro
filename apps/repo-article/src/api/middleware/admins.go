@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"repo_article/src/domain/services"
 	"repo_article/src/config"
 	"repo_article/src/domain/entities"
+	"repo_article/src/domain/services"
 
 	"github.com/gin-gonic/gin"
 )

@@ -5,6 +5,9 @@ definitions:
         type: string
       category:
         type: string
+      id:
+        description: 'Optional: If provided, must be unique'
+        type: integer
       link:
         type: string
       subcategory:
@@ -34,6 +37,31 @@ definitions:
     required:
     - id
     type: object
+  repo_article_src_api_dto.FeedbackRequest:
+    properties:
+      value:
+        example: 1
+        maximum: 1
+        minimum: 0
+        type: integer
+    required:
+    - value
+    type: object
+  repo_article_src_api_dto.FeedbackStatsResponse:
+    properties:
+      article_title:
+        type: string
+      dislike_count:
+        type: integer
+      like_count:
+        type: integer
+      like_ratio:
+        type: number
+      news_id:
+        type: integer
+      total_count:
+        type: integer
+    type: object
   repo_article_src_data_models.Article:
     properties:
       abstract:
@@ -52,6 +80,22 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  repo_article_src_data_models.Feedback:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      news_id:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      value:
+        description: 0 = dislike, 1 = like
+        type: integer
     type: object
 info:
   contact: {}
@@ -293,6 +337,147 @@ paths:
       summary: Update article
       tags:
       - Articles
+  /articles/{id}/feedback:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user feedback for a specific article
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete feedback for an article
+      tags:
+      - feedback
+    get:
+      consumes:
+      - application/json
+      description: Get feedback statistics and user's feedback for a specific article
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.FeedbackStatsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get feedback for a specific article
+      tags:
+      - feedback
+    post:
+      consumes:
+      - application/json
+      description: Create or update user feedback for a specific article
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Feedback data
+        in: body
+        name: feedback
+        required: true
+        schema:
+          $ref: '#/definitions/repo_article_src_api_dto.FeedbackRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create feedback for an article
+      tags:
+      - feedback
+    put:
+      consumes:
+      - application/json
+      description: Update existing user feedback for a specific article
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated feedback data
+        in: body
+        name: feedback
+        required: true
+        schema:
+          $ref: '#/definitions/repo_article_src_api_dto.FeedbackRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update feedback for an article
+      tags:
+      - feedback
   /articles/categories:
     get:
       description: Get all available article categories
@@ -353,4 +538,125 @@ paths:
       summary: Get subcategories
       tags:
       - Articles
+  /feedback/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all feedback with pagination (Admin only)
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo_article_src_data_models.Feedback'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all feedback
+      tags:
+      - feedback
+  /feedback/export/csv:
+    get:
+      consumes:
+      - application/json
+      description: Export all article feedback data to CSV format (Admin only)
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - text/csv
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Export all feedback to CSV
+      tags:
+      - feedback
+  /feedback/my-feedback:
+    get:
+      consumes:
+      - application/json
+      description: Get all feedback given by the authenticated user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo_article_src_data_models.Feedback'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get user's feedback history
+      tags:
+      - feedback
+  /feedback/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get aggregated feedback statistics for all articles (Admin only)
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo_article_src_api_dto.FeedbackStatsResponse'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get feedback statistics
+      tags:
+      - feedback
 swagger: "2.0"
