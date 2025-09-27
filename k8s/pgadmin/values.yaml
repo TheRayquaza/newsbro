@@ -45,7 +45,7 @@ data:
         maxUnavailable: 1
 
     preferences:
-      enabled: true
+      enabled: false
       existingConfigMap: ""
       data:
         misc:user_interface:theme: dark
