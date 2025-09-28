@@ -2,9 +2,7 @@ package middleware
 
 import (
 	"net/http"
-	"strings"
 
-	"repo_article/src/config"
 	"repo_article/src/domain/entities"
 	"repo_article/src/domain/services"
 
@@ -23,14 +21,7 @@ func AdminMiddleware(authService *services.AuthService) gin.HandlerFunc {
 			return
 		}
 		u := user.(*entities.User)
-		isAdmin := false
-		for _, admin := range config.Load().Admins {
-			if strings.EqualFold(u.Email, admin) {
-				isAdmin = true
-				break
-			}
-		}
-		if !isAdmin {
+		if u.Role != "admin" {
 			c.JSON(http.StatusForbidden, gin.H{
 				"error":      "Forbidden: Admins only",
 				"request_id": c.GetString("requestID"),

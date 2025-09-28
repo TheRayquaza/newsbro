@@ -32,6 +32,13 @@ spec:
                 name: repo-article
                 port:
                   number: 80
+          - path: /swagger
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-article
+                port:
+                  number: 80
     - host: article.newsbro.cc
       http:
         paths:
