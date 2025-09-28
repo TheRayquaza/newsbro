@@ -19,6 +19,7 @@ type JWTClaims struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
+	Role      string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -55,5 +56,6 @@ func (s *AuthService) ValidateToken(tokenStr string) (*entities.User, error) {
 		FirstName: claims.FirstName,
 		LastName:  claims.LastName,
 		Username:  claims.Username,
+		Role:      claims.Role,
 	}, nil
 }

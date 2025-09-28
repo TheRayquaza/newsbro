@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -21,14 +20,6 @@ func Load() *Config {
 		log.Println("No .env file found")
 	}
 
-	admins := strings.Split(getEnv("ADMINS", ""), ",")
-	filtered := make([]string, 0, len(admins))
-	for _, a := range admins {
-		if trimmed := strings.TrimSpace(a); trimmed != "" {
-			filtered = append(filtered, trimmed)
-		}
-	}
-
 	return &Config{
 		Port: getEnv("PORT", "8080"),
 		DatabaseURL: fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
@@ -38,7 +29,6 @@ func Load() *Config {
 			getEnv("DATABASE_NAME", "repo_account"),
 		),
 		JWTSecret: getEnv("JWT_SECRET", ""),
-		Admins:    filtered,
 	}
 }
 

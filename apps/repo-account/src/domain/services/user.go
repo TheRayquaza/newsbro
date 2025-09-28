@@ -25,6 +25,14 @@ func (s *UserService) UpdateUser(id uint, updates map[string]interface{}) (*mode
 		return nil, err
 	}
 
+	if role, ok := updates["role"].(string); ok {
+		if role == "admin" && user.Role != "admin" {
+			return nil, gorm.ErrInvalidData // only admin can assign admin role
+		} else if role != "admin" && role != "user" {
+			return nil, gorm.ErrInvalidData
+		} // only user or admin now
+	}
+
 	if err := s.Db.Model(&user).Updates(updates).Error; err != nil {
 		return nil, err
 	}

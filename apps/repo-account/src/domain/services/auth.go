@@ -31,6 +31,7 @@ type JWTClaims struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Username  string `json:"username"`
+	Role      string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -40,7 +41,6 @@ func NewAuthService(cfg *config.Config, db *gorm.DB) *AuthService {
 		db:     db,
 	}
 
-	// Initialize OIDC if configured
 	if cfg.OIDCIssuerURL != "" {
 		service.initOIDC()
 	}
@@ -76,13 +76,13 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.LoginResponse, er
 		return nil, errors.New("user already exists")
 	}
 
-	// Create new user
 	user := models.User{
 		Email:     req.Email,
 		Username:  req.Username,
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		IsActive:  true,
+		Role:      "user",
 	}
 
 	if err := user.SetPassword(req.Password); err != nil {
@@ -149,6 +149,7 @@ func (s *AuthService) generateTokens(user *models.User) (*dto.LoginResponse, err
 			Username:  user.Username,
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
+			Role:      user.Role,
 			IsActive:  user.IsActive,
 		},
 	}, nil
@@ -161,6 +162,7 @@ func (s *AuthService) GenerateAccessToken(user *models.User) (string, error) {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Username:  user.Username,
+		Role:      user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -259,6 +261,7 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 		Subject    string `json:"sub"`
 		GivenName  string `json:"given_name"`
 		FamilyName string `json:"family_name"`
+		Role       string `json:"role"`
 		Iss        string `json:"iss"`
 	}
 
@@ -277,6 +280,7 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 				Username:  claims.Subject,
 				FirstName: claims.GivenName,
 				LastName:  claims.FamilyName,
+				Role:      claims.Role,
 				Issuer:    &claims.Iss,
 				IsActive:  true,
 			}

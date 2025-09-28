@@ -8,4 +8,3 @@ data:
   DATABASE_NAME: "repo-article"
   GIN_MODE: release
   PORT: "8080"
-  ADMINS: "mateo@forge.epita.fr,maxim.bocquillion@epita.fr,samy.yacef@epita.fr"
