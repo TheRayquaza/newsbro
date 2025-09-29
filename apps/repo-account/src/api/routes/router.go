@@ -2,10 +2,11 @@ package routes
 
 import (
 	"repo_account/src/api/controllers"
-	"repo_account/src/api/middleware"
 	"repo_account/src/config"
 	"repo_account/src/domain/services"
 
+	authMiddleware "github.com/TheRayquaza/newsbro/apps/libs/auth/middleware"
+	middleware "github.com/TheRayquaza/newsbro/apps/libs/utils/middleware"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	docs "repo_account/docs"
@@ -38,7 +39,7 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 	})
 
 	// Readiness check
-	router.GET("/readiness", func(c *gin.Context) {
+	router.GET("/ready", func(c *gin.Context) {
 		if err := userService.Db.Raw("SELECT 1").Error; err != nil {
 			c.JSON(500, gin.H{"status": "unhealthy", "reason": err})
 			return
@@ -60,14 +61,14 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 		{
 			auth.POST("/register", authController.Register)
 			auth.POST("/login", authController.Login)
-			auth.POST("/refresh", middleware.AuthMiddleware(authService), authController.RefreshToken)
+			auth.POST("/refresh", authMiddleware.AuthMiddleware(cfg.JWTSecret, cfg.LoginRedirectURL), authController.RefreshToken)
 			auth.GET("/oauth/login", authController.OAuthLogin)
 			auth.GET("/callback", authController.OAuthCallback)
 		}
 
 		// Protected routes
 		protected := v1.Group("/")
-		protected.Use(middleware.AuthMiddleware(authService))
+		protected.Use(authMiddleware.AuthMiddleware(cfg.JWTSecret, cfg.LoginRedirectURL))
 		{
 			// User routes
 			users := protected.Group("/users")

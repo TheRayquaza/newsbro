@@ -65,8 +65,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "302": {
+                        "description": "Found"
                     },
                     "400": {
                         "description": "Bad Request"
@@ -85,8 +85,8 @@
                 ],
                 "summary": "OAuth Login",
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "302": {
+                        "description": "Found"
                     },
                     "503": {
                         "description": "Service Unavailable"
@@ -209,7 +209,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repo_account_src_data_models.User"
+                                "$ref": "#/definitions/repo_account_src_api_dto.UserResponse"
                             }
                         }
                     },
@@ -248,7 +248,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repo_account_src_data_models.User"
+                            "$ref": "#/definitions/repo_account_src_api_dto.UserResponse"
                         }
                     },
                     "401": {
@@ -297,7 +297,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repo_account_src_data_models.User"
+                            "$ref": "#/definitions/repo_account_src_api_dto.UserResponse"
                         }
                     },
                     "400": {
@@ -354,12 +354,9 @@
                 }
             }
         },
-        "repo_account_src_data_models.User": {
+        "repo_account_src_api_dto.UserResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -375,7 +372,7 @@
                 "last_name": {
                     "type": "string"
                 },
-                "updated_at": {
+                "role": {
                     "type": "string"
                 },
                 "username": {
