@@ -38,7 +38,6 @@ func Load() *Config {
 		OIDCClientID:            getEnv("OIDC_CLIENT_ID", ""),
 		OIDCClientSecret:        getEnv("OIDC_CLIENT_SECRET", ""),
 		OIDCRedirectURL:         getEnv("OIDC_REDIRECT_URL", "http://localhost:8080/auth/callback"),
-		OIDCRedirectFrontendURL: getEnv("OIDC_REDIRECT_FRONTEND_URL", "http://localhost:3000"),
 		CookieDomain:            getEnv("COOKIE_DOMAIN", ""),
 		LoginRedirectURL:        getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000"),
 	}

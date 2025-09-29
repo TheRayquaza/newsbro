@@ -259,5 +259,5 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 }
 
 func (s *AuthService) GetPostOAuthRedirectURL() string {
-	return s.Config.OIDCRedirectFrontendURL
+	return s.Config.LoginRedirectURL
 }
