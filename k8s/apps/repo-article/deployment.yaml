@@ -30,7 +30,7 @@ spec:
         - name: pull-secret
       containers:
         - name: repo-article
-          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.1.0
+          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.2.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
