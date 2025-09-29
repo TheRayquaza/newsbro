@@ -1,12 +1,10 @@
 package middleware
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 
-	"repo_article/src/domain/entities"
-	"repo_article/src/domain/services"
-
-	"github.com/gin-gonic/gin"
+	"libs/auth/services"
 )
 
 func AdminMiddleware(authService *services.AuthService) gin.HandlerFunc {
@@ -20,7 +18,7 @@ func AdminMiddleware(authService *services.AuthService) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		u := user.(*entities.User)
+		u := user.(*services.JWTClaims)
 		if u.Role != "admin" {
 			c.JSON(http.StatusForbidden, gin.H{
 				"error":      "Forbidden: Admins only",

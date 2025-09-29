@@ -6,7 +6,6 @@ import (
 
 func Secure() gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
-		// Security headers
 		c.Header("X-Content-Type-Options", "nosniff")
 		c.Header("X-Frame-Options", "DENY")
 		c.Header("X-XSS-Protection", "1; mode=block")

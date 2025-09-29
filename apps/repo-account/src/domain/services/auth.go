@@ -13,6 +13,7 @@ import (
 	"repo_account/src/data/models"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	libJwt "github.com/TheRayquaza/newsbro/apps/libs/auth/services"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
 	"gorm.io/gorm"
@@ -193,35 +194,6 @@ func (s *AuthService) generateRefreshToken(user *models.User) (string, error) {
 	}
 
 	return tokenStr, nil
-}
-
-func (s *AuthService) ValidateToken(tokenStr string) (*models.User, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(s.config.JWTSecret), nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !token.Valid {
-		return nil, errors.New("invalid token")
-	}
-
-	claims, ok := token.Claims.(*JWTClaims)
-	if !ok {
-		return nil, errors.New("invalid token claims")
-	}
-
-	var user models.User
-	if err := s.db.First(&user, claims.UserID).Error; err != nil {
-		return nil, err
-	}
-
-	return &user, nil
 }
 
 func (s *AuthService) GetOAuthURL(state string) string {

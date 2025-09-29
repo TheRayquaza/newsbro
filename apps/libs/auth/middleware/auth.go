@@ -4,14 +4,28 @@ import (
 	"net/http"
 	"strings"
 
-	"repo_account/src/domain/services"
+	"github.com/gin-contrib/sessions"
 
 	"github.com/gin-gonic/gin"
+	"libs/auth/services"
 )
 
 func AuthMiddleware(authService *services.AuthService) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
+		session := sessions.Default(c)
+		cookie, exists := session.Get("auth_token").(string)
+		if exists && cookie != "" {
+			if authHeader != "" && authHeader != "Bearer "+cookie {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"error":      "Conflicting authentication methods",
+					"request_id": c.GetString("requestID"),
+				})
+				c.Abort()
+				return
+			}
+			authHeader = "Bearer " + cookie
+		}
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error":      "Authorization header required",
