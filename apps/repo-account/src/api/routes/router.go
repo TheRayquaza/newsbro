@@ -23,7 +23,6 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 	router.Use(middleware.Recover())
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.Secure())
-	router.Use(middleware.RemoveTrailingSlash())
 
 	// Controllers
 	authController := controllers.NewAuthController(authService)
@@ -76,7 +75,7 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 				users.GET("/profile", userController.GetProfile)
 				users.PUT("/profile", userController.UpdateProfile)
 				//users.DELETE("/profile", userController.DeleteProfile)
-				users.GET("/", userController.GetUsers) // Admin only in production
+				users.GET("", userController.GetUsers) // Admin only in production
 			}
 		}
 	}
