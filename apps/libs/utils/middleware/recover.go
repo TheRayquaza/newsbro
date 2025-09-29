@@ -11,10 +11,8 @@ func Recover() gin.HandlerFunc {
 	return gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
 		requestID, _ := c.Get("requestID")
 
-		// Log the panic
 		fmt.Printf("[PANIC] [%v] %v\n", requestID, recovered)
 
-		// Return error response
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":      "Internal server error",
 			"request_id": requestID,

@@ -4,13 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-
-	"repo_article/src/config"
-	"repo_article/src/domain/entities"
 )
 
-type AuthService struct {
-	cfg *config.Config
+type JWTService struct {
+	JWTSecret string
 }
 
 type JWTClaims struct {
@@ -23,18 +20,18 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewAuthService(cfg *config.Config) *AuthService {
-	return &AuthService{
-		cfg: cfg,
+func NewJWTService(jwtSecret string) *JWTService {
+	return &JWTService{
+		JWTSecret: jwtSecret,
 	}
 }
 
-func (s *AuthService) ValidateToken(tokenStr string) (*entities.User, error) {
+func (s *JWTService) ValidateToken(tokenStr string) (*JWTClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(s.cfg.JWTSecret), nil
+		return []byte(s.JWTSecret), nil
 	})
 
 	if err != nil {
@@ -50,12 +47,5 @@ func (s *AuthService) ValidateToken(tokenStr string) (*entities.User, error) {
 		return nil, errors.New("invalid token claims")
 	}
 
-	return &entities.User{
-		ID:        claims.UserID,
-		Email:     claims.Email,
-		FirstName: claims.FirstName,
-		LastName:  claims.LastName,
-		Username:  claims.Username,
-		Role:      claims.Role,
-	}, nil
+	return claims, nil
 }
