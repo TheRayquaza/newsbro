@@ -4,10 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 
-	"libs/auth/services"
+	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
 )
 
-func AdminMiddleware(authService *services.AuthService) gin.HandlerFunc {
+func AdminMiddleware() gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		var user, exists = c.Get("user")
 		if user == nil || !exists {
@@ -18,7 +18,7 @@ func AdminMiddleware(authService *services.AuthService) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		u := user.(*services.JWTClaims)
+		u := user.(*entities.JWTClaims)
 		if u.Role != "admin" {
 			c.JSON(http.StatusForbidden, gin.H{
 				"error":      "Forbidden: Admins only",

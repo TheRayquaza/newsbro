@@ -1,16 +1,19 @@
 package middleware
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gin-contrib/sessions"
+	"github.com/golang-jwt/jwt/v5"
 
+	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
 	"github.com/gin-gonic/gin"
-	"libs/auth/services"
 )
 
-func AuthMiddleware(authService *services.AuthService) gin.HandlerFunc {
+func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		session := sessions.Default(c)
@@ -45,7 +48,7 @@ func AuthMiddleware(authService *services.AuthService) gin.HandlerFunc {
 			return
 		}
 
-		user, err := authService.ValidateToken(tokenParts[1])
+		user, err := validateToken(tokenParts[1], jwtSecret)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error":      "Invalid token",
@@ -58,4 +61,28 @@ func AuthMiddleware(authService *services.AuthService) gin.HandlerFunc {
 		c.Set("user", user)
 		c.Next()
 	})
+}
+
+func validateToken(tokenStr string, jwtSecret string) (*entities.JWTClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &entities.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(jwtSecret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(*entities.JWTClaims)
+	if !ok {
+		return nil, errors.New("invalid token claims")
+	}
+
+	return claims, nil
 }
