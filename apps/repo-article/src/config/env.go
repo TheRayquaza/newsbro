@@ -12,7 +12,7 @@ type Config struct {
 	Port        string
 	DatabaseURL string
 	JWTSecret   string
-	Admins      []string
+	LoginRedirectURL string
 }
 
 func Load() *Config {
@@ -29,6 +29,7 @@ func Load() *Config {
 			getEnv("DATABASE_NAME", "repo_account"),
 		),
 		JWTSecret: getEnv("JWT_SECRET", ""),
+		LoginRedirectURL: getEnv("LOGIN_REDIRECT_URL", "http://localhost:8080"),
 	}
 }
 

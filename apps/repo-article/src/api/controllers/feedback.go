@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"repo_article/src/api/dto"
-	"repo_article/src/domain/entities"
 	"repo_article/src/domain/services"
 
+	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,13 +48,13 @@ func (fc *FeedbackController) GetArticleFeedback(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
-	usr, ok := user.(*entities.User)
+	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
 
-	userID := usr.ID
+	userID := usr.UserID
 
 	stats, userFeedback, err := fc.feedbackService.GetArticleFeedback(uint(newsID), userID)
 	if err != nil {
@@ -101,13 +101,13 @@ func (fc *FeedbackController) CreateFeedback(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
-	usr, ok := user.(*entities.User)
+	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
 
-	userID := usr.ID
+	userID := usr.UserID
 
 	feedback, err := fc.feedbackService.CreateOrUpdateFeedback(userID, uint(newsID), req.Value)
 	if err != nil {
@@ -149,13 +149,13 @@ func (fc *FeedbackController) UpdateFeedback(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
-	usr, ok := user.(*entities.User)
+	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
 
-	userID := usr.ID
+	userID := usr.UserID
 
 	_, err = fc.feedbackService.UpdateFeedback(userID, uint(newsID), req.Value)
 	if err != nil {
@@ -190,13 +190,13 @@ func (fc *FeedbackController) DeleteFeedback(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
-	usr, ok := user.(*entities.User)
+	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
 
-	userID := usr.ID
+	userID := usr.UserID
 
 	err = fc.feedbackService.DeleteFeedback(userID, uint(newsID))
 	if err != nil {
@@ -225,7 +225,7 @@ func (fc *FeedbackController) GetUserFeedback(c *gin.Context) {
 		return
 	}
 
-	usr, ok := user.(*entities.User)
+	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
@@ -234,7 +234,7 @@ func (fc *FeedbackController) GetUserFeedback(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	feedback, _, err := fc.feedbackService.GetUserFeedback(usr.ID, page, limit)
+	feedback, _, err := fc.feedbackService.GetUserFeedback(usr.UserID, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

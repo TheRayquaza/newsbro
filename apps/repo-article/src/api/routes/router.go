@@ -2,17 +2,18 @@ package routes
 
 import (
 	"repo_article/src/api/controllers"
-	"repo_article/src/api/middleware"
 	"repo_article/src/config"
 	"repo_article/src/domain/services"
 
 	"github.com/gin-gonic/gin"
+	middleware "github.com/TheRayquaza/newsbro/apps/libs/utils/middleware"
+	authMiddleware "github.com/TheRayquaza/newsbro/apps/libs/auth/middleware"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	docs "repo_article/docs"
 )
 
-func SetupRouter(cfg *config.Config, articleService *services.ArticleService, authService *services.AuthService, feedbackService *services.FeedbackService) *gin.Engine {
+func SetupRouter(cfg *config.Config, articleService *services.ArticleService, feedbackService *services.FeedbackService) *gin.Engine {
 	router := gin.Default()
 
 	// Middleware
@@ -53,7 +54,7 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, au
 	{
 		// Protected routes
 		protected := v1.Group("/")
-		protected.Use(middleware.AuthMiddleware(authService))
+		protected.Use(authMiddleware.AuthMiddleware(cfg.JWTSecret, cfg.LoginRedirectURL))
 		{
 			// Article routes
 			articles := protected.Group("/articles")
@@ -62,9 +63,9 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, au
 				articles.GET("/categories", articleController.GetCategories)
 				articles.GET("/subcategories", articleController.GetSubcategories)
 				articles.GET("/:id", articleController.GetArticle)
-				articles.POST("", middleware.AdminMiddleware(authService), articleController.CreateArticle)
-				articles.PUT("/:id", middleware.AdminMiddleware(authService), articleController.UpdateArticle)
-				articles.DELETE("/:id", middleware.AdminMiddleware(authService), articleController.DeleteArticle)
+				articles.POST("", authMiddleware.AdminMiddleware(), articleController.CreateArticle)
+				articles.PUT("/:id", authMiddleware.AdminMiddleware(), articleController.UpdateArticle)
+				articles.DELETE("/:id", authMiddleware.AdminMiddleware(), articleController.DeleteArticle)
 
 				// Article feedback routes
 				articles.GET("/:id/feedback", feedbackController.GetArticleFeedback)
@@ -80,9 +81,9 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, au
 				feedback.GET("/my-feedback", feedbackController.GetUserFeedback)
 
 				// Admin routes for feedback management
-				feedback.GET("/csv", middleware.AdminMiddleware(authService), feedbackController.ExportFeedbackCSV)
-				feedback.GET("/stats", middleware.AdminMiddleware(authService), feedbackController.GetFeedbackStats)
-				feedback.GET("/all", middleware.AdminMiddleware(authService), feedbackController.GetAllFeedback)
+				feedback.GET("/csv", authMiddleware.AdminMiddleware(), feedbackController.ExportFeedbackCSV)
+				feedback.GET("/stats", authMiddleware.AdminMiddleware(), feedbackController.GetFeedbackStats)
+				feedback.GET("/all", authMiddleware.AdminMiddleware(), feedbackController.GetAllFeedback)
 			}
 		}
 	}
