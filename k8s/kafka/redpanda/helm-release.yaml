@@ -1,0 +1,54 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: redpanda-console
+  namespace: kafka
+  labels:
+    app: redpanda-console
+spec:
+  releaseName: redpanda-console
+  interval: 5m
+  chart:
+    spec:
+      chart: console
+      version: v3.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: redpanda
+        namespace: kafka
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 3
+
+    config:
+      kafka:
+        brokers: ["kafka-kafka-bootstrap.kafka.svc:9092"]
+
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: 500m
+      requests:
+        memory: 256Mi
+        cpu: 100m
+
+    ingress:
+      enabled: true
+      className: traefik
+      hosts:
+        - host: "redpanda.localhost"
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+
+    replicaCount: 1

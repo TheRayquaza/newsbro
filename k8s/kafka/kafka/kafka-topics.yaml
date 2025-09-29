@@ -1,0 +1,29 @@
+# ---
+# apiVersion: kafka.strimzi.io/v1beta2
+# kind: KafkaTopic
+# metadata:
+#   name: alert-event-topic
+#   namespace: kafka
+#   labels:
+#     strimzi.io/cluster: kafka
+# spec:
+#   partitions: 1
+#   replicas: 1
+#   config:
+#     retention.ms: 60000 # 1 min
+#     segment.bytes: 1073741824
+
+# ---
+# apiVersion: kafka.strimzi.io/v1beta2
+# kind: KafkaTopic
+# metadata:
+#   name: parking-event-topic
+#   namespace: kafka
+#   labels:
+#     strimzi.io/cluster: kafka
+# spec:
+#   partitions: 1
+#   replicas: 1
+#   config:
+#     retention.ms: 60000 # 1 min
+#     segment.bytes: 1073741824

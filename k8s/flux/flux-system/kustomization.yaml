@@ -12,3 +12,4 @@ resources:
 - external-secrets.yaml
 - vault.yaml
 - cert-manager.yaml
+- kafka.yaml
