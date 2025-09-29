@@ -6,5 +6,7 @@ metadata:
 data:
   DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
   DATABASE_NAME: "repo-account"
+  COOKIE_DOMAIN: ".newsbro.cc"
+  LOGIN_REDIRECT_URL: "https://app.newsbro.cc/login"
   GIN_MODE: release
   PORT: "8080"
