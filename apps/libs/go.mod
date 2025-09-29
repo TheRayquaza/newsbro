@@ -1,4 +1,4 @@
-module libs
+module github.com/TheRayquaza/newsbro/apps/libs
 
 go 1.24.0
 
