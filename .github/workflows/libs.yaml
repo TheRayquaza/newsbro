@@ -1,0 +1,25 @@
+name: libs
+
+on:
+  push:
+    branches: ["**"]   # all branches
+    paths:
+      - 'apps/libs/**'
+    tags:
+      - 'apps/libs/v*.*.*'
+
+jobs:
+  lint:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+      - name: Go Format
+        run: go fmt ./...
+        working-directory: ./apps/libs
+      - name: Go Lint
+        run: go vet ./...
+        working-directory: ./apps/libs
