@@ -29,10 +29,8 @@ definitions:
     - password
     - username
     type: object
-  repo_account_src_data_models.User:
+  repo_account_src_api_dto.UserResponse:
     properties:
-      created_at:
-        type: string
       email:
         type: string
       first_name:
@@ -43,7 +41,7 @@ definitions:
         type: boolean
       last_name:
         type: string
-      updated_at:
+      role:
         type: string
       username:
         type: string
@@ -90,8 +88,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "302":
+          description: Found
         "400":
           description: Bad Request
       summary: OAuth Callback
@@ -103,8 +101,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "302":
+          description: Found
         "503":
           description: Service Unavailable
       summary: OAuth Login
@@ -183,7 +181,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/repo_account_src_data_models.User'
+              $ref: '#/definitions/repo_account_src_api_dto.UserResponse'
             type: array
         "403":
           description: Forbidden
@@ -208,7 +206,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/repo_account_src_data_models.User'
+            $ref: '#/definitions/repo_account_src_api_dto.UserResponse'
         "401":
           description: Unauthorized
       security:
@@ -240,7 +238,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/repo_account_src_data_models.User'
+            $ref: '#/definitions/repo_account_src_api_dto.UserResponse'
         "400":
           description: Bad Request
         "401":

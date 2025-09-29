@@ -8,13 +8,16 @@ import (
 )
 
 type Config struct {
-	Port             string
-	DatabaseURL      string
-	JWTSecret        string
-	OIDCIssuerURL    string
-	OIDCClientID     string
-	OIDCClientSecret string
-	OIDCRedirectURL  string
+	Port                    string
+	DatabaseURL             string
+	JWTSecret               string
+	OIDCIssuerURL           string
+	OIDCClientID            string
+	OIDCClientSecret        string
+	OIDCRedirectURL         string
+	OIDCRedirectFrontendURL string
+	CookieDomain            string
+	LoginRedirectURL        string
 }
 
 func Load() *Config {
@@ -30,11 +33,14 @@ func Load() *Config {
 			getEnv("DATABASE_HOST", "localhost:5432"),
 			getEnv("DATABASE_NAME", "repo_account"),
 		),
-		JWTSecret:        getEnv("JWT_SECRET", "your-secret-key"),
-		OIDCIssuerURL:    getEnv("OIDC_ISSUER_URL", ""),
-		OIDCClientID:     getEnv("OIDC_CLIENT_ID", ""),
-		OIDCClientSecret: getEnv("OIDC_CLIENT_SECRET", ""),
-		OIDCRedirectURL:  getEnv("OIDC_REDIRECT_URL", "http://localhost:8080/auth/callback"),
+		JWTSecret:               getEnv("JWT_SECRET", "your-secret-key"),
+		OIDCIssuerURL:           getEnv("OIDC_ISSUER_URL", ""),
+		OIDCClientID:            getEnv("OIDC_CLIENT_ID", ""),
+		OIDCClientSecret:        getEnv("OIDC_CLIENT_SECRET", ""),
+		OIDCRedirectURL:         getEnv("OIDC_REDIRECT_URL", "http://localhost:8080/auth/callback"),
+		OIDCRedirectFrontendURL: getEnv("OIDC_REDIRECT_FRONTEND_URL", "http://localhost:3000"),
+		CookieDomain:            getEnv("COOKIE_DOMAIN", ""),
+		LoginRedirectURL:        getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000"),
 	}
 }
 

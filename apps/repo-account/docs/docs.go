@@ -76,8 +76,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "302": {
+                        "description": "Found"
                     },
                     "400": {
                         "description": "Bad Request"
@@ -96,8 +96,8 @@ const docTemplate = `{
                 ],
                 "summary": "OAuth Login",
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "302": {
+                        "description": "Found"
                     },
                     "503": {
                         "description": "Service Unavailable"
@@ -220,7 +220,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repo_account_src_data_models.User"
+                                "$ref": "#/definitions/repo_account_src_api_dto.UserResponse"
                             }
                         }
                     },
@@ -259,7 +259,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repo_account_src_data_models.User"
+                            "$ref": "#/definitions/repo_account_src_api_dto.UserResponse"
                         }
                     },
                     "401": {
@@ -308,7 +308,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repo_account_src_data_models.User"
+                            "$ref": "#/definitions/repo_account_src_api_dto.UserResponse"
                         }
                     },
                     "400": {
@@ -365,12 +365,9 @@ const docTemplate = `{
                 }
             }
         },
-        "repo_account_src_data_models.User": {
+        "repo_account_src_api_dto.UserResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -386,7 +383,7 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string"
                 },
-                "updated_at": {
+                "role": {
                     "type": "string"
                 },
                 "username": {

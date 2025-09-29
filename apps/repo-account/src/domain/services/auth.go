@@ -12,33 +12,24 @@ import (
 	"repo_account/src/config"
 	"repo_account/src/data/models"
 
+	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
+
 	"github.com/coreos/go-oidc/v3/oidc"
-	libJwt "github.com/TheRayquaza/newsbro/apps/libs/auth/services"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
 	"gorm.io/gorm"
 )
 
 type AuthService struct {
-	config       *config.Config
+	Config       *config.Config
 	db           *gorm.DB
 	oidcVerifier *oidc.IDTokenVerifier
 	oauth2Config oauth2.Config
 }
 
-type JWTClaims struct {
-	UserID    uint   `json:"user_id"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Username  string `json:"username"`
-	Role      string `json:"role"`
-	jwt.RegisteredClaims
-}
-
 func NewAuthService(cfg *config.Config, db *gorm.DB) *AuthService {
 	service := &AuthService{
-		config: cfg,
+		Config: cfg,
 		db:     db,
 	}
 
@@ -51,20 +42,20 @@ func NewAuthService(cfg *config.Config, db *gorm.DB) *AuthService {
 
 func (s *AuthService) initOIDC() {
 	ctx := context.Background()
-	provider, err := oidc.NewProvider(ctx, s.config.OIDCIssuerURL)
+	provider, err := oidc.NewProvider(ctx, s.Config.OIDCIssuerURL)
 	if err != nil {
 		fmt.Printf("Failed to initialize OIDC provider: %v\n", err)
 		return
 	}
 
 	s.oidcVerifier = provider.Verifier(&oidc.Config{
-		ClientID: s.config.OIDCClientID,
+		ClientID: s.Config.OIDCClientID,
 	})
 
 	s.oauth2Config = oauth2.Config{
-		ClientID:     s.config.OIDCClientID,
-		ClientSecret: s.config.OIDCClientSecret,
-		RedirectURL:  s.config.OIDCRedirectURL,
+		ClientID:     s.Config.OIDCClientID,
+		ClientSecret: s.Config.OIDCClientSecret,
+		RedirectURL:  s.Config.OIDCRedirectURL,
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
@@ -157,7 +148,7 @@ func (s *AuthService) generateTokens(user *models.User) (*dto.LoginResponse, err
 }
 
 func (s *AuthService) GenerateAccessToken(user *models.User) (string, error) {
-	claims := JWTClaims{
+	claims := entities.JWTClaims{
 		UserID:    user.ID,
 		Email:     user.Email,
 		FirstName: user.FirstName,
@@ -173,7 +164,7 @@ func (s *AuthService) GenerateAccessToken(user *models.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(s.config.JWTSecret))
+	return token.SignedString([]byte(s.Config.JWTSecret))
 }
 
 func (s *AuthService) generateRefreshToken(user *models.User) (string, error) {
@@ -265,4 +256,8 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 	}
 
 	return s.generateTokens(&user)
+}
+
+func (s *AuthService) GetPostOAuthRedirectURL() string {
+	return s.Config.OIDCRedirectFrontendURL
 }

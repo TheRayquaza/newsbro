@@ -69,6 +69,9 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, true, true)
+	c.SetCookie("refresh_token", response.RefreshToken, 86400, "/", ac.authService.Config.CookieDomain, true, true)
+
 	c.JSON(http.StatusOK, response)
 }
 
@@ -108,7 +111,7 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 // @Description Redirect to OAuth provider for login
 // @Tags Auth
 // @Produce json
-// @Success 200
+// @Success 302
 // @Failure 503
 // @Router /auth/oauth/login [get]
 func (ac *AuthController) OAuthLogin(c *gin.Context) {
@@ -135,7 +138,7 @@ func (ac *AuthController) OAuthLogin(c *gin.Context) {
 // @Produce json
 // @Param code query string true "Authorization Code"
 // @Param state query string true "State Parameter"
-// @Success 200
+// @Success 302
 // @Failure 400
 // @Router /auth/oauth/callback [get]
 func (ac *AuthController) OAuthCallback(c *gin.Context) {
@@ -158,5 +161,8 @@ func (ac *AuthController) OAuthCallback(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, true, true)
+	c.SetCookie("refresh_token", response.RefreshToken, 86400, "/", ac.authService.Config.CookieDomain, true, true)
+
+	c.Redirect(http.StatusFound, ac.authService.GetPostOAuthRedirectURL())
 }
