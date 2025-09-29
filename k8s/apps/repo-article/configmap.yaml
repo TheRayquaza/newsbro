@@ -7,4 +7,5 @@ data:
   DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
   DATABASE_NAME: "repo-article"
   GIN_MODE: release
+  LOGIN_REDIRECT_URL: "https://app.newsbro.cc/login"
   PORT: "8080"
