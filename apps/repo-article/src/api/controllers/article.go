@@ -5,9 +5,9 @@ import (
 	"strconv"
 
 	"repo_article/src/api/dto"
-	"repo_article/src/domain/entities"
 	"repo_article/src/domain/services"
-	//"repo_article/src/data/models"
+
+	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
 
 	"github.com/gin-gonic/gin"
 )
@@ -49,7 +49,7 @@ func (ac *ArticleController) CreateArticle(c *gin.Context) {
 		return
 	}
 
-	userID := user.(*entities.User).ID
+	userID := user.(*entities.JWTClaims).UserID
 
 	article, err := ac.articleService.CreateArticle(&req, userID)
 	if err != nil {
@@ -185,7 +185,7 @@ func (ac *ArticleController) UpdateArticle(c *gin.Context) {
 		return
 	}
 
-	userID := user.(*entities.User).ID
+	userID := user.(*entities.JWTClaims).UserID
 
 	article, err := ac.articleService.UpdateArticle(uint(id), &req, userID)
 	if err != nil {
@@ -230,7 +230,7 @@ func (ac *ArticleController) DeleteArticle(c *gin.Context) {
 		return
 	}
 
-	userID := user.(*entities.User).ID
+	userID := user.(*entities.JWTClaims).UserID
 
 	err = ac.articleService.DeleteArticle(uint(id), userID)
 	if err != nil {
