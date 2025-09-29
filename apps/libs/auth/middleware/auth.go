@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
@@ -16,10 +15,9 @@ import (
 func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
-		session := sessions.Default(c)
-		cookie, exists := session.Get("auth_token").(string)
-		if exists && cookie != "" {
-			if authHeader != "" && authHeader != "Bearer "+cookie {
+		if cookie, err := c.Request.Cookie("auth_token"); err == nil && cookie.Value != "" {
+			token := cookie.Value
+			if authHeader != "" && authHeader != "Bearer "+token {
 				c.JSON(http.StatusUnauthorized, gin.H{
 					"error":      "Conflicting authentication methods",
 					"request_id": c.GetString("requestID"),
@@ -27,7 +25,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			authHeader = "Bearer " + cookie
+			authHeader = "Bearer " + token
 		}
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
