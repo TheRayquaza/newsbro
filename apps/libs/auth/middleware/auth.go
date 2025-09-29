@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
+func AuthMiddleware(jwtSecret string, loginRedirect string) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if cookie, err := c.Request.Cookie("auth_token"); err == nil && cookie.Value != "" {
@@ -28,30 +29,24 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			authHeader = "Bearer " + token
 		}
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error":      "Authorization header required",
-				"request_id": c.GetString("requestID"),
-			})
+			log.Println("Authorization header is missing, redirecting to login")
+			c.Redirect(http.StatusFound, loginRedirect)
 			c.Abort()
 			return
 		}
 
 		tokenParts := strings.Split(authHeader, " ")
 		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error":      "Invalid authorization header format",
-				"request_id": c.GetString("requestID"),
-			})
+			log.Println("Invalid authorization header format, redirecting to login")
+			c.Redirect(http.StatusFound, loginRedirect)
 			c.Abort()
 			return
 		}
 
 		user, err := validateToken(tokenParts[1], jwtSecret)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error":      "Invalid token",
-				"request_id": c.GetString("requestID"),
-			})
+			log.Printf("Token validation failed: %v, redirecting to login\n", err)
+			c.Redirect(http.StatusFound, loginRedirect)
 			c.Abort()
 			return
 		}
@@ -64,6 +59,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 func validateToken(tokenStr string, jwtSecret string) (*entities.JWTClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &entities.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			log.Printf("Unexpected signing method: %v\n", token.Header["alg"])
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(jwtSecret), nil
