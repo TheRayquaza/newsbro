@@ -297,6 +297,11 @@ func (c *ArticleCategorizer) mapToStandardCategory(category string) string {
 func normalizeCategory(cat string) string {
 	cat = strings.TrimSpace(cat)
 	cat = strings.Title(strings.ToLower(cat))
+
+	uuidPattern := regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`)
+	if uuidPattern.MatchString(cat) {
+		return ""
+	}
 	return cat
 }
 
@@ -307,6 +312,7 @@ func (u *rSSService) sendToKafka(message *command.NewArticleCommand) error {
 	}
 
 	msg := &sarama.ProducerMessage{
+		Key:   sarama.StringEncoder(message.Link),
 		Topic: u.config.KafkaTopic,
 		Value: sarama.ByteEncoder(payload),
 	}
@@ -325,6 +331,32 @@ func cleanHTML(content string) string {
 	cleaned = strings.ReplaceAll(cleaned, "&gt;", ">")
 	cleaned = strings.ReplaceAll(cleaned, "&quot;", "\"")
 	cleaned = strings.ReplaceAll(cleaned, "&#39;", "'")
+
+	re = regexp.MustCompile(`([.!?,;:]){2,}`)
+	cleaned = re.ReplaceAllString(cleaned, "$1")
+
+	re = regexp.MustCompile(`\s[•◦▪▫■□●○★☆→←↑↓]+\s`)
+	cleaned = re.ReplaceAllString(cleaned, " ")
+
+	re = regexp.MustCompile(`[-_]{3,}`)
+	cleaned = re.ReplaceAllString(cleaned, " ")
+
+	re = regexp.MustCompile(`^[.,;:!?]+|[.,;:!?]+$`)
+	cleaned = re.ReplaceAllString(cleaned, "")
+
+	re = regexp.MustCompile(`\s+[.,;:!?]+\s+`)
+	cleaned = re.ReplaceAllString(cleaned, " ")
+
+	re = regexp.MustCompile(`\.{2,}|…`)
+	cleaned = re.ReplaceAllString(cleaned, ".")
+
+	re = regexp.MustCompile(`\s+([.,;:!?])`)
+	cleaned = re.ReplaceAllString(cleaned, "$1")
+
+	cleaned = strings.ReplaceAll(cleaned, """, "\"")
+	cleaned = strings.ReplaceAll(cleaned, """, "\"")
+	cleaned = strings.ReplaceAll(cleaned, "'", "'")
+	cleaned = strings.ReplaceAll(cleaned, "'", "'")
 
 	cleaned = strings.TrimSpace(cleaned)
 	re = regexp.MustCompile(`\s+`)
