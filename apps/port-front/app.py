@@ -1,6 +1,7 @@
 import streamlit as st
 from login.login import login_page
 from login.register import register_page
+from main_pages.admin_page import admin_page
 
 st.set_page_config(page_title="Academic Paper Platform", page_icon="🎓", layout="centered")
 
@@ -74,12 +75,16 @@ st.markdown("""
 # Page navigation
 # ------------------------------
 if st.session_state.authenticated:
-    st.markdown('<div class="login-container">', unsafe_allow_html=True)
-    st.markdown(f"### 🎉 Welcome, {st.session_state.get('login_user', 'User')}!")
-    if st.button("Logout"):
-        st.session_state.authenticated = False
-        set_page("login")
-    st.markdown('</div>', unsafe_allow_html=True)
+    if st.session_state.get("login_user") == "admin@admin.com":
+        admin_page(set_page)
+    else:
+        st.markdown('<div class="login-container">', unsafe_allow_html=True)
+        st.markdown(f"### 🎉 Welcome, {st.session_state.get('login_user', 'User')}!")
+        if st.button("Logout"):
+            st.session_state.authenticated = False
+            set_page("login")
+        st.markdown('</div>', unsafe_allow_html=True)
+
 else:
     if st.session_state.page == "login":
         login_page(set_page)

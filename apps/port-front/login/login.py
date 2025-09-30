@@ -30,12 +30,21 @@ def login_page(set_page):
                     )
                     if resp.status_code == 200:
                         data = resp.json()
-                        # Save authenticated state and token
-                        st.session_state.authenticated = True
-                        st.session_state.login_user = email
-                        st.session_state.auth_token = data.get("token")  # assuming API returns {"token": "..."}
-                        st.success(f"Welcome, {email}!")
-                        st.rerun()
+
+                        # 👀 Debug - see what API actually returns
+                        # st.write("DEBUG login response:", data)
+
+                        # Some APIs return "access_token", some "token"
+                        token = data.get("access_token") or data.get("token")
+
+                        if token:
+                            st.session_state.authenticated = True
+                            st.session_state.login_user = email
+                            st.session_state.auth_token = token
+                            st.success(f"Welcome, {email}!")
+                            st.rerun()
+                        else:
+                            st.error("Login succeeded but no token received from server")
                     else:
                         # Show detailed error if available
                         try:
@@ -63,12 +72,3 @@ def login_page(set_page):
         )
 
     st.markdown('</div>', unsafe_allow_html=True)
-
-# Example usage:
-# if 'authenticated' not in st.session_state:
-#     st.session_state.authenticated = False
-# 
-# if not st.session_state.authenticated:
-#     login_page(lambda page: st.session_state.update(page=page))
-# else:
-#     st.write("You are logged in!")
