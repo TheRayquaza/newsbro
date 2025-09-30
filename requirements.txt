@@ -4,3 +4,4 @@ pandas
 scikit_learn
 sentence_transformers
 streamlit
+validators
