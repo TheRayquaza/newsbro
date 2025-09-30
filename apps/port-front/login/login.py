@@ -31,9 +31,6 @@ def login_page(set_page):
                     if resp.status_code == 200:
                         data = resp.json()
 
-                        # 👀 Debug - see what API actually returns
-                        # st.write("DEBUG login response:", data)
-
                         # Some APIs return "access_token", some "token"
                         token = data.get("access_token") or data.get("token")
 
@@ -41,8 +38,12 @@ def login_page(set_page):
                             st.session_state.authenticated = True
                             st.session_state.login_user = email
                             st.session_state.auth_token = token
-                            st.success(f"Welcome, {email}!")
-                            st.rerun()
+                            
+                            # Redirect to appropriate page
+                            if email == "admin@admin.com":
+                                set_page("admin")
+                            else:
+                                set_page("home")
                         else:
                             st.error("Login succeeded but no token received from server")
                     else:
@@ -61,7 +62,6 @@ def login_page(set_page):
     with col2:
         if st.button("Register"):
             set_page("register")
-            st.rerun()
 
     # --- Forge login ---
     st.markdown("---")
