@@ -2,14 +2,8 @@ import streamlit as st
 from login.login import login_page
 from login.register import register_page
 
-# ------------------------------
-# Page configuration (must be first)
-# ------------------------------
 st.set_page_config(page_title="Academic Paper Platform", page_icon="🎓", layout="centered")
 
-# ------------------------------
-# Session state initialization
-# ------------------------------
 if "page" not in st.session_state:
     st.session_state.page = "login"
 if "authenticated" not in st.session_state:
@@ -17,14 +11,22 @@ if "authenticated" not in st.session_state:
 if "users" not in st.session_state:
     st.session_state.users = {"admin": "password"}
 
+query_params = st.query_params
+
+if "page" in query_params:
+    st.session_state.page = query_params["page"]
+
+def set_page(page: str):
+    st.session_state.page = page
+    st.query_params["page"] = page
+    st.rerun()
+
 # ------------------------------
-# CSS styling (remove extra white space)
+# CSS styling
 # ------------------------------
 st.markdown("""
 <style>
-    /* Remove top padding */
     .css-18e3th9 {padding-top: 0rem !important;}
-    
     .login-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 30px 20px;
@@ -33,7 +35,6 @@ st.markdown("""
         text-align: center;
         margin-bottom: 20px;
     }
-
     .login-container {
         background: #f8f9fa;
         padding: 20px 20px;
@@ -42,7 +43,6 @@ st.markdown("""
         margin: auto;
         box-shadow: 0 2px 12px rgba(60, 64, 67, 0.1);
     }
-
     .stButton > button {
         border-radius: 12px;
         border: none;
@@ -54,18 +54,15 @@ st.markdown("""
         transition: all 0.2s ease;
         width: 100%;
     }
-
     .stButton > button:hover {
         background: #1565c0;
         transform: translateY(-1px);
     }
-
     .secondary-btn > button {
         background: #f5f5f5 !important;
         color: #333 !important;
         border: 1px solid #ddd !important;
     }
-
     .secondary-btn > button:hover {
         background: #eeeeee !important;
         color: #000 !important;
@@ -81,10 +78,10 @@ if st.session_state.authenticated:
     st.markdown(f"### 🎉 Welcome, {st.session_state.get('login_user', 'User')}!")
     if st.button("Logout"):
         st.session_state.authenticated = False
-        st.session_state.page = "login"
+        set_page("login")
     st.markdown('</div>', unsafe_allow_html=True)
 else:
     if st.session_state.page == "login":
-        login_page()
+        login_page(set_page)
     elif st.session_state.page == "register":
-        register_page()
+        register_page(set_page)
