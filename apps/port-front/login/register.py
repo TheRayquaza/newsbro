@@ -1,7 +1,7 @@
 import streamlit as st
 
-def register_page():
-    st.markdown('<div class="login-header"><h1>🎓 Academic Paper Platform</h1><p style="font-size:16px;opacity:0.9;">Create a new account</p></div>', unsafe_allow_html=True)
+def register_page(set_page):
+    st.markdown('<div class="login-header"><h1>🎓 Academic Paper Platform</h1><p>Create a new account</p></div>', unsafe_allow_html=True)
     st.markdown('<div class="login-container">', unsafe_allow_html=True)
 
     if "reg_user_input" not in st.session_state:
@@ -22,9 +22,11 @@ def register_page():
             else:
                 st.session_state.users[username] = password
                 st.success("Registration successful! Please log in.")
-                st.session_state.page = "login"
+                set_page("login")
+                st.rerun() 
     with col2:
         if st.button("Back to Login"):
-            st.session_state.page = "login"
+            set_page("login")
+            st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)

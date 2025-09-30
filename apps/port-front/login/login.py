@@ -1,14 +1,16 @@
 import streamlit as st
+import requests
 
-def login_page():
-    st.markdown('<div class="login-header"><h1>🎓 Academic Paper Platform</h1><p style="font-size:16px;opacity:0.9;">Please log in to access the platform</p></div>', unsafe_allow_html=True)
+API_LOGIN = "https://account.newsbro.cc/api/v1/auth/login"
+FORGE_OAUTH = "https://account.newsbro.cc/api/v1/auth/oauth/login"
+
+def login_page(set_page):
+    st.markdown(
+        '<div class="login-header"><h1>🎓 Academic Paper Platform</h1>'
+        '<p>Please log in to access the platform</p></div>',
+        unsafe_allow_html=True
+    )
     st.markdown('<div class="login-container">', unsafe_allow_html=True)
-
-    # Use session_state to fix double-click bug
-    if "login_user_input" not in st.session_state:
-        st.session_state.login_user_input = ""
-    if "login_pass_input" not in st.session_state:
-        st.session_state.login_pass_input = ""
 
     username = st.text_input("Username", key="login_user_input")
     password = st.text_input("Password", type="password", key="login_pass_input")
@@ -16,14 +18,31 @@ def login_page():
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Login"):
-            if username in st.session_state.users and st.session_state.users[username] == password:
-                st.session_state.authenticated = True
-                st.session_state.login_user = username
-                st.success(f"Welcome, {username}!")
+            if username and password:
+                try:
+                    resp = requests.post(API_LOGIN, json={"username": username, "password": password}, timeout=5)
+                    if resp.status_code == 200:
+                        st.session_state.authenticated = True
+                        st.session_state.login_user = username
+                        st.success(f"Welcome, {username}!")
+                        st.rerun()
+                    else:
+                        st.error(f"Login failed ({resp.status_code})")
+                except Exception as e:
+                    st.error(f"Error: {e}")
             else:
-                st.error("Invalid username or password")
+                st.error("Please enter username and password")
     with col2:
         if st.button("Register"):
-            st.session_state.page = "register"
+            set_page("register")
+            st.rerun()
+
+    # --- Forge login ---
+    st.markdown("---")
+    if st.button("🔑 Connect via Forge"):
+        st.markdown(
+            f'<meta http-equiv="refresh" content="0; url={FORGE_OAUTH}" />',
+            unsafe_allow_html=True
+        )
 
     st.markdown('</div>', unsafe_allow_html=True)
