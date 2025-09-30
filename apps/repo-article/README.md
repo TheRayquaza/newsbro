@@ -76,3 +76,6 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 | DATABASE_NAME        | `repo_article`                        |
 | JWT_SECRET           | `your-secret-key`                     |
 | LOGIN_REDIRECT_URL   | `http://localhost:8080`               |
+| KAFKA_BROKERS        | `localhost:9092`                      |
+| KAFKA_TOPIC          | `new-article-command`                 |
+| KAFKA_GROUP_ID       | `repo-article-group`                  |

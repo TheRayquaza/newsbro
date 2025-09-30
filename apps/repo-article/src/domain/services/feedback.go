@@ -4,20 +4,27 @@ import (
 	"errors"
 	"fmt"
 	"time"
-
 	"gorm.io/gorm"
+
 	"repo_article/src/api/dto"
 	"repo_article/src/data/models"
 	"repo_article/src/domain/entities"
+	"repo_article/src/config"
+
+	"github.com/IBM/sarama"
 )
 
 type FeedbackService struct {
 	Db *gorm.DB
+	producer sarama.SyncProducer
+	config   *config.Config
 }
 
-func NewFeedbackService(db *gorm.DB) *FeedbackService {
+func NewFeedbackService(db *gorm.DB, producer sarama.SyncProducer, config *config.Config) *FeedbackService {
 	return &FeedbackService{
 		Db: db,
+		producer: producer,
+		config:   config,
 	}
 }
 
