@@ -5,9 +5,9 @@ import (
 	"repo_article/src/config"
 	"repo_article/src/domain/services"
 
-	"github.com/gin-gonic/gin"
-	middleware "github.com/TheRayquaza/newsbro/apps/libs/utils/middleware"
 	authMiddleware "github.com/TheRayquaza/newsbro/apps/libs/auth/middleware"
+	middleware "github.com/TheRayquaza/newsbro/apps/libs/utils/middleware"
+	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	docs "repo_article/docs"

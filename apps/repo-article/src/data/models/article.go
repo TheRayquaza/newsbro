@@ -10,7 +10,7 @@ type Article struct {
 	Subcategory string    `json:"subcategory" gorm:"not null;index"`
 	Title       string    `json:"title" gorm:"not null"`
 	Abstract    string    `json:"abstract" gorm:"type:text"`
-	Link        string    `json:"link" gorm:"not null"`
+	Link        string    `json:"link" gorm:"not null;uniqueIndex"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	//DeletedAt        gorm.DeletedAt `json:"-" gorm:"index"` // no soft delete
