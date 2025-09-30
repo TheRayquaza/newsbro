@@ -54,33 +54,6 @@ spec:
       type: persistent-claim
       size: 5Gi
 
-    metricsConfig:
-      type: jmxPrometheusExporter
-      valueFrom:
-        configMapKeyRef:
-          name: kafka-metrics
-          key: kafka-metrics-config.yml
-
-  zookeeper:
-    replicas: 1
-    resources:
-      requests:
-        memory: 256Mi
-        cpu: 200m
-      limits:
-        memory: 512Mi
-        cpu: 300m
-    storage:
-      type: persistent-claim
-      size: 2Gi
-
-    metricsConfig:
-      type: jmxPrometheusExporter
-      valueFrom:
-        configMapKeyRef:
-          name: kafka-metrics
-          key: zookeeper-metrics-config.yml
-
   entityOperator:
     topicOperator:
       resources:

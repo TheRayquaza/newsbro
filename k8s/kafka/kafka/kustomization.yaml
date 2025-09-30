@@ -3,5 +3,6 @@ kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
 - kafka-brokers.yaml
+- kafka-controllers.yaml
 - kafka-topics.yaml
 - kafka.yaml

@@ -33,3 +33,5 @@ spec:
       requests:
         memory: 384Mi
         cpu: 200m
+# kubectl set env deployment/strimzi-cluster-operator STRIMZI_KUBERNETES_VERSION="major=1,minor=33"
+# https://github.com/strimzi/strimzi-kafka-operator/issues/11386
