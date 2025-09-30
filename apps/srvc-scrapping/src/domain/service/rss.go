@@ -353,11 +353,6 @@ func cleanHTML(content string) string {
 	re = regexp.MustCompile(`\s+([.,;:!?])`)
 	cleaned = re.ReplaceAllString(cleaned, "$1")
 
-	cleaned = strings.ReplaceAll(cleaned, """, "\"")
-	cleaned = strings.ReplaceAll(cleaned, """, "\"")
-	cleaned = strings.ReplaceAll(cleaned, "'", "'")
-	cleaned = strings.ReplaceAll(cleaned, "'", "'")
-
 	cleaned = strings.TrimSpace(cleaned)
 	re = regexp.MustCompile(`\s+`)
 	cleaned = re.ReplaceAllString(cleaned, " ")
