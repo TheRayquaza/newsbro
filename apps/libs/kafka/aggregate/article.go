@@ -10,6 +10,6 @@ type ArticleAggregate struct {
 	Title       string    `json:"title"`
 	Abstract    string    `json:"abstract"`
 	Link        string    `json:"link"`
-	Date        time.Time `json:"date"`
+	PublishedAt time.Time `json:"published_at"`
 	IsActive    bool      `json:"is_active"`
 }
