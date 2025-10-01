@@ -37,3 +37,16 @@ spec:
   owner: repo-article
   ensure: present
   extensions: []
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: srvc-scrapping-db
+  namespace: postgres
+spec:
+  cluster:
+    name: postgres-cluster
+  name: srvc-scrapping
+  owner: srvc-scrapping
+  ensure: present
+  extensions: []
