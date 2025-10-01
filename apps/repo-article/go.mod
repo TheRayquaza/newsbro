@@ -17,7 +17,7 @@ require (
 require (
 	github.com/IBM/sarama v1.46.1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/TheRayquaza/newsbro/apps/libs v0.4.1 // indirect
+	github.com/TheRayquaza/newsbro/apps/libs v0.4.4 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.1 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
@@ -49,6 +49,7 @@ require (
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
