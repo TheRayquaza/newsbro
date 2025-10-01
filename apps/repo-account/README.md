@@ -79,6 +79,5 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 | OIDC_CLIENT_ID             | *(empty)*                                 |
 | OIDC_CLIENT_SECRET         | *(empty)*                                 |
 | OIDC_REDIRECT_URL          | `http://localhost:8080/auth/callback`     |
-| OIDC_REDIRECT_FRONTEND_URL |                                           |
 | COOKIE_DOMAIN              | ` `                                       |
 | LOGIN_REDIRECT_URL         | `http://localhost:8080/api/v1/auth/login` |

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"log"
 
 	"repo_account/src/api/dto"
 	"repo_account/src/config"
@@ -44,7 +45,7 @@ func (s *AuthService) initOIDC() {
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, s.Config.OIDCIssuerURL)
 	if err != nil {
-		fmt.Printf("Failed to initialize OIDC provider: %v\n", err)
+		log.Printf("Failed to initialize OIDC provider: %v\n", err)
 		return
 	}
 
@@ -65,6 +66,7 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.LoginResponse, er
 	// Check if user already exists
 	var existingUser models.User
 	if err := s.db.Where("email = ? OR username = ?", req.Email, req.Username).First(&existingUser).Error; err == nil {
+		log.Println("Attempt to register with existing email or username:", req.Email, req.Username)
 		return nil, errors.New("user already exists")
 	}
 
@@ -91,14 +93,17 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.LoginResponse, er
 func (s *AuthService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 	var user models.User
 	if err := s.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
+		log.Println("Login attempt with non-existent email:", req.Email)
 		return nil, errors.New("invalid credentials")
 	}
 
 	if !user.CheckPassword(req.Password) {
+		log.Println("Invalid password attempt for email:", req.Email)
 		return nil, errors.New("invalid credentials")
 	}
 
 	if !user.IsActive {
+		log.Println("Attempt to login to inactive account:", user.Email)
 		return nil, errors.New("account is inactive")
 	}
 
@@ -108,6 +113,7 @@ func (s *AuthService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 func (s *AuthService) RefreshToken(user *models.User) (*dto.LoginResponse, error) {
 	var token *models.RefreshToken
 	if err := s.db.Preload("User").Where("user_id = ? AND expires_at > ?", user.ID, time.Now()).First(&token).Error; err != nil {
+		log.Println("Invalid or expired refresh token for user ID:", user.ID)
 		return nil, errors.New("invalid refresh token")
 	}
 
@@ -122,12 +128,14 @@ func (s *AuthService) generateTokens(user *models.User) (*dto.LoginResponse, err
 	// Generate access token
 	accessToken, err := s.GenerateAccessToken(user)
 	if err != nil {
+		log.Println("Error generating access token for user ID:", user.ID, "Error:", err)
 		return nil, err
 	}
 
 	// Generate refresh token
 	refreshTokenStr, err := s.generateRefreshToken(user)
 	if err != nil {
+		log.Println("Error generating refresh token for user ID:", user.ID, "Error:", err)
 		return nil, err
 	}
 
@@ -181,6 +189,7 @@ func (s *AuthService) generateRefreshToken(user *models.User) (string, error) {
 	}
 
 	if err := s.db.Create(&refreshToken).Error; err != nil {
+		log.Println("Error saving refresh token for user ID:", user.ID, "Error:", err)
 		return "", err
 	}
 
@@ -196,6 +205,7 @@ func (s *AuthService) GetOAuthURL(state string) string {
 
 func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, error) {
 	if s.oidcVerifier == nil {
+		log.Println("OIDC not configured")
 		return nil, errors.New("OIDC not configured")
 	}
 
@@ -248,6 +258,7 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 				IsActive:  true,
 			}
 			if err := s.db.Create(&user).Error; err != nil {
+				log.Println("Error creating user from OIDC claims:", err)
 				return nil, err
 			}
 		} else {
@@ -259,5 +270,5 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 }
 
 func (s *AuthService) GetPostOAuthRedirectURL() string {
-	return s.Config.LoginRedirectURL
+	return s.Config.OIDCRedirectFrontendURL
 }
