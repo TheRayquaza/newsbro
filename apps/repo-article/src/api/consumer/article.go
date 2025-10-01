@@ -95,6 +95,7 @@ func (h *consumerGroupHandler) processMessage(data []byte) {
 		Abstract:    cmd.Description,
 		Category:    cmd.Category,
 		Subcategory: cmd.Subcategory,
+		PublishedAt: cmd.PublishedAt,
 	}
 
 	article, err := h.articleService.CreateArticle(req, 0)

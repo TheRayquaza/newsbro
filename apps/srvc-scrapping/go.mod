@@ -6,7 +6,7 @@ toolchain go1.24.7
 
 require (
 	github.com/IBM/sarama v1.46.1
-	github.com/TheRayquaza/newsbro/apps/libs v0.4.1
+	github.com/TheRayquaza/newsbro/apps/libs v0.4.4
 	github.com/gin-gonic/gin v1.11.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mmcdole/gofeed v1.3.0

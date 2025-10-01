@@ -1,14 +1,16 @@
 package services
 
 import (
-	"fmt"
-	"log"
 	"repo_article/src/api/dto"
 	"repo_article/src/data/models"
 	"repo_article/src/config"
+	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
+
+	"fmt"
+	"log"
 	"strings"
 	"encoding/json"
-	"encoding/binary"
+	"time"
 
 	"github.com/IBM/sarama"
 	"gorm.io/gorm"
@@ -28,13 +30,6 @@ func NewArticleService(db *gorm.DB, producer sarama.SyncProducer, config *config
 	}
 }
 
-func uintToBytes(u uint) []byte {
-    buf := make([]byte, 8)
-    binary.BigEndian.PutUint64(buf, uint64(u))
-    return buf
-}
-
-// CreateArticle creates a new article and publishes to Kafka
 func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID uint) (*models.Article, error) {
 	article := &models.Article{
 		Category:    req.Category,
@@ -42,7 +37,11 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 		Title:       req.Title,
 		Abstract:    req.Abstract,
 		Link:        req.Link,
+		PublishedAt: req.PublishedAt,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
+	
 	if req.ID != 0 {
 		var existing models.Article
 		if err := as.Db.First(&existing, "id = ?", req.ID).Error; err == nil {
@@ -60,13 +59,24 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 		return nil, fmt.Errorf("failed to create article: %w", err)
 	}
 
-	articleBytes, err := json.Marshal(article)
+	articleAggregate := aggregate.ArticleAggregate{
+		Category:    article.Category,
+		Subcategory: article.Subcategory,
+		Title:       article.Title,
+		Abstract:    article.Abstract,
+		Link:        article.Link,
+		PublishedAt: article.PublishedAt,
+		IsActive:    true,
+	}
+
+	articleBytes, err := json.Marshal(articleAggregate)
 	if err != nil {
+		log.Printf("failed to marshal article aggregate: %s", err)
 		return nil, err
 	}
 
 	msg := &sarama.ProducerMessage{
-		Key:   sarama.StringEncoder(article.Link),
+		Key:   sarama.StringEncoder(articleAggregate.Link),
 		Topic: as.config.KafkaArticleAggregateTopic,
 		Value: sarama.ByteEncoder(articleBytes),
 	}
@@ -81,7 +91,6 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 	return article, err
 }
 
-// GetArticleByID retrieves an article by its ID
 func (as *ArticleService) GetArticleByID(id uint) (*models.Article, error) {
 	var article models.Article
 	if err := as.Db.First(&article, id).Error; err != nil {
@@ -143,7 +152,6 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 		return nil, fmt.Errorf("failed to get article: %w", err)
 	}
 
-	// Update fields if provided
 	updates := make(map[string]interface{})
 	if req.Category != nil {
 		updates["category"] = *req.Category
@@ -171,13 +179,23 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 		return nil, fmt.Errorf("failed to reload updated article: %w", err)
 	}
 
-	articleBytes, err := json.Marshal(article)
+	articleAggregate := aggregate.ArticleAggregate{
+		Category:    article.Category,
+		Subcategory: article.Subcategory,
+		Title:       article.Title,
+		Abstract:    article.Abstract,
+		Link:        article.Link,
+		IsActive:    true,
+	}
+
+	articleBytes, err := json.Marshal(articleAggregate)
 	if err != nil {
+		log.Printf("failed to marshal article aggregate: %s", err)
 		return nil, err
 	}
 
 	msg := &sarama.ProducerMessage{
-		Key:   sarama.StringEncoder(article.Link),
+		Key:   sarama.StringEncoder(articleAggregate.Link),
 		Topic: as.config.KafkaArticleAggregateTopic,
 		Value: sarama.ByteEncoder(articleBytes),
 	}
@@ -207,13 +225,37 @@ func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
 		return fmt.Errorf("failed to delete article: %w", err)
 	}
 
-	// Publish to Kafka
-	//as.publishToKafka("article_deleted", &article, userID)
+	articleAggregate := aggregate.ArticleAggregate{
+		Category:    article.Category,
+		Subcategory: article.Subcategory,
+		Title:       article.Title,
+		Abstract:    article.Abstract,
+		Link:        article.Link,
+		IsActive:    false,
+	}
+
+	articleBytes, err := json.Marshal(articleAggregate)
+	if err != nil {
+		log.Printf("failed to marshal article aggregate: %s", err)
+		return err
+	}
+
+	msg := &sarama.ProducerMessage{
+		Key:   sarama.StringEncoder(article.Link),
+		Topic: as.config.KafkaArticleAggregateTopic,
+		Value: sarama.ByteEncoder(articleBytes),
+	}
+
+	_, _, err = as.producer.SendMessage(msg)
+
+	if err != nil {
+		log.Printf("failed to publish article to kafka: %s", err)
+		return fmt.Errorf("failed to publish article to kafka: %w", err)
+	}
 
 	return nil
 }
 
-// GetCategories retrieves all unique categories
 func (as *ArticleService) GetCategories() ([]string, error) {
 	var categories []string
 	if err := as.Db.Model(&models.Article{}).
