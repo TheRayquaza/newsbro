@@ -8,7 +8,7 @@ type NewArticleCommand struct {
 	Description string    `json:"description"`
 	Content     string    `json:"content"`
 	Author      string    `json:"author"`
-	Category	string    `json:"category"`
-	Subcategory	string    `json:"subcategory"`
+	Category    string    `json:"category"`
+	Subcategory string    `json:"subcategory"`
 	PublishedAt time.Time `json:"published_at"`
 }
