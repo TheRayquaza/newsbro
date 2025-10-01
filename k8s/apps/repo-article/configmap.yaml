@@ -9,3 +9,7 @@ data:
   GIN_MODE: release
   LOGIN_REDIRECT_URL: "https://app.newsbro.cc/login"
   PORT: "8080"
+  KAFKA_BROKERS: "kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
+  KAFKA_ARTICLE_COMMAND_TOPIC: "new-articles-command"
+  KAFKA_ARTICLE_AGGREGATE_TOPIC: "article-aggregate"
+  KAFKA_GROUP_ID: "repo-article-group"

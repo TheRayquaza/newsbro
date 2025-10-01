@@ -1,0 +1,55 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: srvc-scrapping-job
+  namespace: apps
+  labels:
+    app: srvc-scrapping
+    type: backends
+spec:
+  # 9 AM and 6 PM every day
+  schedule: "0 9,18 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: srvc-scrapping
+        spec:
+          imagePullSecrets:
+            - name: pull-secret
+          restartPolicy: OnFailure
+          containers:
+            - name: srvc-scrapping
+              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.0.3
+              imagePullPolicy: IfNotPresent
+              ports:
+                - containerPort: 8080
+                  name: http
+                - containerPort: 9090
+                  name: metrics
+              envFrom:
+                - configMapRef:
+                    name: srvc-scrapping-config
+                - secretRef:
+                    name: srvc-scrapping-secrets
+              resources:
+                requests:
+                  memory: "512Mi"
+                  cpu: "125m"
+                limits:
+                  memory: "1Gi"
+                  cpu: "250m"
+              livenessProbe:
+                httpGet:
+                  path: /health
+                  port: 8080
+                initialDelaySeconds: 20
+                periodSeconds: 10
+              readinessProbe:
+                httpGet:
+                  path: /ready
+                  port: 8080
+                initialDelaySeconds: 20
+                periodSeconds: 10
