@@ -6,6 +6,7 @@ resources:
   - namespace.yaml
   - repo-account
   - repo-article
+  - srvc-scrapping
   - pull-secrets.yaml
   - certificate.yaml
   - oidc-secrets.yaml
