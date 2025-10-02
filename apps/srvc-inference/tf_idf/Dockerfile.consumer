@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy consumer scripts
+COPY article_consumer.py .
+COPY feedback_consumer.py .
+COPY .env .
+
+# Create data directory (will be mounted as volume in docker-compose)
+RUN mkdir -p /app/data
+
+# Default command (overridden in docker-compose)
+CMD ["python", "article_consumer.py"]
