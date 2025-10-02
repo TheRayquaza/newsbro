@@ -1,11 +1,11 @@
 import streamlit as st
 from login.login import login_page
-from login.register import register_page
+from register.register import register_page
 from main_pages.admin_page import admin_page
 import base64
 import json
 
-st.set_page_config(page_title="Academic Paper Platform", page_icon="🎓", layout="wide")
+st.set_page_config(page_title="Newsbro", page_icon="📰", layout="wide")
 
 # ------------------------------
 # Helper functions for session persistence
@@ -74,49 +74,16 @@ def set_page(page: str):
 # CSS styling
 # ------------------------------
 
-st.markdown("""
+@st.cache_data
+def load_css():
+    s = ""
+    with open("./styles.css") as f:
+        s = f.read()
+    return s
+
+st.markdown(f"""
 <style>
-    .css-18e3th9 {padding-top: 0rem !important;}
-    .login-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 30px 20px;
-        border-radius: 20px;
-        color: white;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .login-container {
-        background: #f8f9fa;
-        padding: 20px 20px;
-        border-radius: 16px;
-        max-width: 400px;
-        margin: auto;
-        box-shadow: 0 2px 12px rgba(60, 64, 67, 0.1);
-    }
-    .stButton > button {
-        border-radius: 12px;
-        border: none;
-        background: #1976d2;
-        color: white;
-        font-weight: 500;
-        padding: 10px 20px;
-        font-size: 1em;
-        transition: all 0.2s ease;
-        width: 100%;
-    }
-    .stButton > button:hover {
-        background: #1565c0;
-        transform: translateY(-1px);
-    }
-    .secondary-btn > button {
-        background: #f5f5f5 !important;
-        color: #333 !important;
-        border: 1px solid #ddd !important;
-    }
-    .secondary-btn > button:hover {
-        background: #eeeeee !important;
-        color: #000 !important;
-    }
+{load_css()}
 </style>
 """, unsafe_allow_html=True)
 
