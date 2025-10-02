@@ -1,12 +1,13 @@
 import streamlit as st
 import requests
 import validators
+import os
 
-API_USERS = "https://account.newsbro.cc/api/v1/users"
-API_ARTICLES = "https://article.newsbro.cc/api/v1/articles"
-API_CATEGORIES = "https://article.newsbro.cc/api/v1/articles/categories"
-API_SUBCATEGORIES = "https://article.newsbro.cc/api/v1/articles/subcategories"
-
+API_USERS = f"{os.getenv('ACCOUNT_BASE_URL', 'https://account.newsbro.cc')}/api/v1/users"
+API_ARTICLES = f"{os.getenv('ARTICLE_BASE_URL', 'https://article.newsbro.cc')}/api/v1/articles"
+API_CATEGORIES = f"{os.getenv('ARTICLE_BASE_URL', 'https://article.newsbro.cc')}/api/v1/articles/categories"
+API_SUBCATEGORIES = f"{os.getenv('ARTICLE_BASE_URL', 'https://article.newsbro.cc')}/api/v1/articles/subcategories"
+API_STATS = f"{os.getenv('ARTICLE_BASE_URL', 'https://article.newsbro.cc')}/api/v1/feedback/stats"
 
 def admin_page(set_page):
     st.markdown(
@@ -199,7 +200,7 @@ def admin_page(set_page):
     with tabs[2]:
         st.subheader("Feedback Stats (Admin)")
         try:
-            resp = requests.get("https://article.newsbro.cc/api/v1/feedback/stats", headers=headers)
+            resp = requests.get(API_STATS, headers=headers)
             if resp.status_code == 200:
                 stats = resp.json()
                 st.json(stats)

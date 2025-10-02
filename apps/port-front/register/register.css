@@ -1,0 +1,178 @@
+/* Reset default Streamlit padding */
+.block-container {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    max-width: 100% !important;
+}
+
+/* Dark animated gradient background - smoother */
+.stApp {
+    background: linear-gradient(-45deg,
+        #0a0f1c 0%,
+        #0c121f 50%,
+        #000000 100%
+    );
+    background-size: 600% 600%;
+    animation: gradientShift 60s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Center the entire content */
+.main > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Glass morphism card */
+div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlock"] {
+    background: rgba(10, 14, 26, 0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(79, 172, 254, 0.15);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Center container */
+[data-testid="column"] {
+    display: flex;
+    justify-content: center;
+}
+
+/* Header styling */
+h1 {
+    color: #4facfe !important;
+    font-size: 2.8rem !important;
+    font-weight: 800 !important;
+    margin: 0 0 0.5rem 0 !important;
+    text-shadow: 0 0 20px rgba(79, 172, 254, 0.5) !important;
+    letter-spacing: -0.02em !important;
+    text-align: center !important;
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Input styling - LARGER SIZE */
+.stTextInput > div > div > input {
+    background: rgba(10, 14, 26, 0.6) !important;
+    border: 1px solid rgba(79, 172, 254, 0.25) !important;
+    border-radius: 12px !important;
+    color: white !important;
+    font-size: 1.1rem !important;
+    padding: 1rem 1.25rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.stTextInput > div > div > input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.stTextInput > div > div > input:focus {
+    background: rgba(10, 14, 26, 0.8) !important;
+    border: 1px solid rgba(79, 172, 254, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2) !important;
+}
+
+.stTextInput > label {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Button styling - CENTERED REGISTER BUTTON */
+.stButton > button {
+    width: 100%;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    color: #0a0e27 !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 1rem 1.5rem !important;
+    height: 2.5rem !important;
+    font-weight: 700 !important;
+    font-size: 1.05rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4) !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 25px rgba(79, 172, 254, 0.6) !important;
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
+}
+
+.stButton > button:active {
+    transform: translateY(0) !important;
+}
+
+/* Divider line */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 2rem 0 1.5rem 0;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(79, 172, 254, 0.2);
+}
+
+.divider::before {
+    margin-right: 1rem;
+}
+
+.divider::after {
+    margin-left: 1rem;
+}
+
+/* Back to Login link styling */
+.back-link {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.back-link a {
+    color: rgba(79, 172, 254, 0.7);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.back-link a:hover {
+    color: rgba(79, 172, 254, 1);
+    text-decoration: underline;
+}
+
+/* Hide Streamlit branding */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
