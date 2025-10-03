@@ -1,0 +1,18 @@
+[server]
+headless = true
+port = 8501
+enableCORS = true
+enableXsrfProtection = true
+address = "0.0.0.0"
+runOnSave = true
+# cookieSecret = "a-random-key-appears-here" # THIS SHOULD BE SET
+
+[logger]
+level = "info"
+messageFormat = "%(asctime)s %(message)s"
+
+[browser]
+gatherUsageStats = true
+
+[theme]
+base = "dark"

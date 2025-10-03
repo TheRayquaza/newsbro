@@ -1,11 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.metrics.pairwise import cosine_similarity
-import os
-import json
 
 def preprocessing():
     
