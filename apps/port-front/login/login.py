@@ -62,7 +62,7 @@ def login_page(set_page):
                             try:
                                 err = resp.json().get("message", "Invalid credentials")
                                 st.error(f"❌ {err}")
-                            except:
+                            except Exception:
                                 st.error(f"❌ Login failed ({resp.status_code})")
                     except Exception as e:
                         st.error(f"⚠️ Connection error: {str(e)}")

@@ -1,0 +1,13 @@
+pydantic
+fastapi-cli
+fastapi
+joblib
+streamlit
+pandas
+scikit-learn
+ruff
+mlflow
+boto3
+validators
+ty
+ruff

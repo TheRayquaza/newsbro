@@ -1,40 +1,39 @@
 {
+  description = "Simple python fhs devshell that works";
+
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
   };
+
   outputs = {
-    self,
     nixpkgs,
-    utils,
+    flake-utils,
+    ...
   }:
-    utils.lib.eachDefaultSystem (
+    flake-utils.lib.eachDefaultSystem (
       system: let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+        };
       in {
-        devShell = let
-          python = pkgs.python313.withPackages (ppkgs:
-            with ppkgs; [
-              python-lsp-server
-              uv
-              pydantic
-              fastapi-cli
-              fastapi
-              joblib
-              streamlit
-              pandas
-              scikit-learn
-              ruff
-              validators
-            ]);
+        devShells.default = let
+          python = pkgs.python313;
         in
-          pkgs.mkShell {
-            buildInputs = [
+          (pkgs.buildFHSEnv {
+            name = "simple-python-fhs";
+
+            targetPkgs = _: [
+              pkgs.mlflow-server
               python
+              pkgs.uv
+              pkgs.zlib
             ];
-            UV_PYTHON = python;
-            UV_PYTHON_PREFERENCE="only-system";
-          };
+            profile = ''
+              export UV_PYTHON=${python}
+              bash
+            '';
+          }).env;
       }
     );
 }

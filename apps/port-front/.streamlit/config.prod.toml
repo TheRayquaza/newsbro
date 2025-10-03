@@ -1,0 +1,21 @@
+[server]
+headless = true
+port = 8501
+enableCORS = true
+enableXsrfProtection = true
+address = "0.0.0.0"
+
+[logger]
+level = "info"
+messageFormat = "%(asctime)s %(message)s"
+showSidebarNavigation = false
+
+[browser]
+serverAddress = "app.newsbro.cc"
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+
+[theme]
+base = "dark"

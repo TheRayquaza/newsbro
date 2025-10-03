@@ -6,7 +6,9 @@ For Nix users:
 
 ```bash
 nix develop .
-streamlit run app.py
+uv venv
+source ./.venv/bin/activate
+uv pip install -r requirements.txt --python .venv/bin/python
 ```
 
 For normal users:
@@ -20,7 +22,8 @@ streamlit run app.py
 ## Tools
 
 ```bash
-
+ruff check --fix
+ty check
 ```
 
 ## Variables

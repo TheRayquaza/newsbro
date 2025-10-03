@@ -81,9 +81,9 @@ def register_page(set_page):
                             else:
                                 try:
                                     st.error(f"❌ Registration failed: {response.json()['error']}")
-                                except:
+                                except Exception:
                                     st.error(f"❌ Registration failed: {response.text}")
-                        except requests.exceptions.RequestException as e:
+                        except Exception as e:
                             st.error(f"⚠️ Network error: {e}")
 
             # Divider
