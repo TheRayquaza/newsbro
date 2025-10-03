@@ -33,8 +33,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: port-front-config
-            - secretRef:
-                name: port-front-secrets
+            #- secretRef:
+            #    name: port-front-secrets
           resources:
             requests:
               memory: "256Mi"
