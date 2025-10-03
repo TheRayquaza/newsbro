@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: port-front
+  namespace: apps
+  labels:
+    app: port-front
+    type: frontends
+spec:
+  # replicas: 1 # managed by hpa
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: port-front
+  template:
+    metadata:
+      labels:
+        app: port-front
+    spec:
+      imagePullSecrets:
+        - name: pull-secret
+      containers:
+        - name: port-front
+          image: ghcr.io/therayquaza/arxivist/port-front:port-front-v1.1.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8501
+              name: http
+          envFrom:
+            - configMapRef:
+                name: port-front-config
+            - secretRef:
+                name: port-front-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "125m"
+            limits:
+              memory: "1Gi"
+              cpu: "250m"
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 20
+            periodSeconds: 10

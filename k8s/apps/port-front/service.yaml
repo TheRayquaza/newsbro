@@ -1,0 +1,16 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: port-front
+  namespace: apps
+  labels:
+    app: port-front
+spec:
+    type: ClusterIP
+    selector:
+      app: port-front
+    ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 8501
