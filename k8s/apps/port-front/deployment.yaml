@@ -25,10 +25,10 @@ spec:
         - name: pull-secret
       containers:
         - name: port-front
-          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.0.0
+          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.1.0
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8501
+            - containerPort: 80
               name: http
           envFrom:
             - configMapRef:
