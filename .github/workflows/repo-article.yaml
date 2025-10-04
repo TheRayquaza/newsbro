@@ -2,7 +2,7 @@ name: repo-article
 
 on:
   push:
-    branches: ["**"]   # all branches
+    branches: ["**"]
     paths:
       - 'apps/repo-article/**'
     tags:
