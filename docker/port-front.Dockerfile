@@ -1,21 +1,19 @@
-FROM python:3.13-slim-bookworm
+FROM node:22-alpine3.22 AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    software-properties-common \
-    && rm -rf /var/lib/apt/lists/*
+COPY package*.json ./
+RUN npm ci
 
-COPY requirements.txt .
+COPY . ./
+RUN npm run build
 
-RUN pip3 install -r requirements.txt
+FROM nginx:alpine3.22
 
-COPY . .
+RUN rm -rf /usr/share/nginx/html/*
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-ENV STREAMLIT_CONFIG_FILE=/app/.streamlit/config.prod.toml
-EXPOSE 8501
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+EXPOSE 80
 
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["nginx", "-g", "daemon off;"]
