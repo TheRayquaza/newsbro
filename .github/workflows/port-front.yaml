@@ -5,10 +5,8 @@ on:
     branches: ["**"]
     paths:
       - 'apps/port-front/**'
-    tags: ['port-front-v*.*.*']
-  pull_request:
-    paths:
-      - 'apps/port-front/**'
+    tags:
+      - 'port-front-v*.*.*'
 
 env:
   REGISTRY: ghcr.io

@@ -2,7 +2,7 @@ name: srvc-scrapping
 
 on:
   push:
-    branches: ["**"]   # all branches
+    branches: ["**"]
     paths:
       - 'apps/srvc-scrapping/**'
     tags:
