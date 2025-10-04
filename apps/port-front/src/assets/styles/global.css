@@ -1,0 +1,196 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: linear-gradient(-45deg, #0a0f1c 0%, #0c121f 50%, #000000 100%);
+  background-size: 600% 600%;
+  animation: gradientShift 60s ease-in-out infinite;
+  font-family: system-ui, sans-serif;
+  color: white;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Center login/register card */
+.login-wrapper {
+  display: flex;
+  justify-content: center; /* center horizontally */
+  align-items: center; /* center vertically */
+  min-height: 100vh; /* full viewport height */
+}
+
+/* 🪟 Glass card container (login/register/etc.) */
+.card {
+  background: rgba(10, 14, 26, 0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(79, 172, 254, 0.15);
+  animation: fadeInUp 0.6s ease-out;
+  max-width: 420px;
+  width: 100%;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ✨ Headings */
+h1 {
+  color: #4facfe;
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.subtitle,
+.card-header p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* 📝 Inputs */
+input {
+  width: 100%;
+  background: rgba(10, 14, 26, 0.6);
+  border: 1px solid rgba(79, 172, 254, 0.25);
+  border-radius: 12px;
+  color: white;
+  font-size: 1.05rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+input:focus {
+  background: rgba(10, 14, 26, 0.8);
+  border: 1px solid rgba(79, 172, 254, 0.6);
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+  outline: none;
+}
+
+/* 🔘 Primary action button */
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: #0a0e27;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(79, 172, 254, 0.6);
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+}
+
+/* ⚒️ Secondary / provider button (Forge, Google, etc.) */
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: rgba(79, 172, 254, 0.15);
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(79, 172, 254, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.3);
+  border: 1px solid rgba(79, 172, 254, 0.5);
+}
+
+/* ─────────────── Divider line ─────────────── */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0 1.5rem 0;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(79, 172, 254, 0.2);
+}
+
+.divider::before {
+  margin-right: 1rem;
+}
+.divider::after {
+  margin-left: 1rem;
+}
+
+/* ↩ Back / small links */
+.back-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.back-link a {
+  color: rgba(79, 172, 254, 0.7);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.back-link a:hover {
+  color: rgba(79, 172, 254, 1);
+  text-decoration: underline;
+}

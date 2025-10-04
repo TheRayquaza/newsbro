@@ -1,0 +1,11 @@
+--2025-10-03 18:32:54--  https://docs.forge.epita.fr/assets/images/forge_logo_white-38d02f6ef9b56a34f60b46030ee8b0de.svg
+Resolving docs.forge.epita.fr (docs.forge.epita.fr)... 91.243.117.184
+Connecting to docs.forge.epita.fr (docs.forge.epita.fr)|91.243.117.184|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 17760 (17K) [image/svg+xml]
+Saving to: ‘forge_logo_white-38d02f6ef9b56a34f60b46030ee8b0de.svg’
+
+     0K .......... .......                                    100% 1.45M=0.01s
+
+2025-10-03 18:32:55 (1.45 MB/s) - ‘forge_logo_white-38d02f6ef9b56a34f60b46030ee8b0de.svg’ saved [17760/17760]
+
