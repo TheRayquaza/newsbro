@@ -1,10 +1,21 @@
-kind: ConfigMap
-apiVersion: v1
+---
+# https://fluxcd.io/flux/components/helm/helmreleases/
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
 metadata:
-  name: minio-values
+  name: minio-new
   namespace: minio
-data:
-  values.yaml: |
+spec:
+  interval: 10m0s
+  chart:
+    spec:
+      chart: minio
+      version: 5.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: helm-repo
+        namespace: minio
+  values:
     # https://artifacthub.io/packages/helm/bitnami/minio?modal=values
     auth:
       existingSecret: minio-root-secret
