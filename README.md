@@ -3,12 +3,38 @@
 Distributed resilient architecture for news recommendation
 
 ## Table of Contents
+- [App](#App)
 - [Project Structure](#project-structure)
 - [Documentation](#documentation)
 - [Architecture](#architecture)
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Deployment Specifications](#deployment-specifications)
+
+## App
+
+A small react web app has been designed to interact with articles.
+
+Feel free to have a look at https://app.newsbro.cc website to create your account
+and interact with 100k+ articles.
+
+We provide automatic update everyday (9am / 6pm UTC), 10k articles ingested
+from various sources, list can be found ./k8s/apps/srvc-scrapping/configmap.yaml
+
+![login page](./assets/login.png)
+
+Feel free to open issues if you see anything relevant that could be added.
+App will be down at the end of our project (~ Jan. 2026)
+
+### Privacy Note
+
+We only use your feedback to improve our system recommenders.
+- Passwords are never stored, authentication is handled through secure and short-lived JWT.
+- Internal credentials are randomly generated for each session and securely stored in Vault, never embedded in code, only injected as env variables.
+- All feedback data is anonymized before being used for training or evaluation (only `user_id` is used), ensuring that no personally identifiable information is retained.
+- Data transmission is encrypted (TLS) between client & dns provider, and between dns provider and server.
+
+All internal data will be securely erased once the project concludes.
 
 ## Project Structure
 
