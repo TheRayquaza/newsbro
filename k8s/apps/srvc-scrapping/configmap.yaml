@@ -7,7 +7,6 @@ data:
   DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
   DATABASE_NAME: "srvc-scrapping"
   GIN_MODE: release
-  LOGIN_REDIRECT_URL: "https://app.newsbro.cc/login"
   PORT: "8080"
   KAFKA_BROKERS: "kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
   KAFKA_TOPIC: "new-articles-command"
@@ -23,7 +22,6 @@ data:
     https://www.theverge.com/rss/index.xml
     http://feeds.arstechnica.com/arstechnica/index/
     http://feeds.mashable.com/Mashable
-    https://news.ycombinator.com/rss
     https://gizmodo.com/rss
     https://www.bloomberg.com/feed/podcast/etf-report.xml
     https://www.forbes.com/business/feed/
@@ -189,13 +187,11 @@ data:
     http://feeds2.feedburner.com/bit-tech/all
     http://feeds.arstechnica.com/arstechnica/technology-lab
     http://feeds.arstechnica.com/arstechnica/business
-    http://feeds.newscientist.com/tech
     http://feeds.washingtonpost.com/rss/business/technology
     http://feeds.feedburner.com/IeeeSpectrumRoboticsChannel
     http://www.latimes.com/entertainment/rss2.0.xml
     http://feeds.feedburner.com/nymag/vulture
     http://www.newyorker.com/feed/culture
-    http://www.buzzfeed.com/tvandmovies.xml
     http://www.tmz.com/rss.xml
     http://www.cbsnews.com/latest/rss/entertainment
     http://feeds.abcnews.com/abcnews/entertainmentheadlines
@@ -209,14 +205,12 @@ data:
     http://feeds.feedburner.com/VGChartz
     http://www.giantbomb.com/feeds/mashup/
     http://www.gamespot.com/feeds/mashup/
-    http://www.destructoid.com/?mode=atom
     http://feeds.feedburner.com/Rpgcast
     http://www.polygon.com/rss/index.xml
     http://www.gamesradar.com/all-platforms/news/rss/
     http://www.cnet.com/rss/gaming/
     http://feeds.webservice.techradar.com/us/rss/news/gaming
     http://feeds.arstechnica.com/arstechnica/gaming
-    http://www.journaldemontreal.com/rss.xml
     http://leaderpost.com/feed/
     http://thestarphoenix.com/feed/
     http://windsorstar.com/feed/
@@ -229,13 +223,11 @@ data:
     http://feeds.feedburner.com/FP_TopStories?format=xml
     http://cogconnected.com/feed/
     http://www.cvawards.ca/feed/
-    http://www.journaldemontreal.com/jm/sante/rss.xml
     http://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml
     http://ottawacitizen.com/feed
     http://www.cbc.ca/cmlink/1.392
     http://business.financialpost.com/category/fp-tech-desk/feed/
     http://news.nationalpost.com/category/health/feed/
-    http://www.journaldemontreal.com/sports/rss.xml
     http://torontosportsmedia.com/feed
     http://www.sportsnet.ca/feed/
     https://ca.sports.yahoo.com/top/rss.xml
@@ -248,18 +240,12 @@ data:
     http://feeds.feedburner.com/ExclaimCaAllArticles
     http://www.chartattack.com/feed/
     http://musiccanada.com/feed/
-    http://www.journaldemontreal.com/spectacles/rss.xml
     http://rss.cbc.ca/lineup/arts.xml
     http://www.dose.ca/feed
     http://feeds.bbci.co.uk/news/world/asia/india/rss.xml
     http://zeenews.india.com/rss/world-news.xml
-    http://economictimes.indiatimes.com/News/rssfeeds/1715249553.cms
     http://www.sikhsiyasat.com/feed/
     http://www.dnaindia.com/rss.xml
-    http://www.deccanchronicle.com/rss.xml
-    http://www.thehindu.com/news/national/?service=rss
-    http://www.thehindu.com/news/international/south-asia/?service=rss
-    http://www.thehindu.com/news/cities/?service=rss
     http://www.ft.com/rss/world/asiapacific/india
     http://economictimes.indiatimes.com/rssfeedsdefault.cms
     http://zeenews.india.com/rss/business.xml
@@ -273,15 +259,10 @@ data:
     http://www.femina.in/feeds/feeds-fitness.xml
     http://timesofindia.indiatimes.com/rssfeeds/2886714.cms
     http://feeds.bbci.co.uk/news/world/asia/rss.xml
-    http://www.thehindu.com/sci-tech/health/?service=rss
-    http://www.thehindu.com/sci-tech/science/?service=rss
     http://www.dnaindia.com/feeds/scitech.xml
     http://www.indodaily.com/indodaily.xml
     http://www.espncricinfo.com/rss/content/story/feeds/6.xml
     http://zeenews.india.com/rss/sports-news.xml
-    http://www.thehindu.com/sport/?service=rss
-    http://www.thehindu.com/sci-tech/?service=rss
-    http://www.thehindu.com/sci-tech/technology/?service=rss
     http://zeenews.india.com/rss/science-technology-news.xml
     http://rollingstoneindia.com/feed/
     http://www.tellychakkar.com/rss.xml
@@ -290,7 +271,6 @@ data:
     http://www.bollywoodhungama.com/rss/news.xml
     http://www.dnaindia.com/feeds/entertainment.xml
     http://zeenews.india.com/rss/india-national-news.xml
-    http://www.thehindu.com/entertainment/?service=rss
     http://www.theguardian.com/observer/rss
     http://www.theguardian.com/world/rss
     http://www.theweek.co.uk/feeds/all
@@ -327,7 +307,6 @@ data:
     http://www.ok.co.uk/rss/health
     http://www.candis.co.uk/feed/
     http://www.theguardian.com/uk/environment/rss
-    https://www.newscientist.com/feed/home
     http://feeds.theguardian.com/theguardian/science/rss
     http://feeds.bbci.co.uk/news/science_and_environment/rss.xml
     http://www.independent.co.uk/news/science/rss
@@ -371,7 +350,6 @@ data:
     http://www.abc.net.au/news/feed/46182/rss.xml
     http://feeds.feedburner.com/TheAustralianTheNationNews
     http://www.theguardian.com/au/rss
-    http://rss.nzherald.co.nz/rss/xml/nzhrsscid_000000002.xml
     http://www.dailymail.co.uk/auhome/index.rss
     http://feeds.feedburner.com/dailytelegraphnationalnewsndm?format=xml
     http://feeds.news.com.au/public/rss/2.0/bcm_top_stories_257.xml
@@ -384,7 +362,6 @@ data:
     http://www.rba.gov.au/rss/rss-cb-media-releases.xml
     http://www.crikey.com.au/politics/feed
     http://www.theguardian.com/world/australian-politics/rss
-    http://www.cio.com/index.rss
     http://www.dynamicbusiness.com.au/feed
     http://feeds.feedburner.com/TheAustralianBusNews?format=xml
     http://feeds.feedburner.com/TheAustralianBusAviation?format=xml
@@ -399,7 +376,6 @@ data:
     http://www.smh.com.au/rssheadlines/health/article/rss.xml
     http://www.theage.com.au/rssheadlines/technology-news/article/rss.xml
     http://www.watoday.com.au/rssheadlines/technology-news/article/rss.xml
-    http://feeds.news.com.au/public/rss/2.0/fs_breaking_news_13.xml
     http://www.abc.net.au/news/feed/45924/rss.xml
     http://feeds.feedburner.com/TheAustralianSportsNews
     http://feeds.news.com.au/public/rss/2.0/news_sport_3168.xml
@@ -428,10 +404,6 @@ data:
     https://www.mediapart.fr/articles/feed
     https://mondediplo.com/backend
     https://frenchdailynews.com/feed
-    https://sudouest.fr/essentiel/rss.xml
-    https://estrepublicain.fr/rss
-    https://francesoir.fr/rss.xml
-    https://lafranceagricole.fr/rss
     http://www.washingtonpost.com/rss/
     http://feeds.sciencedaily.com/sciencedaily
     http://feeds.nature.com/nature/rss/current
@@ -442,7 +414,6 @@ data:
     https://www.perthnow.com.au/news/feed
     https://www.themercury.com.au/rss
     https://indaily.com.au/feed/
-    https://www.lapresse.ca/actualites/rss
     https://globalnews.ca/feed/
     https://ottawacitizen.com/feed/
     https://business.financialpost.com/feed/
@@ -453,143 +424,46 @@ data:
     https://riotimesonline.com/feed/
     https://feeds.feedburner.com/IrishCentral
     http://feeds.feedburner.com/oatmealfeed
-    https://www.whowhatwear.com/rss
     https://postsecret.com/feed/?alt=rss
     https://www.bostonglobe.com/rss/bigpicture
     http://feeds.feedburner.com/wPolitycepl
-    https://gazeta.ua/rss
     https://www.elle.com/rss/fashion.xml/
-    https://www.pravda.com.ua/rss/
     https://www.reddit.com/r/sports.rss
     https://tvline.com/feed/
-    https://www.mehrnews.com/rss
     https://citizen.co.za/feed/
     https://feeds.thelocal.com/rss/es
     http://www.brasilwire.com/feed/
     https://www.dailymaverick.co.za/dmrss/
     https://sports.yahoo.com/rss/
-    https://tv.avclub.com/rss
     https://rss.nytimes.com/services/xml/rss/nyt/Travel.xml
-    https://feeds.folha.uol.com.br/emcimadahora/rss091.xml
-    https://www.merdeka.com/feed/
     https://www.suara.com/rss
-    https://www.yjc.ir/fa/rss/allnews
     https://www.the42.ie/feed/
-    http://www.thithtoolwin.com/feeds/posts/default
-    https://rss.unian.net/site/news_rus.rss
     https://www.penny-arcade.com/feed
-    http://rss.home.uol.com.br/index.xml
     https://feeds.feedburner.com/ietopstories
     https://www.thesouthafrican.com/feed/
     https://bookriot.com/feed/
     http://feeds.bbci.co.uk/sport/rss.xml
     https://reddit.com/r/television/.rss
     https://www.livelifetravel.world/feed/
-    http://newsfeed.zeit.de/index
     https://english.kyodonews.net/rss/all.xml
     https://www.nytimes.com/svc/collections/v1/publish/http://www.nytimes.com/topic/destination/japan/rss.xml
     https://www.tribunnews.com/rss
-    https://e00-expansion.uecdn.es/rss/portada.xml
     https://www.efe.com/efe/english/4/rss
     https://jornaldebrasilia.com.br/feed/
-    https://www.thejournal.ie/feed/
     https://www.sowetanlive.co.za/rss/?publication=sowetan-live
     https://www.fashionlady.in/category/fashion/feed
     https://www.fashionbeans.com/rss-feed/?category=fashion
     http://phdcomics.com/gradfeed.php
-    https://500px.com/editors.rss
     https://www.japantimes.co.jp/feed/topstories/
-    https://www.rmf24.pl/feed
-    https://nv.ua/rss/all.xml
-    https://www.eldiario.es/rss/
-    https://www.tabnak.ir/fa/rss/allnews
     https://www.irishmirror.ie/?service=rss
-    https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
-    https://censor.net.ua/includes/news_ru.xml
-    https://noticias.r7.com/feed.xml
-    https://www.rp.pl/rss/1019
     https://www.moneyweb.co.za/feed/
-    https://www.pap.pl/rss.xml
-    https://www.huffingtonpost.es/feeds/index.xml
     https://rss.nytimes.com/services/xml/rss/nyt/FashionandStyle.xml
     https://feeds.feedburner.com/DigitalPhotographySchool
     https://www.bleedingcool.com/tv/feed/
     https://techcentral.co.za/feed
     https://www.euroweeklynews.com/feed/
-    https://gordonua.com/xml/rss_category/top.html
     http://www.dvb.no/feed
     http://feeds.feedburner.com/Explosm
     http://feeds.feedburner.com/failblog
-    https://tsn.ua/rss/full.rss
     https://wokeread.home.blog/feed/
     https://www.theguardian.com/fashion/rss
-    http://feeds.feedburner.com/OneBigPhoto
-    http://feeds.feedburner.com/SdJapan
-    https://newsnblogs.com/feed/
-    http://feeds.news24.com/articles/news24/TopStories/rss
-    https://www.newinbooks.com/feed/
-    https://www.asriran.com/fa/rss/allnews
-    http://rss.gazetaprawna.pl/GazetaPrawna
-    https://ayearofreadingtheworld.com/feed/
-    https://www.canonrumors.com/feed/
-    https://japantoday.com/feed
-    https://tribune.com.pk/feed/home
-    http://rss.dziennik.pl/Dziennik-PL/
-    https://www.thenews.com.pk/rss/1/1
-    https://xkcd.com/rss.xml
-    https://www.tvfanatic.com/rss.xml
-    https://aestasbookblog.com/feed/
-    https://thebloggess.com/feed/
-    https://feeds.breakingnews.ie/bntopstories
-    https://news.livedoor.com/topics/rss/top.xml
-    http://myanmargazette.net/feed
-    https://www.theguardian.com/uk/travel/rss
-    https://nation.com.pk/rss/top-stories
-    https://awkwardfamilyphotos.com/feed/
-    http://feeds.feedburner.com/CrackedRSS
-    https://rss.elconfidencial.com/espana/
-    https://telegraf.com.ua/yandex-feed/
-    https://feeds.feedburner.com/TheSartorialist
-    http://www.ebc.com.br/rss/feed.xml
-    https://espreso.tv/rss
-    https://www.kirkusreviews.com/feeds/rss/
-    https://ewn.co.za/RSS%20Feeds/Latest%20News
-    https://www.timeslive.co.za/rss/
-    http://k.img.com.ua/rss/ru/all_news2.0.xml
-    https://fashionista.com/.rss/excerpt/
-    https://www.theonion.com/rss
-    https://www.khabaronline.ir/rss
-    https://www.express.pk/feed/
-    https://www.wirtualnemedia.pl/rss/wirtualnemedia_rss.xml
-    https://stuckincustoms.com/feed/
-    https://www.sportskeeda.com/feed
-    https://www.urdupoint.com/rss/urdupoint.rss
-    https://www.popsugar.com/fashion/feed
-    https://www.lightstalking.com/feed/
-    https://www.smbc-comics.com/comic/rss
-    https://lightroomkillertips.com/feed/
-    https://www.nomadicmatt.com/travel-blog/feed/
-    http://www.newsonjapan.com/rss/top.xml
-    http://rss.iol.io/iol/news
-    https://rss.unian.net/site/news_eng.rss
-    https://www.lonelyplanet.com/news/feed/atom/
-    https://www.faz.net/rss/aktuell/
-    https://www.republika.co.id/rss/
-    https://www.isna.ir/rss
-    https://reddit.com/r/books/.rss
-    https://www.refinery29.com/fashion/rss.xml
-    http://www.tagesschau.de/xml/rss2
-    https://vesti.ua/feeds/partners
-    https://api.axios.com/feed/
-    http://feeds.feedburner.com/icanhascheezburger
-    http://feeds.feedburner.com/thetvaddict/AXob
-    https://rss.focus.de/fol/XML/rss_folnews.xml
-    https://jang.com.pk/rss/1/1
-    https://www.newsweek.pl/rss.xml
-    http://feeds.skynews.com/feeds/rss/sports.xml
-    https://www.atlasobscura.com/feeds/latest
-    http://rss.asahi.com/rss/asahi/newsheadlines.rdf
-    https://www.yesstyle.com/blog/category/trend-and-style/feed/
-    https://iso.500px.com/feed/
-    https://www.elperiodico.com/es/rss/rss_portada.xml
-    http://syndication.thedailywtf.com/TheDailyWtf
