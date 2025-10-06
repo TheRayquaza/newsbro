@@ -60,6 +60,7 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 	}
 
 	articleAggregate := aggregate.ArticleAggregate{
+		ID:          article.ID,
 		Category:    article.Category,
 		Subcategory: article.Subcategory,
 		Title:       article.Title,
@@ -180,6 +181,7 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 	}
 
 	articleAggregate := aggregate.ArticleAggregate{
+		ID:          article.ID,
 		Category:    article.Category,
 		Subcategory: article.Subcategory,
 		Title:       article.Title,
@@ -226,6 +228,7 @@ func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
 	}
 
 	articleAggregate := aggregate.ArticleAggregate{
+		ID:          article.ID,
 		Category:    article.Category,
 		Subcategory: article.Subcategory,
 		Title:       article.Title,
@@ -281,4 +284,50 @@ func (as *ArticleService) GetSubcategories(category string) ([]string, error) {
 	}
 
 	return subcategories, nil
+}
+
+func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) error {
+	if beginDate.After(endDate) {
+		return dto.NewBadRequest("begin_date must be before end_date")
+	}
+
+	var articles []models.Article
+	if err := as.Db.Where("published_at BETWEEN ? AND ?", beginDate, endDate).Find(&articles).Error; err != nil {
+		log.Printf("failed to get articles for ingestion: %s", err)
+		return fmt.Errorf("failed to get articles for ingestion: %w", err)
+	}
+	if len(articles) == 0 {
+		log.Printf("no articles found for ingestion between %s and %s", beginDate, endDate)
+		return nil
+	}
+
+	for _, article := range articles {
+		articleAggregate := aggregate.ArticleAggregate{
+			ID:          article.ID,
+			Category:    article.Category,
+			Subcategory: article.Subcategory,
+			Title:       article.Title,
+			Abstract:    article.Abstract,
+			Link:        article.Link,
+			PublishedAt: article.PublishedAt,
+			IsActive:    true,
+		}
+		articleBytes, err := json.Marshal(articleAggregate)
+		if err != nil {
+			log.Printf("failed to marshal article aggregate: %s", err)
+			return err
+		}
+		msg := &sarama.ProducerMessage{
+			Key:   sarama.StringEncoder(articleAggregate.Link),
+			Topic: as.config.KafkaArticleAggregateTopic,
+			Value: sarama.ByteEncoder(articleBytes),
+		}
+		_, _, err = as.producer.SendMessage(msg)
+		if err != nil {
+			log.Printf("failed to publish article to kafka: %s", err)
+			return fmt.Errorf("failed to publish article to kafka: %w", err)
+		}
+	}
+
+	return nil
 }
