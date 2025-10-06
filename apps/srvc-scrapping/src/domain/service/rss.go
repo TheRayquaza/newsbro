@@ -13,6 +13,7 @@ import (
 	"srvc_scrapping/src/data/models"
 	"srvc_scrapping/src/data/repository"
 
+	"github.com/pemistahl/lingua-go"
 	"github.com/IBM/sarama"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/command"
 	"github.com/mmcdole/gofeed"
@@ -27,14 +28,35 @@ type rSSService struct {
 	producer    sarama.SyncProducer
 	config      *config.Config
 	categorizer *ArticleCategorizer
+	detector    lingua.LanguageDetector
 }
 
 func NewRSSService(articleRepo repository.ArticleRepository, producer sarama.SyncProducer, cfg *config.Config) RSSService {
+	languages := []lingua.Language{
+		lingua.Afrikaans, lingua.Albanian, lingua.Arabic, lingua.Armenian, lingua.Azerbaijani,
+		lingua.Basque, lingua.Belarusian, lingua.Bengali, lingua.Bosnian, lingua.Bulgarian,
+		lingua.Catalan, lingua.Chinese, lingua.Croatian, lingua.Czech, lingua.Danish, lingua.Dutch, lingua.English,
+		lingua.Esperanto, lingua.Estonian,lingua.Finnish, lingua.French,lingua.Ganda, lingua.Georgian,lingua.German,
+		lingua.Greek, lingua.Gujarati, lingua.Hebrew, lingua.Hindi, lingua.Hungarian, lingua.Icelandic, lingua.Indonesian,
+		lingua.Irish, lingua.Italian, lingua.Japanese, lingua.Kazakh, lingua.Korean, lingua.Latin, lingua.Latvian,
+		lingua.Lithuanian, lingua.Macedonian, lingua.Malay, lingua.Maori, lingua.Marathi, lingua.Mongolian,
+		lingua.Persian, lingua.Polish, lingua.Portuguese, lingua.Punjabi, lingua.Romanian, lingua.Russian,
+		lingua.Serbian, lingua.Shona, lingua.Slovak, lingua.Slovene, lingua.Somali,
+		lingua.Sotho, lingua.Spanish, lingua.Swahili, lingua.Swedish, lingua.Tagalog, lingua.Tamil,
+		lingua.Telugu, lingua.Thai, lingua.Tsonga, lingua.Tswana, lingua.Turkish,
+		lingua.Ukrainian, lingua.Urdu, lingua.Vietnamese, lingua.Welsh, lingua.Xhosa, lingua.Yoruba,
+	}
+
+    detector := lingua.NewLanguageDetectorBuilder().
+        FromLanguages(languages...).
+        Build()
+
 	return &rSSService{
 		articleRepo: articleRepo,
 		producer:    producer,
 		config:      cfg,
 		categorizer: NewArticleCategorizer(),
+		detector:    detector,
 	}
 }
 
@@ -67,6 +89,13 @@ func (u *rSSService) ProcessFeed(ctx context.Context) (int, error) {
 
 			description := cleanHTML(item.Description)
 			content := cleanHTML(item.Content)
+
+			if language, exists := u.detector.DetectLanguageOf(description + " " + content); exists {
+				if language != lingua.English {
+					log.Println("Skipping non-English article from feed:", feedURL)
+					continue
+				}
+			}
 
 			// Extract categories using multiple strategies
 			category, subCategory := u.categorizer.Categorize(item, description, content)
