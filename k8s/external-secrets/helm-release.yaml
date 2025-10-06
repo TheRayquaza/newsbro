@@ -15,7 +15,50 @@ spec:
         kind: HelmRepository
         name: helm-repo
         namespace: external-secrets
-  valuesFrom:
-    - kind: ConfigMap
-      name: external-secrets-values
-      valuesKey: values.yaml
+  values:
+    replicaCount: 1
+
+    image:
+      repository: oci.external-secrets.io/external-secrets/external-secrets
+      tag: ""
+      pullPolicy: IfNotPresent
+
+    installCRDs: true
+    crds:
+      createClusterExternalSecret: true
+      createClusterSecretStore: true
+      createClusterGenerator: true
+      createClusterPushSecret: true
+      createPushSecret: true
+
+    log:
+      level: info
+
+    serviceAccount:
+      create: true
+      automount: true
+
+    securityContext:
+      enabled: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+
+    webhook:
+      create: true
+      failurePolicy: Fail
+      replicaCount: 1
+
+    certController:
+      create: true
+      replicaCount: 1

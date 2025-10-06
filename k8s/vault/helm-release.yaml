@@ -14,7 +14,61 @@ spec:
         kind: HelmRepository
         name: helm-repo
         namespace: vault
-  valuesFrom:
-    - kind: ConfigMap
-      name: vault-values
-      valuesKey: values.yaml
+  values:
+    global:
+      enabled: true
+      namespace: vault
+      tlsDisable: true
+
+    injector:
+      enabled: false
+
+    server:
+      enabled: true
+      image:
+        repository: hashicorp/vault
+        tag: "1.20.1"
+        pullPolicy: IfNotPresent
+
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 200m
+        limits:
+          memory: 256Mi
+          cpu: 300m
+
+      # Single node with file storage
+      standalone:
+        enabled: true
+        config: |
+          ui = true
+          listener "tcp" {
+            tls_disable = 1
+            address = "[::]:8200"
+            cluster_address = "[::]:8201"
+          }
+          storage "file" {
+            path = "/vault/data"
+          }
+
+      dataStorage:
+        enabled: true
+        size: 10Gi
+        mountPath: /vault/data
+        accessMode: ReadWriteOnce
+
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+          - host: vault.localhost
+            paths:
+              - /
+        tls: []   # configure if you want HTTPS from traefik
+
+    ui:
+      enabled: true
+      serviceType: ClusterIP
+      externalPort: 8200
+      targetPort: 8200

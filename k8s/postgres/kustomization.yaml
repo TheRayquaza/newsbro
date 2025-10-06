@@ -4,7 +4,6 @@ resources:
 - namespace.yaml
 - helm-repo.yaml
 - helm-release.yaml
-- values.yaml
 - cluster.yaml
 - dbs.yaml
 - db-secrets.yaml
