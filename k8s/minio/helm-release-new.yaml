@@ -66,12 +66,12 @@ spec:
       ingressClassName: traefik
       path: /
       hosts:
-        - minio-svc.localhost
+        - minio-new-svc.localhost
 
     consoleIngress:
       enabled: true
       ingressClassName: traefik
       path: /
       hosts:
-        - minio.localhost
+        - minio-new.localhost
 
