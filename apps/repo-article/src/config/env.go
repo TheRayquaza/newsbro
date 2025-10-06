@@ -10,14 +10,15 @@ import (
 )
 
 type Config struct {
-	Port             string
-	DatabaseURL      string
-	JWTSecret        string
-	LoginRedirectURL string
-	KafkaBrokers     []string
-	KafkaArticleCommandTopic       string
-	KafkaGroupID     string
-	KafkaArticleAggregateTopic string
+	Port                        string
+	DatabaseURL                 string
+	JWTSecret                   string
+	LoginRedirectURL            string
+	KafkaBrokers                []string
+	KafkaArticleCommandTopic    string
+	KafkaGroupID                string
+	KafkaArticleAggregateTopic  string
+	KafkaFeedbackAggregateTopic string
 }
 
 func Load() *Config {
@@ -33,12 +34,13 @@ func Load() *Config {
 			getEnv("DATABASE_HOST", "localhost:5432"),
 			getEnv("DATABASE_NAME", "repo_account"),
 		),
-		JWTSecret:        getEnv("JWT_SECRET", ""),
-		LoginRedirectURL: getEnv("LOGIN_REDIRECT_URL", "http://localhost:8080"),
-		KafkaBrokers:     strings.Split(getEnv("KAFKA_BROKERS", "localhost:9092"), ","),
-		KafkaArticleCommandTopic:       getEnv("KAFKA_ARTICLE_COMMAND_TOPIC", "new-articles-command"),
-		KafkaArticleAggregateTopic:       getEnv("KAFKA_ARTICLE_AGGREGATE_TOPIC", "articles-aggregate"),
-		KafkaGroupID:     getEnv("KAFKA_GROUP_ID", "repo-article-group"),
+		JWTSecret:                   getEnv("JWT_SECRET", ""),
+		LoginRedirectURL:            getEnv("LOGIN_REDIRECT_URL", "http://localhost:8080"),
+		KafkaBrokers:                strings.Split(getEnv("KAFKA_BROKERS", "localhost:9092"), ","),
+		KafkaArticleCommandTopic:    getEnv("KAFKA_ARTICLE_COMMAND_TOPIC", "new-articles-command"),
+		KafkaArticleAggregateTopic:  getEnv("KAFKA_ARTICLE_AGGREGATE_TOPIC", "articles-aggregate"),
+		KafkaFeedbackAggregateTopic: getEnv("KAFKA_FEEDBACK_AGGREGATE_TOPIC", "feedback-aggregate"),
+		KafkaGroupID:                getEnv("KAFKA_GROUP_ID", "repo-article-group"),
 	}
 }
 

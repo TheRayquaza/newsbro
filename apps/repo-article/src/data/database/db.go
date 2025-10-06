@@ -16,6 +16,7 @@ func Initialize(databaseURL string) (*gorm.DB, error) {
 	// Auto-migrate models
 	err = db.AutoMigrate(
 		&models.Article{},
+		&models.Feedback{},
 	)
 	if err != nil {
 		return nil, err

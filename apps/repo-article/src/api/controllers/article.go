@@ -6,6 +6,7 @@ import (
 
 	"repo_article/src/api/dto"
 	"repo_article/src/domain/services"
+	//"repo_article/src/data/models"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
 
@@ -290,4 +291,35 @@ func (ac *ArticleController) GetSubcategories(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"subcategories": subcategories})
+}
+
+// @Summary Trigger article ingestion
+// @Description Trigger ingestion of articles published within a specified date range
+// @Tags Articles
+// @Produce json
+// @Param article body dto.ArticleTriggerIngestionRequest true "Article update data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /articles/ingestion [post]
+func (ac *ArticleController) TriggerArticleIngestion(c *gin.Context) {
+	var req dto.ArticleTriggerIngestionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	count, err := ac.articleService.TriggerArticleIngestion(req.BeginDate, req.EndDate)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if count == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No articles found for the given date range"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Article ingestion triggered", "article_count": count})
 }

@@ -1,15 +1,15 @@
 package services
 
 import (
-	"repo_article/src/api/dto"
-	"repo_article/src/data/models"
-	"repo_article/src/config"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
+	"repo_article/src/api/dto"
+	"repo_article/src/config"
+	"repo_article/src/data/models"
 
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
-	"encoding/json"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -17,14 +17,14 @@ import (
 )
 
 type ArticleService struct {
-	Db *gorm.DB
+	Db       *gorm.DB
 	producer sarama.SyncProducer
 	config   *config.Config
 }
 
 func NewArticleService(db *gorm.DB, producer sarama.SyncProducer, config *config.Config) *ArticleService {
 	return &ArticleService{
-		Db: db,
+		Db:       db,
 		producer: producer,
 		config:   config,
 	}
@@ -41,7 +41,7 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	
+
 	if req.ID != 0 {
 		var existing models.Article
 		if err := as.Db.First(&existing, "id = ?", req.ID).Error; err == nil {
@@ -286,20 +286,23 @@ func (as *ArticleService) GetSubcategories(category string) ([]string, error) {
 	return subcategories, nil
 }
 
-func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) error {
+func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) (uint, error) {
 	if beginDate.After(endDate) {
-		return dto.NewBadRequest("begin_date must be before end_date")
+		return 0, dto.NewBadRequest("begin_date must be before end_date")
 	}
 
 	var articles []models.Article
 	if err := as.Db.Where("published_at BETWEEN ? AND ?", beginDate, endDate).Find(&articles).Error; err != nil {
 		log.Printf("failed to get articles for ingestion: %s", err)
-		return fmt.Errorf("failed to get articles for ingestion: %w", err)
+		return 0, fmt.Errorf("failed to get articles for ingestion: %w", err)
 	}
 	if len(articles) == 0 {
 		log.Printf("no articles found for ingestion between %s and %s", beginDate, endDate)
-		return nil
+		return 0, nil
 	}
+
+	count := uint(0)
+	failed := make([]uint, 0)
 
 	for _, article := range articles {
 		articleAggregate := aggregate.ArticleAggregate{
@@ -315,7 +318,8 @@ func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) 
 		articleBytes, err := json.Marshal(articleAggregate)
 		if err != nil {
 			log.Printf("failed to marshal article aggregate: %s", err)
-			return err
+			failed = append(failed, article.ID)
+			continue
 		}
 		msg := &sarama.ProducerMessage{
 			Key:   sarama.StringEncoder(articleAggregate.Link),
@@ -325,9 +329,18 @@ func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) 
 		_, _, err = as.producer.SendMessage(msg)
 		if err != nil {
 			log.Printf("failed to publish article to kafka: %s", err)
-			return fmt.Errorf("failed to publish article to kafka: %w", err)
+			failed = append(failed, article.ID)
+			continue
+		}
+		count++
+	}
+
+	if len(failed) > 0 {
+		log.Printf("failed to ingest articles with IDs: %v", failed)
+		for _, id := range failed {
+			log.Printf(" - %d", id)
 		}
 	}
 
-	return nil
+	return count, nil
 }

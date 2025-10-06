@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"repo_article/src/api/routes"
 	"repo_article/src/api/consumer"
+	"repo_article/src/api/routes"
 	"repo_article/src/config"
 	"repo_article/src/data/database"
 	"repo_article/src/domain/services"
