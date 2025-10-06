@@ -22,13 +22,11 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: srvc-scrapping
-              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.0.3
+              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.1.0
               imagePullPolicy: IfNotPresent
               ports:
                 - containerPort: 8080
                   name: http
-                - containerPort: 9090
-                  name: metrics
               envFrom:
                 - configMapRef:
                     name: srvc-scrapping-config
@@ -36,11 +34,11 @@ spec:
                     name: srvc-scrapping-secrets
               resources:
                 requests:
-                  memory: "512Mi"
-                  cpu: "125m"
+                  memory: "64Mi"
+                  cpu: "50m"
                 limits:
-                  memory: "1Gi"
-                  cpu: "250m"
+                  memory: "256Mi"
+                  cpu: "200m"
               livenessProbe:
                 httpGet:
                   path: /health
