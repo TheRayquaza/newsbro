@@ -62,7 +62,7 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 				articles.GET("", articleController.GetArticles)
 				articles.GET("/categories", articleController.GetCategories)
 				articles.GET("/subcategories", articleController.GetSubcategories)
-				articles.GET("/ingestion", authMiddleware.AdminMiddleware(), articleController.TriggerArticleIngestion)
+				articles.POST("/ingestion", authMiddleware.AdminMiddleware(), articleController.TriggerArticleIngestion)
 				articles.GET("/:id", articleController.GetArticle)
 				articles.POST("", authMiddleware.AdminMiddleware(), articleController.CreateArticle)
 				articles.PUT("/:id", authMiddleware.AdminMiddleware(), articleController.UpdateArticle)
@@ -71,7 +71,6 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 				// Article feedback routes
 				articles.GET("/:id/feedback", feedbackController.GetArticleFeedback)
 				articles.POST("/:id/feedback", feedbackController.CreateFeedback)
-				articles.PUT("/:id/feedback", feedbackController.UpdateFeedback)
 				articles.DELETE("/:id/feedback", feedbackController.DeleteFeedback)
 			}
 
@@ -79,7 +78,7 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 			feedback := protected.Group("/feedback")
 			{
 				// Get user's feedback history
-				feedback.GET("/my-feedback", feedbackController.GetUserFeedback)
+				feedback.GET("/my", feedbackController.GetUserFeedback)
 
 				// Admin routes for feedback management
 				feedback.GET("/csv", authMiddleware.AdminMiddleware(), feedbackController.ExportFeedbackCSV)

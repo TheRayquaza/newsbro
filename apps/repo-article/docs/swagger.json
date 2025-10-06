@@ -195,6 +195,65 @@
                 }
             }
         },
+        "/articles/ingestion": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Trigger ingestion of articles published within a specified date range",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Trigger article ingestion",
+                "parameters": [
+                    {
+                        "description": "Article update data",
+                        "name": "article",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/repo_article_src_api_dto.ArticleTriggerIngestionRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/articles/subcategories": {
             "get": {
                 "security": [
@@ -453,7 +512,7 @@
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get feedback statistics and user's feedback for a specific article",
@@ -473,6 +532,14 @@
                         "description": "Article ID",
                         "name": "id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true
                     }
                 ],
@@ -499,69 +566,10 @@
                     }
                 }
             },
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Update existing user feedback for a specific article",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "feedback"
-                ],
-                "summary": "Update feedback for an article",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Article ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated feedback data",
-                        "name": "feedback",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/repo_article_src_api_dto.FeedbackRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "JWT": []
                     }
                 ],
                 "description": "Create or update user feedback for a specific article",
@@ -591,6 +599,14 @@
                         "schema": {
                             "$ref": "#/definitions/repo_article_src_api_dto.FeedbackRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -620,7 +636,7 @@
             "delete": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "JWT": []
                     }
                 ],
                 "description": "Delete user feedback for a specific article",
@@ -640,6 +656,14 @@
                         "description": "Article ID",
                         "name": "id",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
                         "required": true
                     }
                 ],
@@ -668,7 +692,7 @@
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get all feedback with pagination (Admin only)",
@@ -696,6 +720,14 @@
                         "description": "Items per page",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -711,11 +743,11 @@
                 }
             }
         },
-        "/feedback/export/csv": {
+        "/feedback/csv": {
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "JWT": []
                     }
                 ],
                 "description": "Export all article feedback data to CSV format (Admin only)",
@@ -741,6 +773,14 @@
                         "description": "End date (YYYY-MM-DD)",
                         "name": "end_date",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -760,11 +800,11 @@
                 }
             }
         },
-        "/feedback/my-feedback": {
+        "/feedback/my": {
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get all feedback given by the authenticated user",
@@ -792,6 +832,14 @@
                         "description": "Items per page",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -811,7 +859,7 @@
             "get": {
                 "security": [
                     {
-                        "BearerAuth": []
+                        "JWT": []
                     }
                 ],
                 "description": "Get aggregated feedback statistics for all articles (Admin only)",
@@ -839,6 +887,14 @@
                         "description": "Items per page",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -861,6 +917,7 @@
             "required": [
                 "category",
                 "link",
+                "published_at",
                 "subcategory",
                 "title"
             ],
@@ -878,10 +935,28 @@
                 "link": {
                     "type": "string"
                 },
+                "published_at": {
+                    "type": "string"
+                },
                 "subcategory": {
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "repo_article_src_api_dto.ArticleTriggerIngestionRequest": {
+            "type": "object",
+            "required": [
+                "begin_date",
+                "end_date"
+            ],
+            "properties": {
+                "begin_date": {
+                    "type": "string"
+                },
+                "end_date": {
                     "type": "string"
                 }
             }
@@ -914,15 +989,9 @@
         },
         "repo_article_src_api_dto.FeedbackRequest": {
             "type": "object",
-            "required": [
-                "value"
-            ],
             "properties": {
                 "value": {
-                    "type": "integer",
-                    "maximum": 1,
-                    "minimum": 0,
-                    "example": 1
+                    "type": "boolean"
                 }
             }
         },
@@ -967,6 +1036,9 @@
                 "link": {
                     "type": "string"
                 },
+                "published_at": {
+                    "type": "string"
+                },
                 "subcategory": {
                     "type": "string"
                 },
@@ -981,6 +1053,14 @@
         "repo_article_src_data_models.Feedback": {
             "type": "object",
             "properties": {
+                "article": {
+                    "description": "\u003c-- link to Article",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/repo_article_src_data_models.Article"
+                        }
+                    ]
+                },
                 "created_at": {
                     "type": "string"
                 },

@@ -1,28 +1,31 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 	"gorm.io/gorm"
+	"time"
 
 	"repo_article/src/api/dto"
+	"repo_article/src/config"
 	"repo_article/src/data/models"
 	"repo_article/src/domain/entities"
-	"repo_article/src/config"
+
+	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
 
 	"github.com/IBM/sarama"
 )
 
 type FeedbackService struct {
-	Db *gorm.DB
+	Db       *gorm.DB
 	producer sarama.SyncProducer
 	config   *config.Config
 }
 
 func NewFeedbackService(db *gorm.DB, producer sarama.SyncProducer, config *config.Config) *FeedbackService {
 	return &FeedbackService{
-		Db: db,
+		Db:       db,
 		producer: producer,
 		config:   config,
 	}
@@ -33,7 +36,6 @@ func (fs *FeedbackService) GetArticleFeedback(newsID, userID uint) (*dto.Feedbac
 	var stats dto.FeedbackStatsResponse
 	var userFeedback *models.Feedback
 
-	// Get article feedback statistics
 	err := fs.Db.Raw(`
 		SELECT 
 			? as news_id,
@@ -52,7 +54,6 @@ func (fs *FeedbackService) GetArticleFeedback(newsID, userID uint) (*dto.Feedbac
 		return nil, nil, fmt.Errorf("failed to get feedback statistics: %w", err)
 	}
 
-	// Get user's specific feedback for this article
 	var feedback models.Feedback
 	err = fs.Db.Where("user_id = ? AND news_id = ?", userID, newsID).First(&feedback).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -73,9 +74,7 @@ func (fs *FeedbackService) GetArticleFeedback(newsID, userID uint) (*dto.Feedbac
 	return &stats, userFeedback, nil
 }
 
-// CreateOrUpdateFeedback creates new feedback or updates existing one
 func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int) (*models.Feedback, error) {
-	// Validate that the article exists
 	var article models.Article
 	if err := fs.Db.First(&article, newsID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -111,6 +110,26 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 		}
 	}
 
+	feedbackAggregate := aggregate.FeedbackAggregate{
+		UserID:   feedback.UserID,
+		NewsID:   feedback.NewsID,
+		Value:    feedback.Value,
+		IsActive: true,
+	}
+	feedbackBytes, err := json.Marshal(feedbackAggregate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal feedback aggregate: %w", err)
+	}
+	msg := &sarama.ProducerMessage{
+		Key:   sarama.StringEncoder(fmt.Sprintf("%d-%d", feedback.UserID, feedback.NewsID)),
+		Topic: fs.config.KafkaFeedbackAggregateTopic,
+		Value: sarama.ByteEncoder(feedbackBytes),
+	}
+	_, _, err = fs.producer.SendMessage(msg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to publish feedback to kafka: %w", err)
+	}
+
 	return &models.Feedback{
 		ID:        feedback.ID,
 		UserID:    feedback.UserID,
@@ -121,48 +140,43 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 	}, nil
 }
 
-// UpdateFeedback updates existing feedback
-func (fs *FeedbackService) UpdateFeedback(userID, newsID uint, value int) (*models.Feedback, error) {
+func (fs *FeedbackService) DeleteFeedback(userID, newsID uint) error {
 	var feedback models.Feedback
 	err := fs.Db.Where("user_id = ? AND news_id = ?", userID, newsID).First(&feedback).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("feedback not found")
+			return dto.NewNotFound("feedback not found")
 		}
-		return nil, fmt.Errorf("failed to find feedback: %w", err)
+		return fmt.Errorf("failed to find feedback: %w", err)
 	}
 
-	feedback.Value = value
-	if err := fs.Db.Save(&feedback).Error; err != nil {
-		return nil, fmt.Errorf("failed to update feedback: %w", err)
+	if err := fs.Db.Delete(&feedback).Error; err != nil {
+		return fmt.Errorf("failed to delete feedback: %w", err)
 	}
 
-	return &models.Feedback{
-		ID:        feedback.ID,
-		UserID:    feedback.UserID,
-		NewsID:    feedback.NewsID,
-		Value:     feedback.Value,
-		CreatedAt: feedback.CreatedAt,
-		UpdatedAt: feedback.UpdatedAt,
-	}, nil
-}
-
-// DeleteFeedback removes user's feedback for an article
-func (fs *FeedbackService) DeleteFeedback(userID, newsID uint) error {
-	result := fs.Db.Where("user_id = ? AND news_id = ?", userID, newsID).Delete(&models.Feedback{})
-
-	if result.Error != nil {
-		return fmt.Errorf("failed to delete feedback: %w", result.Error)
+	feedbackAggregate := aggregate.FeedbackAggregate{
+		UserID:   feedback.UserID,
+		NewsID:   feedback.NewsID,
+		Value:    feedback.Value,
+		IsActive: false,
 	}
-
-	if result.RowsAffected == 0 {
-		return errors.New("feedback not found")
+	feedbackBytes, err := json.Marshal(feedbackAggregate)
+	if err != nil {
+		return fmt.Errorf("failed to marshal feedback aggregate: %w", err)
+	}
+	msg := &sarama.ProducerMessage{
+		Key:   sarama.StringEncoder(fmt.Sprintf("%d-%d", feedback.UserID, feedback.NewsID)),
+		Topic: fs.config.KafkaFeedbackAggregateTopic,
+		Value: sarama.ByteEncoder(feedbackBytes),
+	}
+	_, _, err = fs.producer.SendMessage(msg)
+	if err != nil {
+		return fmt.Errorf("failed to publish feedback deletion to kafka: %w", err)
 	}
 
 	return nil
 }
 
-// GetUserFeedback retrieves all feedback given by a specific user with pagination
 func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]models.Feedback, int64, error) {
 	var feedback []models.Feedback
 	var total int64
@@ -192,6 +206,7 @@ func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]mode
 			ID:        fb.ID,
 			UserID:    fb.UserID,
 			NewsID:    fb.NewsID,
+			Article:   fb.Article,
 			Value:     fb.Value,
 			CreatedAt: fb.CreatedAt,
 			UpdatedAt: fb.UpdatedAt,
@@ -201,7 +216,6 @@ func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]mode
 	return response, total, nil
 }
 
-// GetAllFeedbackForCSV retrieves all feedback data for CSV export
 func (fs *FeedbackService) GetAllFeedbackForCSV(startDate, endDate *time.Time) ([]entities.FeedbackCSVExport, error) {
 	query := fs.Db.Table("feedbacks f").
 		Select(`
@@ -217,7 +231,6 @@ func (fs *FeedbackService) GetAllFeedbackForCSV(startDate, endDate *time.Time) (
 			f.created_at,
 			f.updated_at
 		`).
-		Joins("LEFT JOIN users u ON f.user_id = u.id").
 		Joins("LEFT JOIN articles a ON f.news_id = a.id").
 		Where("f.deleted_at IS NULL")
 
@@ -237,12 +250,10 @@ func (fs *FeedbackService) GetAllFeedbackForCSV(startDate, endDate *time.Time) (
 	return feedback, nil
 }
 
-// GetFeedbackStats retrieves aggregated feedback statistics for all articles
 func (fs *FeedbackService) GetFeedbackStats(page, limit int) ([]dto.FeedbackStatsResponse, int64, error) {
 	var stats []dto.FeedbackStatsResponse
 	var total int64
 
-	// Count total articles with feedback
 	if err := fs.Db.Raw(`
 		SELECT COUNT(DISTINCT news_id) 
 		FROM feedbacks 
@@ -251,7 +262,6 @@ func (fs *FeedbackService) GetFeedbackStats(page, limit int) ([]dto.FeedbackStat
 		return nil, 0, fmt.Errorf("failed to count feedback stats: %w", err)
 	}
 
-	// Get paginated statistics
 	offset := (page - 1) * limit
 	err := fs.Db.Raw(`
 		SELECT 
@@ -279,20 +289,16 @@ func (fs *FeedbackService) GetFeedbackStats(page, limit int) ([]dto.FeedbackStat
 	return stats, total, nil
 }
 
-// GetAllFeedback retrieves all feedback with pagination (for admin)
 func (fs *FeedbackService) GetAllFeedback(page, limit int) ([]models.Feedback, int64, error) {
 	var feedback []models.Feedback
 	var total int64
 
-	// Count total records
 	if err := fs.Db.Model(&models.Feedback{}).Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count all feedback: %w", err)
 	}
 
-	// Get paginated results with user and article information
 	offset := (page - 1) * limit
-	err := fs.Db.Preload("User").
-		Preload("Article").
+	err := fs.Db.Preload("Article").
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).

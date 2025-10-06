@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"log"
 
 	"repo_article/src/api/dto"
 	"repo_article/src/domain/services"
+	//"repo_article/src/data/models"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
 	"github.com/gin-gonic/gin"
@@ -31,7 +33,8 @@ func NewFeedbackController(feedbackService *services.FeedbackService) *FeedbackC
 // @Accept json
 // @Produce json
 // @Param id path int true "Article ID"
-// @Security BearerAuth
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Success 200 {object} dto.FeedbackStatsResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
@@ -78,7 +81,8 @@ func (fc *FeedbackController) GetArticleFeedback(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Article ID"
 // @Param feedback body dto.FeedbackRequest true "Feedback data"
-// @Security BearerAuth
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Success 201 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
@@ -92,78 +96,37 @@ func (fc *FeedbackController) CreateFeedback(c *gin.Context) {
 
 	var req dto.FeedbackRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Println("Error binding JSON:", err)
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		log.Println("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
 	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
+		log.Println("Invalid user type in context")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
 
 	userID := usr.UserID
+	val := 1
+	if !req.Value {
+		val = 0
+	}
 
-	feedback, err := fc.feedbackService.CreateOrUpdateFeedback(userID, uint(newsID), req.Value)
+	feedback, err := fc.feedbackService.CreateOrUpdateFeedback(userID, uint(newsID), val)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusCreated, feedback)
-}
-
-// UpdateFeedback godoc
-// @Summary Update feedback for an article
-// @Description Update existing user feedback for a specific article
-// @Tags feedback
-// @Accept json
-// @Produce json
-// @Param id path int true "Article ID"
-// @Param feedback body dto.FeedbackRequest true "Updated feedback data"
-// @Security BearerAuth
-// @Success 201 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Router /articles/{id}/feedback [put]
-func (fc *FeedbackController) UpdateFeedback(c *gin.Context) {
-	newsID, err := strconv.ParseUint(c.Param("id"), 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "Invalid article ID")
-		return
-	}
-
-	var req dto.FeedbackRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
-		return
-	}
-
-	user, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
-		return
-	}
-	usr, ok := user.(*entities.JWTClaims)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
-		return
-	}
-
-	userID := usr.UserID
-
-	_, err = fc.feedbackService.UpdateFeedback(userID, uint(newsID), req.Value)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.Status(http.StatusNoContent)
 }
 
 // DeleteFeedback godoc
@@ -173,7 +136,8 @@ func (fc *FeedbackController) UpdateFeedback(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Article ID"
-// @Security BearerAuth
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Success 204
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
@@ -200,7 +164,12 @@ func (fc *FeedbackController) DeleteFeedback(c *gin.Context) {
 
 	err = fc.feedbackService.DeleteFeedback(userID, uint(newsID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		switch err.(type) {
+		case *dto.ErrNotFound:
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
@@ -215,9 +184,10 @@ func (fc *FeedbackController) DeleteFeedback(c *gin.Context) {
 // @Produce json
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Items per page" default(10)
-// @Security BearerAuth
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Success 200 {array} models.Feedback
-// @Router /feedback/my-feedback [get]
+// @Router /feedback/my [get]
 func (fc *FeedbackController) GetUserFeedback(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
@@ -258,10 +228,11 @@ func (fc *FeedbackController) GetUserFeedback(c *gin.Context) {
 // @Produce text/csv
 // @Param start_date query string false "Start date (YYYY-MM-DD)"
 // @Param end_date query string false "End date (YYYY-MM-DD)"
-// @Security BearerAuth
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Success 200 {file} csv
 // @Failure 500 {object} map[string]interface{}
-// @Router /feedback/export/csv [get]
+// @Router /feedback/csv [get]
 func (fc *FeedbackController) ExportFeedbackCSV(c *gin.Context) {
 	var startDate, endDate *time.Time
 
@@ -318,7 +289,8 @@ func (fc *FeedbackController) ExportFeedbackCSV(c *gin.Context) {
 // @Produce json
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Items per page" default(10)
-// @Security BearerAuth
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Success 200 {array} dto.FeedbackStatsResponse
 // @Router /feedback/stats [get]
 func (fc *FeedbackController) GetFeedbackStats(c *gin.Context) {
@@ -349,7 +321,8 @@ func (fc *FeedbackController) GetFeedbackStats(c *gin.Context) {
 // @Produce json
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Items per page" default(10)
-// @Security BearerAuth
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Success 200 {array} models.Feedback
 // @Router /feedback/all [get]
 func (fc *FeedbackController) GetAllFeedback(c *gin.Context) {

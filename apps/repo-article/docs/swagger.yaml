@@ -10,6 +10,8 @@ definitions:
         type: integer
       link:
         type: string
+      published_at:
+        type: string
       subcategory:
         type: string
       title:
@@ -17,8 +19,19 @@ definitions:
     required:
     - category
     - link
+    - published_at
     - subcategory
     - title
+    type: object
+  repo_article_src_api_dto.ArticleTriggerIngestionRequest:
+    properties:
+      begin_date:
+        type: string
+      end_date:
+        type: string
+    required:
+    - begin_date
+    - end_date
     type: object
   repo_article_src_api_dto.ArticleUpdateRequest:
     properties:
@@ -40,12 +53,7 @@ definitions:
   repo_article_src_api_dto.FeedbackRequest:
     properties:
       value:
-        example: 1
-        maximum: 1
-        minimum: 0
-        type: integer
-    required:
-    - value
+        type: boolean
     type: object
   repo_article_src_api_dto.FeedbackStatsResponse:
     properties:
@@ -74,6 +82,8 @@ definitions:
         type: integer
       link:
         type: string
+      published_at:
+        type: string
       subcategory:
         type: string
       title:
@@ -83,6 +93,10 @@ definitions:
     type: object
   repo_article_src_data_models.Feedback:
     properties:
+      article:
+        allOf:
+        - $ref: '#/definitions/repo_article_src_data_models.Article'
+        description: <-- link to Article
       created_at:
         type: string
       id:
@@ -348,6 +362,12 @@ paths:
         name: id
         required: true
         type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -364,7 +384,7 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+      - JWT: []
       summary: Delete feedback for an article
       tags:
       - feedback
@@ -378,6 +398,12 @@ paths:
         name: id
         required: true
         type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -396,7 +422,7 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+      - JWT: []
       summary: Get feedback for a specific article
       tags:
       - feedback
@@ -416,6 +442,12 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/repo_article_src_api_dto.FeedbackRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -435,47 +467,8 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+      - JWT: []
       summary: Create feedback for an article
-      tags:
-      - feedback
-    put:
-      consumes:
-      - application/json
-      description: Update existing user feedback for a specific article
-      parameters:
-      - description: Article ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Updated feedback data
-        in: body
-        name: feedback
-        required: true
-        schema:
-          $ref: '#/definitions/repo_article_src_api_dto.FeedbackRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update feedback for an article
       tags:
       - feedback
   /articles/categories:
@@ -504,6 +497,46 @@ paths:
       security:
       - JWT: []
       summary: Get categories
+      tags:
+      - Articles
+  /articles/ingestion:
+    post:
+      description: Trigger ingestion of articles published within a specified date
+        range
+      parameters:
+      - description: Article update data
+        in: body
+        name: article
+        required: true
+        schema:
+          $ref: '#/definitions/repo_article_src_api_dto.ArticleTriggerIngestionRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - JWT: []
+      summary: Trigger article ingestion
       tags:
       - Articles
   /articles/subcategories:
@@ -554,6 +587,12 @@ paths:
         in: query
         name: limit
         type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -564,11 +603,11 @@ paths:
               $ref: '#/definitions/repo_article_src_data_models.Feedback'
             type: array
       security:
-      - BearerAuth: []
+      - JWT: []
       summary: Get all feedback
       tags:
       - feedback
-  /feedback/export/csv:
+  /feedback/csv:
     get:
       consumes:
       - application/json
@@ -581,6 +620,12 @@ paths:
       - description: End date (YYYY-MM-DD)
         in: query
         name: end_date
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
         type: string
       produces:
       - text/csv
@@ -595,11 +640,11 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - BearerAuth: []
+      - JWT: []
       summary: Export all feedback to CSV
       tags:
       - feedback
-  /feedback/my-feedback:
+  /feedback/my:
     get:
       consumes:
       - application/json
@@ -615,6 +660,12 @@ paths:
         in: query
         name: limit
         type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -625,7 +676,7 @@ paths:
               $ref: '#/definitions/repo_article_src_data_models.Feedback'
             type: array
       security:
-      - BearerAuth: []
+      - JWT: []
       summary: Get user's feedback history
       tags:
       - feedback
@@ -645,6 +696,12 @@ paths:
         in: query
         name: limit
         type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -655,7 +712,7 @@ paths:
               $ref: '#/definitions/repo_article_src_api_dto.FeedbackStatsResponse'
             type: array
       security:
-      - BearerAuth: []
+      - JWT: []
       summary: Get feedback statistics
       tags:
       - feedback
