@@ -5,7 +5,7 @@ import (
 )
 
 type ArticleAggregate struct {
-	ID          string    `json:"news_id"`
+	ID          uint      `json:"id"`
 	Category    string    `json:"category"`
 	Subcategory string    `json:"subcategory"`
 	Title       string    `json:"title"`
