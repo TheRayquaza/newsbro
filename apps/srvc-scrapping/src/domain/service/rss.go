@@ -13,10 +13,10 @@ import (
 	"srvc_scrapping/src/data/models"
 	"srvc_scrapping/src/data/repository"
 
-	"github.com/pemistahl/lingua-go"
 	"github.com/IBM/sarama"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/command"
 	"github.com/mmcdole/gofeed"
+	"github.com/pemistahl/lingua-go"
 )
 
 type RSSService interface {
@@ -36,7 +36,7 @@ func NewRSSService(articleRepo repository.ArticleRepository, producer sarama.Syn
 		lingua.Afrikaans, lingua.Albanian, lingua.Arabic, lingua.Armenian, lingua.Azerbaijani,
 		lingua.Basque, lingua.Belarusian, lingua.Bengali, lingua.Bosnian, lingua.Bulgarian,
 		lingua.Catalan, lingua.Chinese, lingua.Croatian, lingua.Czech, lingua.Danish, lingua.Dutch, lingua.English,
-		lingua.Esperanto, lingua.Estonian,lingua.Finnish, lingua.French,lingua.Ganda, lingua.Georgian,lingua.German,
+		lingua.Esperanto, lingua.Estonian, lingua.Finnish, lingua.French, lingua.Ganda, lingua.Georgian, lingua.German,
 		lingua.Greek, lingua.Gujarati, lingua.Hebrew, lingua.Hindi, lingua.Hungarian, lingua.Icelandic, lingua.Indonesian,
 		lingua.Irish, lingua.Italian, lingua.Japanese, lingua.Kazakh, lingua.Korean, lingua.Latin, lingua.Latvian,
 		lingua.Lithuanian, lingua.Macedonian, lingua.Malay, lingua.Maori, lingua.Marathi, lingua.Mongolian,
@@ -47,9 +47,9 @@ func NewRSSService(articleRepo repository.ArticleRepository, producer sarama.Syn
 		lingua.Ukrainian, lingua.Urdu, lingua.Vietnamese, lingua.Welsh, lingua.Xhosa, lingua.Yoruba,
 	}
 
-    detector := lingua.NewLanguageDetectorBuilder().
-        FromLanguages(languages...).
-        Build()
+	detector := lingua.NewLanguageDetectorBuilder().
+		FromLanguages(languages...).
+		Build()
 
 	return &rSSService{
 		articleRepo: articleRepo,
