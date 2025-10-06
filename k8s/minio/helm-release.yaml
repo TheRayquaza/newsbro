@@ -19,6 +19,9 @@ spec:
     # https://artifacthub.io/packages/helm/bitnami/minio?modal=values
     auth:
       existingSecret: minio-root-secret
+      rootUserSecretKey: rootUser
+      rootPasswordSecretKey: rootPassword
+      forcePassword: true # force update on vault rotation
 
     usersExistingSecrets:
       - centralized-minio-users
@@ -66,11 +69,11 @@ spec:
       ingressClassName: traefik
       path: /
       hosts:
-        - minio-new-svc.localhost
+        - minio-svc.localhost
 
     consoleIngress:
       enabled: true
       ingressClassName: traefik
       path: /
       hosts:
-        - minio-new.localhost
+        - minio.localhost
