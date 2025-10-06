@@ -97,8 +97,6 @@ spec:
       enabled: false
       allowPrivilegeEscalation: false
 
-    resources: {}
-
     startupProbe:
       failureThreshold: 30
       periodSeconds: 5
