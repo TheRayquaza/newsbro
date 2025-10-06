@@ -18,7 +18,7 @@ spec:
   values:
     # https://artifacthub.io/packages/helm/bitnami/minio?modal=values
     auth:
-      existingSecret: minio-root-secret
+      existingSecret: minio-new
       rootUserSecretKey: rootUser
       rootPasswordSecretKey: rootPassword
       forcePassword: true # force update on vault rotation
