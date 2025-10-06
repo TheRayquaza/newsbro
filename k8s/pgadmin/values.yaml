@@ -68,6 +68,14 @@ data:
       size: 10Gi
       subPath: ""
 
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+
     extraVolumes: []
 
     securityContext:

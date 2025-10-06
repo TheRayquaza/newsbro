@@ -89,7 +89,13 @@ data:
       ipFamilyPolicy: ""
       ipFamilies: []
 
-    resources: {}
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "125m"
+      limits:
+        memory: "1Gi"
+        cpu: "250m"
 
     nodeSelector: {}
 

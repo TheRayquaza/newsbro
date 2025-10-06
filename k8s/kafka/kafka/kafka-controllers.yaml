@@ -13,3 +13,10 @@ spec:
     type: persistent-claim
     size: 5Gi
     deleteClaim: false
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 2Gi
+      cpu: 500m

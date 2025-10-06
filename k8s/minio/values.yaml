@@ -17,7 +17,7 @@ data:
       size: 20Gi
       storageClass: local-path
 
-    replicas: 4
+    replicas: 2
     drivesPerNode: 1
 
     minioAPIPort: 9000
@@ -49,9 +49,6 @@ data:
       - name: mlflow
         policy: none
         purge: false
-      - name: papers
-        policy: none
-        purge: false
 
     ingress:
       enabled: true
@@ -67,8 +64,3 @@ data:
       hosts:
         - minio.localhost
 
-    # metrics:
-    #   serviceMonitor:
-    #     includeNode: true
-    #     enabled: true
-    #     namespace: minio

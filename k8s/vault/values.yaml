@@ -22,11 +22,11 @@ data:
 
       resources:
         requests:
-          memory: 256Mi
-          cpu: 250m
+          memory: 128Mi
+          cpu: 200m
         limits:
           memory: 256Mi
-          cpu: 250m
+          cpu: 300m
 
       # Single node with file storage
       standalone:

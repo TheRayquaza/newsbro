@@ -27,7 +27,7 @@ spec:
     autoscaling:
       enabled: true
       minReplicas: 1
-      maxReplicas: 3
+      maxReplicas: 1
 
     config:
       kafka:

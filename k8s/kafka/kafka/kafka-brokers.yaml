@@ -17,3 +17,10 @@ spec:
         size: 10Gi
         kraftMetadata: shared
         deleteClaim: false
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 5Gi
+      cpu: 1000m

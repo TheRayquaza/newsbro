@@ -87,8 +87,8 @@ data:
 
     resources:
       limits:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 400m
+        memory: 512Mi
       requests:
         cpu: 100m
         memory: 128Mi
@@ -127,17 +127,8 @@ data:
 
     snapshotPersistence:
       enabled: false
-      accessModes: ["ReadWriteOnce"]
-      size: 10Gi
-      annotations: {}
-
     snapshotRestoration:
       enabled: false
-      pvcName: snapshots-pvc
-      # Must not conflict with /qdrant/snapshots or /qdrant/storage
-      mountPath: /qdrant/snapshot-restoration
-      snapshots:
-      #  - /qdrant/snapshot-restoration/test_collection/test_collection-2022-10-24-13-56-50.snapshot:test_collection
 
     config:
       cluster:
@@ -153,12 +144,6 @@ data:
     metrics:
       serviceMonitor:
         enabled: false
-        additionalLabels: {}
-        scrapeInterval: 30s
-        scrapeTimeout: 10s
-        targetPort: http
-        targetPath: "/metrics"
-        relabelings: []
 
     serviceAccount:
       annotations: {}
