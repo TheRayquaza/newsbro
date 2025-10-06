@@ -22,6 +22,7 @@ spec:
       rootUserSecretKey: rootUser
       rootPasswordSecretKey: rootPassword
       forcePassword: true # force update on vault rotation
+      useSecret: true
 
     usersExistingSecrets:
       - centralized-minio-users
