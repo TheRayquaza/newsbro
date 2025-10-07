@@ -38,7 +38,7 @@ class ApiClient {
          * @type {String}
          * @default https://account.newsbro.cc
          */
-        this.basePath = basePath.replace(/\/+$/, '');
+        this.basePath = basePath;
 
         /**
          * The authentication methods to be included for all API calls.

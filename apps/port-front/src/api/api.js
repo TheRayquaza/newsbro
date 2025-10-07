@@ -11,10 +11,10 @@ import ApiClient  from "./users/src/ApiClient";
 class ApiService {
   constructor() {
     // ---- Initialize API clients ----
-    this.articlesApi = new ArticlesApi(new ApiClient({ basePath: ENV.ARTICLE_BASE_URL + '/api/v1' }));
-    this.feedbackApi = new FeedbackApi(new ApiClient({ basePath: ENV.ARTICLE_BASE_URL + '/api/v1' }));
-    this.authApi = new AuthApi(new ApiClient({ basePath: ENV.ACCOUNT_BASE_URL + '/api/v1' }));
-    this.userApi = new UserApi(new ApiClient({ basePath: ENV.ACCOUNT_BASE_URL + '/api/v1' }));
+    this.articlesApi = new ArticlesApi(new ApiClient({ basePath: ENV.ARTICLE_BASE_URL + '/api/v1/' }));
+    this.feedbackApi = new FeedbackApi(new ApiClient({ basePath: ENV.ARTICLE_BASE_URL + '/api/v1/' }));
+    this.authApi = new AuthApi(new ApiClient({ basePath: ENV.ACCOUNT_BASE_URL + '/api/v1/' }));
+    this.userApi = new UserApi(new ApiClient({ basePath: ENV.ACCOUNT_BASE_URL + '/api/v1/' }));
   }
 
   // -------------------- AUTH --------------------
