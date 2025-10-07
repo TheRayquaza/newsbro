@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import api from "../api/api";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext(null);
 
@@ -8,13 +10,32 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem("auth_token");
-    const storedUser = localStorage.getItem("user_email");
+  // Helper to decode JWT
+  const decodeToken = (token) => {
+    try {
+      const decoded = jwtDecode(token);
+      return {
+        id: decoded.user_id,
+        email: decoded.email,
+        firstName: decoded.first_name,
+        lastName: decoded.last_name,
+        username: decoded.username,
+        role: decoded.role,
+      };
+    } catch (e) {
+      console.error("Failed to decode JWT", e);
+      return null;
+    }
+  };
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser({ email: storedUser });
+  useEffect(() => {
+    const storedToken = Cookies.get("auth_token");
+    if (storedToken) {
+      const decodedUser = decodeToken(storedToken);
+      if (decodedUser) {
+        setToken(storedToken);
+        setUser(decodedUser);
+      }
     }
     setLoading(false);
   }, []);
@@ -23,11 +44,13 @@ const AuthProvider = ({ children }) => {
     const data = await api.login(email, password);
     const authToken = data.access_token || data.token;
 
-    setToken(authToken);
-    setUser({ email });
-    localStorage.setItem("auth_token", authToken);
-    localStorage.setItem("user_email", email);
+    const decodedUser = decodeToken(authToken);
 
+    setToken(authToken);
+    setUser(decodedUser);
+
+    // Store in cookies
+    Cookies.set("auth_token", authToken, { expires: 7 });
     return data;
   };
 
@@ -38,9 +61,9 @@ const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_email");
-    api.clearCache();
+
+    Cookies.remove("auth_token");
+    api.clearCache?.();
   };
 
   return (
@@ -53,5 +76,4 @@ const AuthProvider = ({ children }) => {
 };
 
 export { AuthProvider, AuthContext };
-
 export default AuthProvider;

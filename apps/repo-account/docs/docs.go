@@ -131,11 +131,6 @@ const docTemplate = `{
         },
         "/auth/refresh": {
             "post": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Refresh JWT token using refresh token",
                 "consumes": [
                     "application/json"
@@ -218,11 +213,6 @@ const docTemplate = `{
         },
         "/users": {
             "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Get a list of all users (admin only)",
                 "produces": [
                     "application/json"
@@ -282,11 +272,6 @@ const docTemplate = `{
         },
         "/users/profile": {
             "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Get the profile of the authenticated user",
                 "produces": [
                     "application/json"
@@ -321,11 +306,6 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Update the profile of the authenticated user",
                 "consumes": [
                     "application/json"

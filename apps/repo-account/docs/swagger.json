@@ -1,7 +1,9 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "contact": {},
+        "title": "account.newsbro.cc",
+        "version": "1.3.2"
     },
     "paths": {
         "/auth/login": {
@@ -120,11 +122,6 @@
         },
         "/auth/refresh": {
             "post": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Refresh JWT token using refresh token",
                 "consumes": [
                     "application/json"
@@ -207,11 +204,6 @@
         },
         "/users": {
             "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Get a list of all users (admin only)",
                 "produces": [
                     "application/json"
@@ -271,11 +263,6 @@
         },
         "/users/profile": {
             "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Get the profile of the authenticated user",
                 "produces": [
                     "application/json"
@@ -310,11 +297,6 @@
                 }
             },
             "put": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Update the profile of the authenticated user",
                 "consumes": [
                     "application/json"

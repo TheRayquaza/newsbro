@@ -1,6 +1,6 @@
 import "../assets/styles/global.css";
 import forgeIcon from "../assets/icons/forge.png";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { FileText } from "lucide-react";
 import { AuthContext } from "../contexts/Auth";
@@ -11,8 +11,14 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useContext(AuthContext);
-  let navigate = useNavigate();
+  const { login, user, loading: authLoading } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate("/");
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +40,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen w-screen">
+    <div className="flex justify-center items-center h-screen w-screen main-div">
       <div
         className="card w-full max-w-md"
         style={{ padding: "2rem", maxWidth: "500px" }}

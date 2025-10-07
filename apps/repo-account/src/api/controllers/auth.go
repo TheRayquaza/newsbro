@@ -96,7 +96,6 @@ func (ac *AuthController) Login(c *gin.Context) {
 // @Success 200 {object} dto.LoginResponse
 // @Failure 401 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /auth/refresh [post]
 func (ac *AuthController) RefreshToken(c *gin.Context) {
