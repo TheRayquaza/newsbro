@@ -14,3 +14,8 @@ type ErrBadRequest struct{ Msg string }
 
 func (e *ErrBadRequest) Error() string { return e.Msg }
 func NewBadRequest(msg string) error   { return &ErrBadRequest{Msg: msg} }
+
+type ErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}

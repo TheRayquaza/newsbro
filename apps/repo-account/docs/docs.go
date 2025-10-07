@@ -41,10 +41,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -80,7 +92,16 @@ const docTemplate = `{
                         "description": "Found"
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -100,13 +121,21 @@ const docTemplate = `{
                         "description": "Found"
                     },
                     "503": {
-                        "description": "Service Unavailable"
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     }
                 }
             }
         },
         "/auth/refresh": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Refresh JWT token using refresh token",
                 "consumes": [
                     "application/json"
@@ -130,13 +159,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.LoginResponse"
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     },
                     "500": {
-                        "description": "Internal Server Error"
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -170,7 +208,10 @@ const docTemplate = `{
                         "description": "Created"
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -225,7 +266,16 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -263,7 +313,10 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     }
                 }
             },
@@ -312,16 +365,39 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request"
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/repo_account_src_api_dto.ErrorResponse"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "repo_account_src_api_dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "repo_account_src_api_dto.LoginRequest": {
             "type": "object",
             "required": [
@@ -335,6 +411,23 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 6
+                }
+            }
+        },
+        "repo_account_src_api_dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/repo_account_src_api_dto.UserResponse"
                 }
             }
         },

@@ -1,4 +1,11 @@
 definitions:
+  repo_account_src_api_dto.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
   repo_account_src_api_dto.LoginRequest:
     properties:
       email:
@@ -9,6 +16,17 @@ definitions:
     required:
     - email
     - password
+    type: object
+  repo_account_src_api_dto.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/repo_account_src_api_dto.UserResponse'
     type: object
   repo_account_src_api_dto.RegisterRequest:
     properties:
@@ -66,8 +84,16 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
       summary: Login a user
       tags:
       - Auth
@@ -92,6 +118,12 @@ paths:
           description: Found
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
       summary: OAuth Callback
       tags:
       - Auth
@@ -105,6 +137,8 @@ paths:
           description: Found
         "503":
           description: Service Unavailable
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
       summary: OAuth Login
       tags:
       - Auth
@@ -125,10 +159,18 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.LoginResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
+      security:
+      - JWT: []
       summary: Refresh JWT token
       tags:
       - Auth
@@ -151,6 +193,8 @@ paths:
           description: Created
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
       summary: Register a new user
       tags:
       - Auth
@@ -185,6 +229,12 @@ paths:
             type: array
         "403":
           description: Forbidden
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Get all users
@@ -209,6 +259,8 @@ paths:
             $ref: '#/definitions/repo_account_src_api_dto.UserResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Get user profile
@@ -241,8 +293,16 @@ paths:
             $ref: '#/definitions/repo_account_src_api_dto.UserResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_account_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Update user profile

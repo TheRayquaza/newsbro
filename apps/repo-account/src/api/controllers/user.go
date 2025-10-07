@@ -27,20 +27,26 @@ func NewUserController(userService *services.UserService) *UserController {
 // @Tags User
 // @Produce json
 // @Success 200 {object} dto.UserResponse
-// @Failure 401
+// @Failure 401 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /users/profile [get]
 func (uc *UserController) GetProfile(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: "User not found in context",
+		})
 		return
 	}
 
 	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Invalid user type in context",
+		})
 		return
 	}
 
@@ -62,42 +68,54 @@ func (uc *UserController) GetProfile(c *gin.Context) {
 // @Produce json
 // @Param updateRequest body map[string]interface{} true "Update Request"
 // @Success 200 {object} dto.UserResponse
-// @Failure 400
-// @Failure 401
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /users/profile [put]
 func (uc *UserController) UpdateProfile(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: "User not found in context",
+		})
 		return
 	}
 
 	var updates map[string]interface{}
 	if err := c.ShouldBindJSON(&updates); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid request payload",
+		})
 		return
 	}
 
-	// Remove sensitive fields from updates
 	delete(updates, "id")
 	delete(updates, "password")
 	delete(updates, "username")
 
 	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Invalid user type in context",
+		})
 		return
 	}
 
 	updatedUser, err := uc.userService.UpdateUser(usr.UserID, updates)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	response := dto.UserResponse{
+	c.JSON(http.StatusOK, dto.UserResponse{
 		ID:        updatedUser.ID,
 		Email:     updatedUser.Email,
 		Username:  updatedUser.Username,
@@ -105,9 +123,7 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 		LastName:  updatedUser.LastName,
 		Role:      updatedUser.Role,
 		IsActive:  updatedUser.IsActive,
-	}
-
-	c.JSON(http.StatusOK, response)
+	})
 }
 
 // @Summary Get all users
@@ -117,7 +133,8 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 // @Param limit query int false "Limit" default(10)
 // @Param offset query int false "Offset" default(0)
 // @Success 200 {array} dto.UserResponse
-// @Failure 403
+// @Failure 403 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /users [get]
@@ -139,7 +156,10 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 
 	users, err := uc.userService.GetAllUsers(limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
 		return
 	}
 

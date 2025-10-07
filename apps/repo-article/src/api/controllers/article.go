@@ -29,9 +29,9 @@ func NewArticleController(articleService *services.ArticleService) *ArticleContr
 // @Produce json
 // @Param article body dto.ArticleCreateRequest true "Article data"
 // @Success 201 {object} dto.ArticleResponse
-// @Failure 400 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /articles [post]
@@ -72,9 +72,9 @@ func (ac *ArticleController) CreateArticle(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Article ID"
 // @Success 200 {object} dto.ArticleResponse
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /articles/{id} [get]
@@ -108,9 +108,9 @@ func (ac *ArticleController) GetArticle(c *gin.Context) {
 // @Param search query string false "Search in title and abstract"
 // @Param limit query int false "Limit number of results" default(10)
 // @Param offset query int false "Offset for pagination" default(0)
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {array} dto.ArticleResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /articles [get]
@@ -164,10 +164,10 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 // @Param id path int true "Article ID"
 // @Param article body dto.ArticleUpdateRequest true "Article update data"
 // @Success 200 {object} dto.ArticleResponse
-// @Failure 400 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /articles/{id} [put]
@@ -185,7 +185,6 @@ func (ac *ArticleController) UpdateArticle(c *gin.Context) {
 		return
 	}
 
-	// Get user from context
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
@@ -215,10 +214,10 @@ func (ac *ArticleController) UpdateArticle(c *gin.Context) {
 // @Tags Articles
 // @Param id path int true "Article ID"
 // @Success 204
-// @Failure 400 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /articles/{id} [delete]
@@ -230,7 +229,6 @@ func (ac *ArticleController) DeleteArticle(c *gin.Context) {
 		return
 	}
 
-	// Get user from context
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
@@ -257,19 +255,19 @@ func (ac *ArticleController) DeleteArticle(c *gin.Context) {
 // @Description Get all available article categories
 // @Tags Articles
 // @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {array} string
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /articles/categories [get]
 func (ac *ArticleController) GetCategories(c *gin.Context) {
 	categories, err := ac.articleService.GetCategories()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"categories": categories})
+	c.JSON(http.StatusOK, categories)
 }
 
 // @Summary Get subcategories
@@ -277,8 +275,8 @@ func (ac *ArticleController) GetCategories(c *gin.Context) {
 // @Tags Articles
 // @Produce json
 // @Param category query string false "Filter subcategories by category"
-// @Success 200 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Success 200 {array} string
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /articles/subcategories [get]
@@ -289,14 +287,14 @@ func (ac *ArticleController) GetSubcategories(c *gin.Context) {
 	if err != nil {
 		switch err.(type) {
 		case *dto.ErrBadRequest:
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error(), Code: http.StatusBadRequest})
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error(), Code: http.StatusInternalServerError})
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"subcategories": subcategories})
+	c.JSON(http.StatusOK, subcategories)
 }
 
 // @Summary Trigger article ingestion
@@ -305,26 +303,26 @@ func (ac *ArticleController) GetSubcategories(c *gin.Context) {
 // @Produce json
 // @Param article body dto.ArticleTriggerIngestionRequest true "Article update data"
 // @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /articles/ingestion [post]
 func (ac *ArticleController) TriggerArticleIngestion(c *gin.Context) {
 	var req dto.ArticleTriggerIngestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
 	count, err := ac.articleService.TriggerArticleIngestion(req.BeginDate, req.EndDate)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
 
 	if count == 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "No articles found for the given date range"})
+		c.Status(http.StatusNoContent)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Article ingestion triggered", "article_count": count})

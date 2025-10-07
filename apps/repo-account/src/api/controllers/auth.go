@@ -29,18 +29,24 @@ func NewAuthController(authService *services.AuthService) *AuthController {
 // @Produce json
 // @Param registerRequest body dto.RegisterRequest true "Register Request"
 // @Success 201
-// @Failure 400
+// @Failure 400 {object} dto.ErrorResponse
 // @Router /auth/register [post]
 func (ac *AuthController) Register(c *gin.Context) {
 	var req dto.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	response, err := ac.authService.Register(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -53,19 +59,26 @@ func (ac *AuthController) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param loginRequest body dto.LoginRequest true "Login Request"
-// @Success 200
-// @Failure 401
+// @Success 200 {object} dto.LoginResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
 // @Router /auth/login [post]
 func (ac *AuthController) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	response, err := ac.authService.Login(&req)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -80,9 +93,10 @@ func (ac *AuthController) Login(c *gin.Context) {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Success 200
-// @Failure 401
-// @Failure 500
+// @Success 200 {object} dto.LoginResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /auth/refresh [post]
 func (ac *AuthController) RefreshToken(c *gin.Context) {
@@ -100,7 +114,10 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 
 	response, err := ac.authService.RefreshToken(usr)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -112,20 +129,21 @@ func (ac *AuthController) RefreshToken(c *gin.Context) {
 // @Tags Auth
 // @Produce json
 // @Success 302
-// @Failure 503
+// @Failure 503 {object} dto.ErrorResponse
 // @Router /auth/oauth/login [get]
 func (ac *AuthController) OAuthLogin(c *gin.Context) {
-	// Generate state parameter for CSRF protection
 	stateBytes := make([]byte, 16)
 	rand.Read(stateBytes)
 	state := hex.EncodeToString(stateBytes)
 
-	// Store state in session/cache in production
 	c.SetCookie("oauth_state", state, 600, "/", "", false, true)
 
 	authURL := ac.authService.GetOAuthURL(state)
 	if authURL == "" {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "OAuth not configured"})
+		c.JSON(http.StatusServiceUnavailable, dto.ErrorResponse{
+			Code:    http.StatusServiceUnavailable,
+			Message: "OAuth provider not configured",
+		})
 		return
 	}
 
@@ -139,25 +157,30 @@ func (ac *AuthController) OAuthLogin(c *gin.Context) {
 // @Param code query string true "Authorization Code"
 // @Param state query string true "State Parameter"
 // @Success 302
-// @Failure 400
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Router /auth/oauth/callback [get]
 func (ac *AuthController) OAuthCallback(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
 
-	// Verify state parameter
 	storedState, err := c.Cookie("oauth_state")
 	if err != nil || storedState != state {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid state parameter"})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid state parameter",
+		})
 		return
 	}
 
-	// Clear state cookie
 	c.SetCookie("oauth_state", "", -1, "/", "", false, true)
 
 	response, err := ac.authService.HandleOAuthCallback(code)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 

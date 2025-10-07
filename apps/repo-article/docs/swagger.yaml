@@ -67,6 +67,13 @@ definitions:
     required:
     - id
     type: object
+  repo_article_src_api_dto.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
   repo_article_src_api_dto.FeedbackRequest:
     properties:
       value:
@@ -151,18 +158,17 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/repo_article_src_api_dto.ArticleResponse'
+            type: array
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Get all articles
@@ -195,18 +201,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Create a new article
@@ -233,23 +236,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Delete article
@@ -279,18 +278,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Get article by ID
@@ -328,23 +324,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Update article
@@ -486,13 +478,13 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              type: string
+            type: array
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Get categories
@@ -526,13 +518,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Trigger article ingestion
@@ -558,13 +548,13 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              type: string
+            type: array
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
       security:
       - JWT: []
       summary: Get subcategories
