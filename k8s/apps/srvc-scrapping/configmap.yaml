@@ -90,18 +90,13 @@ data:
     http://rss.nytimes.com/services/xml/rss/nyt/Upshot.xml
     http://thecaucus.blogs.nytimes.com/feed/
     http://www.reddit.com/r/politics/.rss
-    http://feeds.dailykos.com/dailykos/index.xml
     http://www.npr.org/rss/rss.php?id=1014
     http://www.npr.org/rss/rss.php?id=5
     http://www.washingtontimes.com/rss/headlines/news/politics/
-    http://feeds.feedburner.com/realclearpolitics/qlMj
     http://feeds.feedburner.com/BreitbartFeed
-    http://dailycaller.com/section/politics/feed/
     http://feeds.feedburner.com/DrudgeReportFeed
     http://feeds.slate.com/slate-101526
     http://feeds.feedburner.com/motherjones/Politics
-    http://www.newrepublic.com/taxonomy/term/17538/feed
-    http://www.redstate.com/feed/
     http://twitchy.com/category/us-politics/feed/
     http://www.nytimes.com/services/xml/rss/nyt/Business.xml
     http://rss.nytimes.com/services/xml/rss/nyt/Business.xml
