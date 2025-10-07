@@ -33,18 +33,9 @@ type rSSService struct {
 
 func NewRSSService(articleRepo repository.ArticleRepository, producer sarama.SyncProducer, cfg *config.Config) RSSService {
 	languages := []lingua.Language{
-		lingua.Afrikaans, lingua.Albanian, lingua.Arabic, lingua.Armenian, lingua.Azerbaijani,
-		lingua.Basque, lingua.Belarusian, lingua.Bengali, lingua.Bosnian, lingua.Bulgarian,
-		lingua.Catalan, lingua.Chinese, lingua.Croatian, lingua.Czech, lingua.Danish, lingua.Dutch, lingua.English,
-		lingua.Esperanto, lingua.Estonian, lingua.Finnish, lingua.French, lingua.Ganda, lingua.Georgian, lingua.German,
-		lingua.Greek, lingua.Gujarati, lingua.Hebrew, lingua.Hindi, lingua.Hungarian, lingua.Icelandic, lingua.Indonesian,
-		lingua.Irish, lingua.Italian, lingua.Japanese, lingua.Kazakh, lingua.Korean, lingua.Latin, lingua.Latvian,
-		lingua.Lithuanian, lingua.Macedonian, lingua.Malay, lingua.Maori, lingua.Marathi, lingua.Mongolian,
-		lingua.Persian, lingua.Polish, lingua.Portuguese, lingua.Punjabi, lingua.Romanian, lingua.Russian,
-		lingua.Serbian, lingua.Shona, lingua.Slovak, lingua.Slovene, lingua.Somali,
-		lingua.Sotho, lingua.Spanish, lingua.Swahili, lingua.Swedish, lingua.Tagalog, lingua.Tamil,
-		lingua.Telugu, lingua.Thai, lingua.Tsonga, lingua.Tswana, lingua.Turkish,
-		lingua.Ukrainian, lingua.Urdu, lingua.Vietnamese, lingua.Welsh, lingua.Xhosa, lingua.Yoruba,
+		lingua.Arabic, lingua.Chinese, lingua.English,
+		lingua.French, lingua.German, lingua.Hindi, lingua.Japanese,
+		lingua.Portuguese, lingua.Russian, lingua.Spanish, lingua.Swedish,
 	}
 
 	detector := lingua.NewLanguageDetectorBuilder().
