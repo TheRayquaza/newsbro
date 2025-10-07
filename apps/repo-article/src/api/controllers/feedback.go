@@ -10,7 +10,6 @@ import (
 
 	"repo_article/src/api/dto"
 	"repo_article/src/domain/services"
-	//"repo_article/src/data/models"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
 	"github.com/gin-gonic/gin"
@@ -186,7 +185,7 @@ func (fc *FeedbackController) DeleteFeedback(c *gin.Context) {
 // @Param limit query int false "Items per page" default(10)
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
-// @Success 200 {array} models.Feedback
+// @Success 200 {array} dto.FeedbackResponse
 // @Router /feedback/my [get]
 func (fc *FeedbackController) GetUserFeedback(c *gin.Context) {
 	user, exists := c.Get("user")
@@ -323,7 +322,7 @@ func (fc *FeedbackController) GetFeedbackStats(c *gin.Context) {
 // @Param limit query int false "Items per page" default(10)
 // @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
-// @Success 200 {array} models.Feedback
+// @Success 200 {array} dto.FeedbackResponse
 // @Router /feedback/all [get]
 func (fc *FeedbackController) GetAllFeedback(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -343,4 +342,36 @@ func (fc *FeedbackController) GetAllFeedback(c *gin.Context) {
 	*/
 
 	c.JSON(http.StatusOK, feedback)
+}
+
+// TriggerIngestFeedback godoc
+// @Summary Trigger feedback ingestion
+// @Description Trigger ingestion of feedback data for articles within a specified date range (Admin only)
+// @Tags feedback
+// @Accept json
+// @Param ingestion body dto.FeedbackTriggerIngestionRequest true "Ingestion date range"
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /feedback/ingest [post]
+func (fc *FeedbackController) TriggerIngestFeedback(c *gin.Context) {
+	var req dto.FeedbackTriggerIngestionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	count, err := fc.feedbackService.TriggerIngestFeedback(req.BeginDate, req.EndDate)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if count == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No articles found for the given date range"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Article ingestion triggered", "article_count": count})
 }

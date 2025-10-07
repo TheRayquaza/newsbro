@@ -136,7 +136,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/repo_article_src_data_models.Article"
+                            "$ref": "#/definitions/repo_article_src_api_dto.ArticleResponse"
                         }
                     },
                     "400": {
@@ -350,7 +350,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repo_article_src_data_models.Article"
+                            "$ref": "#/definitions/repo_article_src_api_dto.ArticleResponse"
                         }
                     },
                     "400": {
@@ -423,7 +423,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repo_article_src_data_models.Article"
+                            "$ref": "#/definitions/repo_article_src_api_dto.ArticleResponse"
                         }
                     },
                     "400": {
@@ -747,7 +747,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repo_article_src_data_models.Feedback"
+                                "$ref": "#/definitions/repo_article_src_api_dto.FeedbackResponse"
                             }
                         }
                     }
@@ -811,6 +811,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/feedback/ingest": {
+            "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Trigger ingestion of feedback data for articles within a specified date range (Admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "feedback"
+                ],
+                "summary": "Trigger feedback ingestion",
+                "parameters": [
+                    {
+                        "description": "Ingestion date range",
+                        "name": "ingestion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/repo_article_src_api_dto.FeedbackTriggerIngestionRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/feedback/my": {
             "get": {
                 "security": [
@@ -859,7 +918,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/repo_article_src_data_models.Feedback"
+                                "$ref": "#/definitions/repo_article_src_api_dto.FeedbackResponse"
                             }
                         }
                     }
@@ -957,6 +1016,32 @@ const docTemplate = `{
                 }
             }
         },
+        "repo_article_src_api_dto.ArticleResponse": {
+            "type": "object",
+            "properties": {
+                "abstract": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "subcategory": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "repo_article_src_api_dto.ArticleTriggerIngestionRequest": {
             "type": "object",
             "required": [
@@ -1006,6 +1091,26 @@ const docTemplate = `{
                 }
             }
         },
+        "repo_article_src_api_dto.FeedbackResponse": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "news_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "integer"
+                }
+            }
+        },
         "repo_article_src_api_dto.FeedbackStatsResponse": {
             "type": "object",
             "properties": {
@@ -1029,67 +1134,18 @@ const docTemplate = `{
                 }
             }
         },
-        "repo_article_src_data_models.Article": {
+        "repo_article_src_api_dto.FeedbackTriggerIngestionRequest": {
             "type": "object",
+            "required": [
+                "begin_date",
+                "end_date"
+            ],
             "properties": {
-                "abstract": {
+                "begin_date": {
                     "type": "string"
                 },
-                "category": {
+                "end_date": {
                     "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "link": {
-                    "type": "string"
-                },
-                "published_at": {
-                    "type": "string"
-                },
-                "subcategory": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "repo_article_src_data_models.Feedback": {
-            "type": "object",
-            "properties": {
-                "article": {
-                    "description": "\u003c-- link to Article",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/repo_article_src_data_models.Article"
-                        }
-                    ]
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "news_id": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "value": {
-                    "description": "0 = dislike, 1 = like",
-                    "type": "integer"
                 }
             }
         }

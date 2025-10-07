@@ -6,7 +6,6 @@ import (
 
 	"repo_article/src/api/dto"
 	"repo_article/src/domain/services"
-	//"repo_article/src/data/models"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
 
@@ -29,7 +28,7 @@ func NewArticleController(articleService *services.ArticleService) *ArticleContr
 // @Accept json
 // @Produce json
 // @Param article body dto.ArticleCreateRequest true "Article data"
-// @Success 201 {object} models.Article
+// @Success 201 {object} dto.ArticleResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -73,7 +72,7 @@ func (ac *ArticleController) CreateArticle(c *gin.Context) {
 // @Tags Articles
 // @Produce json
 // @Param id path int true "Article ID"
-// @Success 200 {object} models.Article
+// @Success 200 {object} dto.ArticleResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -157,7 +156,7 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Article ID"
 // @Param article body dto.ArticleUpdateRequest true "Article update data"
-// @Success 200 {object} models.Article
+// @Success 200 {object} dto.ArticleResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 401 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}

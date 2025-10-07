@@ -84,6 +84,7 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 				feedback.GET("/csv", authMiddleware.AdminMiddleware(), feedbackController.ExportFeedbackCSV)
 				feedback.GET("/stats", authMiddleware.AdminMiddleware(), feedbackController.GetFeedbackStats)
 				feedback.GET("/all", authMiddleware.AdminMiddleware(), feedbackController.GetAllFeedback)
+				feedback.POST("/ingest", authMiddleware.AdminMiddleware(), feedbackController.TriggerIngestFeedback)
 			}
 		}
 	}

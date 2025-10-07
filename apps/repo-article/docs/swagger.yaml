@@ -23,6 +23,23 @@ definitions:
     - subcategory
     - title
     type: object
+  repo_article_src_api_dto.ArticleResponse:
+    properties:
+      abstract:
+        type: string
+      category:
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      published_at:
+        type: string
+      subcategory:
+        type: string
+      title:
+        type: string
+    type: object
   repo_article_src_api_dto.ArticleTriggerIngestionRequest:
     properties:
       begin_date:
@@ -55,6 +72,19 @@ definitions:
       value:
         type: boolean
     type: object
+  repo_article_src_api_dto.FeedbackResponse:
+    properties:
+      date:
+        type: string
+      id:
+        type: integer
+      news_id:
+        type: integer
+      user_id:
+        type: integer
+      value:
+        type: integer
+    type: object
   repo_article_src_api_dto.FeedbackStatsResponse:
     properties:
       article_title:
@@ -70,46 +100,15 @@ definitions:
       total_count:
         type: integer
     type: object
-  repo_article_src_data_models.Article:
+  repo_article_src_api_dto.FeedbackTriggerIngestionRequest:
     properties:
-      abstract:
+      begin_date:
         type: string
-      category:
+      end_date:
         type: string
-      created_at:
-        type: string
-      id:
-        type: integer
-      link:
-        type: string
-      published_at:
-        type: string
-      subcategory:
-        type: string
-      title:
-        type: string
-      updated_at:
-        type: string
-    type: object
-  repo_article_src_data_models.Feedback:
-    properties:
-      article:
-        allOf:
-        - $ref: '#/definitions/repo_article_src_data_models.Article'
-        description: <-- link to Article
-      created_at:
-        type: string
-      id:
-        type: integer
-      news_id:
-        type: integer
-      updated_at:
-        type: string
-      user_id:
-        type: integer
-      value:
-        description: 0 = dislike, 1 = like
-        type: integer
+    required:
+    - begin_date
+    - end_date
     type: object
 info:
   contact: {}
@@ -192,7 +191,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/repo_article_src_data_models.Article'
+            $ref: '#/definitions/repo_article_src_api_dto.ArticleResponse'
         "400":
           description: Bad Request
           schema:
@@ -276,7 +275,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/repo_article_src_data_models.Article'
+            $ref: '#/definitions/repo_article_src_api_dto.ArticleResponse'
         "400":
           description: Bad Request
           schema:
@@ -325,7 +324,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/repo_article_src_data_models.Article'
+            $ref: '#/definitions/repo_article_src_api_dto.ArticleResponse'
         "400":
           description: Bad Request
           schema:
@@ -600,7 +599,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/repo_article_src_data_models.Feedback'
+              $ref: '#/definitions/repo_article_src_api_dto.FeedbackResponse'
             type: array
       security:
       - JWT: []
@@ -644,6 +643,46 @@ paths:
       summary: Export all feedback to CSV
       tags:
       - feedback
+  /feedback/ingest:
+    post:
+      consumes:
+      - application/json
+      description: Trigger ingestion of feedback data for articles within a specified
+        date range (Admin only)
+      parameters:
+      - description: Ingestion date range
+        in: body
+        name: ingestion
+        required: true
+        schema:
+          $ref: '#/definitions/repo_article_src_api_dto.FeedbackTriggerIngestionRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - JWT: []
+      summary: Trigger feedback ingestion
+      tags:
+      - feedback
   /feedback/my:
     get:
       consumes:
@@ -673,7 +712,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/repo_article_src_data_models.Feedback'
+              $ref: '#/definitions/repo_article_src_api_dto.FeedbackResponse'
             type: array
       security:
       - JWT: []

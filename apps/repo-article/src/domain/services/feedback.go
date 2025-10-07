@@ -5,14 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
+	"log"
 	"time"
 
 	"repo_article/src/api/dto"
 	"repo_article/src/config"
+	"repo_article/src/converters"
 	"repo_article/src/data/models"
 	"repo_article/src/domain/entities"
-
-	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
 
 	"github.com/IBM/sarama"
 )
@@ -31,7 +31,6 @@ func NewFeedbackService(db *gorm.DB, producer sarama.SyncProducer, config *confi
 	}
 }
 
-// GetArticleFeedback retrieves feedback statistics for a specific article and user's feedback
 func (fs *FeedbackService) GetArticleFeedback(newsID, userID uint) (*dto.FeedbackStatsResponse, *models.Feedback, error) {
 	var stats dto.FeedbackStatsResponse
 	var userFeedback *models.Feedback
@@ -74,7 +73,7 @@ func (fs *FeedbackService) GetArticleFeedback(newsID, userID uint) (*dto.Feedbac
 	return &stats, userFeedback, nil
 }
 
-func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int) (*models.Feedback, error) {
+func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int) (*dto.FeedbackResponse, error) {
 	var article models.Article
 	if err := fs.Db.First(&article, newsID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -110,12 +109,7 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 		}
 	}
 
-	feedbackAggregate := aggregate.FeedbackAggregate{
-		UserID:   feedback.UserID,
-		NewsID:   feedback.NewsID,
-		Value:    feedback.Value,
-		IsActive: true,
-	}
+	feedbackAggregate := converters.FeedbackModelToFeedbackAggregate(&feedback, true)
 	feedbackBytes, err := json.Marshal(feedbackAggregate)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal feedback aggregate: %w", err)
@@ -130,14 +124,8 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 		return nil, fmt.Errorf("failed to publish feedback to kafka: %w", err)
 	}
 
-	return &models.Feedback{
-		ID:        feedback.ID,
-		UserID:    feedback.UserID,
-		NewsID:    feedback.NewsID,
-		Value:     feedback.Value,
-		CreatedAt: feedback.CreatedAt,
-		UpdatedAt: feedback.UpdatedAt,
-	}, nil
+	feedbackResponse := converters.FeedbackModelToFeedbackResponse(&feedback)
+	return &feedbackResponse, nil
 }
 
 func (fs *FeedbackService) DeleteFeedback(userID, newsID uint) error {
@@ -154,12 +142,7 @@ func (fs *FeedbackService) DeleteFeedback(userID, newsID uint) error {
 		return fmt.Errorf("failed to delete feedback: %w", err)
 	}
 
-	feedbackAggregate := aggregate.FeedbackAggregate{
-		UserID:   feedback.UserID,
-		NewsID:   feedback.NewsID,
-		Value:    feedback.Value,
-		IsActive: false,
-	}
+	feedbackAggregate := converters.FeedbackModelToFeedbackAggregate(&feedback, false)
 	feedbackBytes, err := json.Marshal(feedbackAggregate)
 	if err != nil {
 		return fmt.Errorf("failed to marshal feedback aggregate: %w", err)
@@ -177,16 +160,14 @@ func (fs *FeedbackService) DeleteFeedback(userID, newsID uint) error {
 	return nil
 }
 
-func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]models.Feedback, int64, error) {
+func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]dto.FeedbackResponse, int64, error) {
 	var feedback []models.Feedback
 	var total int64
 
-	// Count total records
 	if err := fs.Db.Model(&models.Feedback{}).Where("user_id = ?", userID).Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count user feedback: %w", err)
 	}
 
-	// Get paginated results with article information
 	offset := (page - 1) * limit
 	err := fs.Db.Preload("Article").
 		Where("user_id = ?", userID).
@@ -199,18 +180,9 @@ func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]mode
 		return nil, 0, fmt.Errorf("failed to get user feedback: %w", err)
 	}
 
-	// Convert to response format
-	var response []models.Feedback
+	var response []dto.FeedbackResponse
 	for _, fb := range feedback {
-		response = append(response, models.Feedback{
-			ID:        fb.ID,
-			UserID:    fb.UserID,
-			NewsID:    fb.NewsID,
-			Article:   fb.Article,
-			Value:     fb.Value,
-			CreatedAt: fb.CreatedAt,
-			UpdatedAt: fb.UpdatedAt,
-		})
+		response = append(response, converters.FeedbackModelToFeedbackResponse(&fb))
 	}
 
 	return response, total, nil
@@ -289,7 +261,7 @@ func (fs *FeedbackService) GetFeedbackStats(page, limit int) ([]dto.FeedbackStat
 	return stats, total, nil
 }
 
-func (fs *FeedbackService) GetAllFeedback(page, limit int) ([]models.Feedback, int64, error) {
+func (fs *FeedbackService) GetAllFeedback(page, limit int) ([]dto.FeedbackResponse, int64, error) {
 	var feedback []models.Feedback
 	var total int64
 
@@ -308,10 +280,14 @@ func (fs *FeedbackService) GetAllFeedback(page, limit int) ([]models.Feedback, i
 		return nil, 0, fmt.Errorf("failed to get all feedback: %w", err)
 	}
 
-	return feedback, total, nil
+	var response []dto.FeedbackResponse
+	for _, fb := range feedback {
+		response = append(response, converters.FeedbackModelToFeedbackResponse(&fb))
+	}
+
+	return response, total, nil
 }
 
-// GetArticleFeedbackCount gets the total feedback count for a specific article
 func (fs *FeedbackService) GetArticleFeedbackCount(newsID uint) (int64, int64, error) {
 	var likeCount, dislikeCount int64
 
@@ -332,7 +308,6 @@ func (fs *FeedbackService) GetArticleFeedbackCount(newsID uint) (int64, int64, e
 	return likeCount, dislikeCount, nil
 }
 
-// HasUserFeedback checks if a user has already given feedback for an article
 func (fs *FeedbackService) HasUserFeedback(userID, newsID uint) (bool, *models.Feedback, error) {
 	var feedback models.Feedback
 	err := fs.Db.Where("user_id = ? AND news_id = ?", userID, newsID).First(&feedback).Error
@@ -345,4 +320,58 @@ func (fs *FeedbackService) HasUserFeedback(userID, newsID uint) (bool, *models.F
 	}
 
 	return true, &feedback, nil
+}
+
+func (fs *FeedbackService) TriggerIngestFeedback(beginDate, endDate *time.Time) (uint, error) {
+	var feedbacks []models.Feedback
+
+	query := fs.Db.Model(&models.Feedback{})
+	if beginDate != nil {
+		query = query.Where("created_at >= ?", *beginDate)
+	}
+	if endDate != nil {
+		endTime := endDate.Add(24*time.Hour - time.Second)
+		query = query.Where("created_at <= ?", endTime)
+	}
+	if err := query.Find(&feedbacks).Error; err != nil {
+		return 0, fmt.Errorf("failed to fetch feedbacks for ingestion: %w", err)
+	}
+
+	if len(feedbacks) == 0 {
+		return 0, nil
+	}
+
+	count := 0
+	failed := make([]uint, 0)
+
+	for _, feedback := range feedbacks {
+		feedbackAggregate := converters.FeedbackModelToFeedbackAggregate(&feedback, true)
+		feedbackBytes, err := json.Marshal(feedbackAggregate)
+		if err != nil {
+			log.Printf("failed to marshal feedback aggregate: %s", err)
+			failed = append(failed, feedback.ID)
+			continue
+		}
+		msg := &sarama.ProducerMessage{
+			Key:   sarama.StringEncoder(fmt.Sprintf("%d-%d", feedback.UserID, feedback.NewsID)),
+			Topic: fs.config.KafkaFeedbackAggregateTopic,
+			Value: sarama.ByteEncoder(feedbackBytes),
+		}
+		_, _, err = fs.producer.SendMessage(msg)
+		if err != nil {
+			log.Printf("failed to publish feedback to kafka: %s", err)
+			failed = append(failed, feedback.ID)
+			continue
+		}
+		count++
+	}
+
+	if len(failed) != 0 {
+		log.Printf("failed for %d news", len(failed))
+		for _, id := range failed {
+			log.Printf(" - %d", id)
+		}
+	}
+
+	return uint(count), nil
 }
