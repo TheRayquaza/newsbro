@@ -168,6 +168,10 @@ func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]dto.
 		return nil, 0, fmt.Errorf("failed to count user feedback: %w", err)
 	}
 
+	if limit <= 0 || limit > fs.config.MaxPageSize {
+		limit = fs.config.MaxPageSize
+	}
+
 	offset := (page - 1) * limit
 	err := fs.Db.Preload("Article").
 		Where("user_id = ?", userID).
@@ -234,6 +238,10 @@ func (fs *FeedbackService) GetFeedbackStats(page, limit int) ([]dto.FeedbackStat
 		return nil, 0, fmt.Errorf("failed to count feedback stats: %w", err)
 	}
 
+	if limit <= 0 || limit > fs.config.MaxPageSize {
+		limit = fs.config.MaxPageSize
+	}
+
 	offset := (page - 1) * limit
 	err := fs.Db.Raw(`
 		SELECT 
@@ -267,6 +275,10 @@ func (fs *FeedbackService) GetAllFeedback(page, limit int) ([]dto.FeedbackRespon
 
 	if err := fs.Db.Model(&models.Feedback{}).Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count all feedback: %w", err)
+	}
+
+	if limit <= 0 || limit > fs.config.MaxPageSize {
+		limit = fs.config.MaxPageSize
 	}
 
 	offset := (page - 1) * limit

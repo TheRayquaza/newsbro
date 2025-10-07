@@ -106,6 +106,8 @@ func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]dto.Articl
 		return nil, 0, dto.NewBadRequest("offset must be >= 0")
 	}
 
+	filters.Limit = min(filters.Limit, as.config.MaxPageSize)
+
 	var articles []models.Article
 	var total int64
 	query := as.Db.Model(&models.Article{})
