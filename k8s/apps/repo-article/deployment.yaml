@@ -35,7 +35,7 @@ spec:
         - name: pull-secret
       containers:
         - name: repo-article
-          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.3.1
+          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.3.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -49,7 +49,7 @@ spec:
                 name: repo-article-secrets
           resources:
             requests:
-              memory: "512Mi"
+              memory: "256Mi"
               cpu: "125m"
             limits:
               memory: "1Gi"

@@ -398,7 +398,6 @@ data:
     https://www.mediapart.fr/articles/feed
     https://mondediplo.com/backend
     https://frenchdailynews.com/feed
-    http://www.washingtonpost.com/rss/
     http://feeds.sciencedaily.com/sciencedaily
     http://feeds.nature.com/nature/rss/current
     https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
@@ -420,7 +419,6 @@ data:
     http://feeds.feedburner.com/oatmealfeed
     https://postsecret.com/feed/?alt=rss
     https://www.bostonglobe.com/rss/bigpicture
-    http://feeds.feedburner.com/wPolitycepl
     https://www.elle.com/rss/fashion.xml/
     https://www.reddit.com/r/sports.rss
     https://tvline.com/feed/
@@ -439,13 +437,10 @@ data:
     http://feeds.bbci.co.uk/sport/rss.xml
     https://reddit.com/r/television/.rss
     https://www.livelifetravel.world/feed/
-    https://english.kyodonews.net/rss/all.xml
     https://www.nytimes.com/svc/collections/v1/publish/http://www.nytimes.com/topic/destination/japan/rss.xml
     https://www.tribunnews.com/rss
     https://www.efe.com/efe/english/4/rss
-    https://jornaldebrasilia.com.br/feed/
     https://www.sowetanlive.co.za/rss/?publication=sowetan-live
-    https://www.fashionlady.in/category/fashion/feed
     https://www.fashionbeans.com/rss-feed/?category=fashion
     http://phdcomics.com/gradfeed.php
     https://www.japantimes.co.jp/feed/topstories/
@@ -456,7 +451,6 @@ data:
     https://www.bleedingcool.com/tv/feed/
     https://techcentral.co.za/feed
     https://www.euroweeklynews.com/feed/
-    http://www.dvb.no/feed
     http://feeds.feedburner.com/Explosm
     http://feeds.feedburner.com/failblog
     https://wokeread.home.blog/feed/
