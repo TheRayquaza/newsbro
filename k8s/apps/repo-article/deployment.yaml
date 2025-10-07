@@ -25,6 +25,11 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090" 
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 2
+        maxUnavailable: 1
     spec:
       imagePullSecrets:
         - name: pull-secret
