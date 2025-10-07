@@ -82,7 +82,6 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 		return nil, fmt.Errorf("failed to verify article existence: %w", err)
 	}
 
-	// Check if feedback already exists
 	var feedback models.Feedback
 	err := fs.Db.Where("user_id = ? AND news_id = ?", userID, newsID).First(&feedback).Error
 
@@ -91,7 +90,6 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		// Create new feedback
 		feedback = models.Feedback{
 			UserID: userID,
 			NewsID: newsID,
@@ -102,7 +100,6 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 			return nil, fmt.Errorf("failed to create feedback: %w", err)
 		}
 	} else {
-		// Update existing feedback
 		feedback.Value = value
 		if err := fs.Db.Save(&feedback).Error; err != nil {
 			return nil, fmt.Errorf("failed to update feedback: %w", err)
@@ -160,7 +157,7 @@ func (fs *FeedbackService) DeleteFeedback(userID, newsID uint) error {
 	return nil
 }
 
-func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]dto.FeedbackResponse, int64, error) {
+func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit uint) ([]dto.FeedbackResponse, int64, error) {
 	var feedback []models.Feedback
 	var total int64
 
@@ -168,16 +165,12 @@ func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit int) ([]dto.
 		return nil, 0, fmt.Errorf("failed to count user feedback: %w", err)
 	}
 
-	if limit <= 0 || limit > fs.config.MaxPageSize {
-		limit = fs.config.MaxPageSize
-	}
-
 	offset := (page - 1) * limit
 	err := fs.Db.Preload("Article").
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(int(limit)).
+		Offset(int(offset)).
 		Find(&feedback).Error
 
 	if err != nil {
@@ -226,7 +219,7 @@ func (fs *FeedbackService) GetAllFeedbackForCSV(startDate, endDate *time.Time) (
 	return feedback, nil
 }
 
-func (fs *FeedbackService) GetFeedbackStats(page, limit int) ([]dto.FeedbackStatsResponse, int64, error) {
+func (fs *FeedbackService) GetFeedbackStats(page, limit uint) ([]dto.FeedbackStatsResponse, int64, error) {
 	var stats []dto.FeedbackStatsResponse
 	var total int64
 
@@ -236,10 +229,6 @@ func (fs *FeedbackService) GetFeedbackStats(page, limit int) ([]dto.FeedbackStat
 		WHERE deleted_at IS NULL
 	`).Scan(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count feedback stats: %w", err)
-	}
-
-	if limit <= 0 || limit > fs.config.MaxPageSize {
-		limit = fs.config.MaxPageSize
 	}
 
 	offset := (page - 1) * limit
@@ -269,7 +258,7 @@ func (fs *FeedbackService) GetFeedbackStats(page, limit int) ([]dto.FeedbackStat
 	return stats, total, nil
 }
 
-func (fs *FeedbackService) GetAllFeedback(page, limit int) ([]dto.FeedbackResponse, int64, error) {
+func (fs *FeedbackService) GetAllFeedback(page, limit uint) ([]dto.FeedbackResponse, int64, error) {
 	var feedback []models.Feedback
 	var total int64
 
@@ -277,15 +266,11 @@ func (fs *FeedbackService) GetAllFeedback(page, limit int) ([]dto.FeedbackRespon
 		return nil, 0, fmt.Errorf("failed to count all feedback: %w", err)
 	}
 
-	if limit <= 0 || limit > fs.config.MaxPageSize {
-		limit = fs.config.MaxPageSize
-	}
-
 	offset := (page - 1) * limit
 	err := fs.Db.Preload("Article").
 		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(int(limit)).
+		Offset(int(offset)).
 		Find(&feedback).Error
 
 	if err != nil {

@@ -200,23 +200,34 @@ func (fc *FeedbackController) GetUserFeedback(c *gin.Context) {
 		return
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	page, _ := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 32)
+	limit, _ := strconv.ParseUint(c.DefaultQuery("limit", "10"), 10, 32)
 
-	feedback, _, err := fc.feedbackService.GetUserFeedback(usr.UserID, page, limit)
+	if page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be greater than 0"})
+		return
+	}
+	if limit < 1 || limit > 100 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit must be between 1 and 100"})
+		return
+	}
+
+	feedback, _, err := fc.feedbackService.GetUserFeedback(usr.UserID, uint(page), uint(limit))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	/*
-		response := gin.H{
-			"data":       feedback,
-			"pagination": utils.GetPaginationInfo(page, limit, int(total)),
-		}
-	*/
+	response := gin.H{
+		"data": feedback,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+			"count": len(feedback),
+		},
+	}
 
-	c.JSON(http.StatusOK, feedback)
+	c.JSON(http.StatusOK, response)
 }
 
 // ExportFeedbackCSV godoc
@@ -293,10 +304,19 @@ func (fc *FeedbackController) ExportFeedbackCSV(c *gin.Context) {
 // @Success 200 {array} dto.FeedbackStatsResponse
 // @Router /feedback/stats [get]
 func (fc *FeedbackController) GetFeedbackStats(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	page, _ := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 32)
+	limit, _ := strconv.ParseUint(c.DefaultQuery("limit", "10"), 10, 32)
 
-	stats, _, err := fc.feedbackService.GetFeedbackStats(page, limit)
+	if page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be greater than 0"})
+		return
+	}
+	if limit < 1 || limit > 100 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit must be between 1 and 100"})
+		return
+	}
+
+	stats, _, err := fc.feedbackService.GetFeedbackStats(uint(page), uint(limit))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -328,20 +348,31 @@ func (fc *FeedbackController) GetAllFeedback(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	feedback, _, err := fc.feedbackService.GetAllFeedback(page, limit)
+	if page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be greater than 0"})
+		return
+	}
+	if limit < 1 || limit > 100 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit must be between 1 and 100"})
+		return
+	}
+
+	feedback, _, err := fc.feedbackService.GetAllFeedback(uint(page), uint(limit))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	/*
-		response := gin.H{
-			"data":       feedback,
-			"pagination": utils.GetPaginationInfo(page, limit, int(total)),
-		}
-	*/
+	response := gin.H{
+		"data": feedback,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+			"count": len(feedback),
+		},
+	}
 
-	c.JSON(http.StatusOK, feedback)
+	c.JSON(http.StatusOK, response)
 }
 
 // TriggerIngestFeedback godoc

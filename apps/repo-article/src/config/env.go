@@ -19,7 +19,6 @@ type Config struct {
 	KafkaGroupID                string
 	KafkaArticleAggregateTopic  string
 	KafkaFeedbackAggregateTopic string
-	MaxPageSize				    uint
 }
 
 func Load() *Config {
@@ -42,7 +41,6 @@ func Load() *Config {
 		KafkaArticleAggregateTopic:  getEnv("KAFKA_ARTICLE_AGGREGATE_TOPIC", "articles-aggregate"),
 		KafkaFeedbackAggregateTopic: getEnv("KAFKA_FEEDBACK_AGGREGATE_TOPIC", "feedback-aggregate"),
 		KafkaGroupID:                getEnv("KAFKA_GROUP_ID", "repo-article-group"),
-		MaxPageSize:                 uint(getEnv("MAX_PAGE_SIZE", "100")),
 	}
 }
 
