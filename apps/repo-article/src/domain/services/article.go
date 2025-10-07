@@ -99,15 +99,6 @@ func (as *ArticleService) GetArticleByID(id uint) (*dto.ArticleResponse, error) 
 }
 
 func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]dto.ArticleResponse, int64, error) {
-	if filters.Limit < 0 {
-		return nil, 0, dto.NewBadRequest("limit must be >= 0")
-	}
-	if filters.Offset < 0 {
-		return nil, 0, dto.NewBadRequest("offset must be >= 0")
-	}
-
-	filters.Limit = min(filters.Limit, as.config.MaxPageSize)
-
 	var articles []models.Article
 	var total int64
 	query := as.Db.Model(&models.Article{})
@@ -130,8 +121,8 @@ func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]dto.Articl
 	}
 
 	if err := query.Order("created_at DESC").
-		Limit(filters.Limit).
-		Offset(filters.Offset).
+		Limit(int(filters.Limit)).
+		Offset(int(filters.Offset)).
 		Find(&articles).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to get articles: %w", err)
 	}

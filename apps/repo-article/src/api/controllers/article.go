@@ -42,7 +42,6 @@ func (ac *ArticleController) CreateArticle(c *gin.Context) {
 		return
 	}
 
-	// Get user from context
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
@@ -122,12 +121,20 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 		return
 	}
 
-	// Set defaults
 	if filters.Limit <= 0 {
 		filters.Limit = 10
 	}
 	if filters.Limit > 100 {
 		filters.Limit = 100
+	}
+
+	if filters.Limit < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "limit must be >= 0"})
+		return
+	}
+	if filters.Offset < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "offset must be >= 0"})
+		return
 	}
 
 	articles, total, err := ac.articleService.GetArticles(&filters)
