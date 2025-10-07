@@ -28,7 +28,6 @@ func NewUserController(userService *services.UserService) *UserController {
 // @Produce json
 // @Success 200 {object} dto.UserResponse
 // @Failure 401 {object} dto.ErrorResponse
-// @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /users/profile [get]
 func (uc *UserController) GetProfile(c *gin.Context) {
@@ -71,7 +70,6 @@ func (uc *UserController) GetProfile(c *gin.Context) {
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /users/profile [put]
 func (uc *UserController) UpdateProfile(c *gin.Context) {
@@ -135,7 +133,6 @@ func (uc *UserController) UpdateProfile(c *gin.Context) {
 // @Success 200 {array} dto.UserResponse
 // @Failure 403 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Security JWT
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /users [get]
 func (uc *UserController) GetUsers(c *gin.Context) {

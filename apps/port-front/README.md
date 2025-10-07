@@ -2,26 +2,14 @@
 
 ### Dev
 
-For Nix users:
-
 ```bash
-nix develop .
-npm run
+npm run dev
 ```
 
-For normal users:
+## Build
 
 ```bash
-python3 -m venv .venv
-pip install -r
-streamlit run app.py
-```
-
-## Tools
-
-```bash
-ruff check --fix
-ty check
+npm run build
 ```
 
 ## Variables

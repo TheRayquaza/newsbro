@@ -1,34 +1,54 @@
 import "./App.css";
-import { useContext, useEffect } from "react";
-import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes, useNavigate, Outlet } from "react-router-dom";
 import { AuthContext, AuthProvider } from "./contexts/Auth";
+import { Navbar } from "./components/Navbar";
+import { Footer } from "./components/Footer";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminPage from "./pages/AdminPage";
+import SettingsPage from "./pages/SettingsPage";
 
-const ProtectedRoute = ({ element, adminOnly = false }) => {
+const AuthRoute = ({ adminOnly = false }) => {
   const { user, loading } = useContext(AuthContext);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/login");
-    }
-    if (!loading && adminOnly && user?.role !== "admin") {
+    } else if (!loading && adminOnly && user?.role !== "admin") {
       navigate("/");
     }
   }, [user, loading, navigate, adminOnly]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-black">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-blue-400 text-xl">Loading...</div>
       </div>
     );
   }
 
-  return user ? element : null;
+  return user ? <Outlet /> : null;
+};
+
+const Layout = () => {
+  const { user, logout } = useContext(AuthContext);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col min-h-screen main-div" style={{ width: "100vw" }}>
+      <Navbar
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        handleLogout={logout}
+        user={user}
+      />
+      <Outlet />
+      <Footer />
+    </div>
+  );
 };
 
 export default function App() {
@@ -36,16 +56,24 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/"
-            element={<ProtectedRoute element={<DashboardPage />} />}
-          />
-          <Route
-            path="/admin"
-            element={<ProtectedRoute element={<AdminPage />} adminOnly />}
-          />
+
+          {/* Protected routes (user & admin) */}
+          <Route element={<AuthRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/" element={<DashboardPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+          </Route>
+
+          {/* Admin-only routes */}
+          <Route element={<AuthRoute adminOnly />}>
+            <Route element={<Layout />}>
+              <Route path="/admin" element={<AdminPage />} />
+            </Route>
+          </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -1,5 +1,5 @@
 import "../assets/styles/global.css";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { FileText } from "lucide-react";
 import { AuthContext } from "../contexts/Auth";
@@ -14,8 +14,14 @@ const RegisterPage = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { register } = useContext(AuthContext);
+  const { register, login, user, loading: authLoading } = useContext(AuthContext);
   let navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate("/");
+    }
+  }, [user, authLoading, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -51,6 +57,7 @@ const RegisterPage = () => {
         height: "100vh",
         width: "100vw",
       }}
+      className="main-div"
     >
       <div
         className="card w-full mx-8"

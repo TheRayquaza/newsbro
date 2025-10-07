@@ -1,12 +1,13 @@
 html,
 body,
 #root {
-  height: 100%;
-  margin: 0;
   padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
 }
 
-body {
+.main-div {
   background: linear-gradient(-45deg, #0a0f1c 0%, #0c121f 50%, #000000 100%);
   background-size: 600% 600%;
   animation: gradientShift 60s ease-in-out infinite;
