@@ -1,9 +1,9 @@
 package services
 
 import (
-	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
 	"repo_article/src/api/dto"
 	"repo_article/src/config"
+	"repo_article/src/converters"
 	"repo_article/src/data/models"
 
 	"encoding/json"
@@ -30,7 +30,7 @@ func NewArticleService(db *gorm.DB, producer sarama.SyncProducer, config *config
 	}
 }
 
-func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID uint) (*models.Article, error) {
+func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID uint) (*dto.ArticleResponse, error) {
 	article := &models.Article{
 		Category:    req.Category,
 		Subcategory: req.Subcategory,
@@ -59,16 +59,7 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 		return nil, fmt.Errorf("failed to create article: %w", err)
 	}
 
-	articleAggregate := aggregate.ArticleAggregate{
-		ID:          article.ID,
-		Category:    article.Category,
-		Subcategory: article.Subcategory,
-		Title:       article.Title,
-		Abstract:    article.Abstract,
-		Link:        article.Link,
-		PublishedAt: article.PublishedAt,
-		IsActive:    true,
-	}
+	articleAggregate := converters.ArticleModelToArticleAggregate(article, true)
 
 	articleBytes, err := json.Marshal(articleAggregate)
 	if err != nil {
@@ -89,10 +80,11 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 		return nil, fmt.Errorf("failed to publish article to kafka: %w", err)
 	}
 
-	return article, err
+	articleResponse := converters.ArticleModelToArticleResponse(article)
+	return &articleResponse, nil
 }
 
-func (as *ArticleService) GetArticleByID(id uint) (*models.Article, error) {
+func (as *ArticleService) GetArticleByID(id uint) (*dto.ArticleResponse, error) {
 	var article models.Article
 	if err := as.Db.First(&article, id).Error; err != nil {
 		log.Printf("failed to get article: %s", err)
@@ -101,10 +93,12 @@ func (as *ArticleService) GetArticleByID(id uint) (*models.Article, error) {
 		}
 		return nil, fmt.Errorf("failed to get article: %w", err)
 	}
-	return &article, nil
+
+	articleResponse := converters.ArticleModelToArticleResponse(&article)
+	return &articleResponse, nil
 }
 
-func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]models.Article, int64, error) {
+func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]dto.ArticleResponse, int64, error) {
 	if filters.Limit < 0 {
 		return nil, 0, dto.NewBadRequest("limit must be >= 0")
 	}
@@ -140,10 +134,15 @@ func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]models.Art
 		return nil, 0, fmt.Errorf("failed to get articles: %w", err)
 	}
 
-	return articles, total, nil
+	var articleResponses []dto.ArticleResponse
+	for _, article := range articles {
+		articleResponses = append(articleResponses, converters.ArticleModelToArticleResponse(&article))
+	}
+
+	return articleResponses, total, nil
 }
 
-func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, userID uint) (*models.Article, error) {
+func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, userID uint) (*dto.ArticleResponse, error) {
 	var article models.Article
 	if err := as.Db.First(&article, id).Error; err != nil {
 		log.Printf("failed to get article: %s", err)
@@ -180,15 +179,7 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 		return nil, fmt.Errorf("failed to reload updated article: %w", err)
 	}
 
-	articleAggregate := aggregate.ArticleAggregate{
-		ID:          article.ID,
-		Category:    article.Category,
-		Subcategory: article.Subcategory,
-		Title:       article.Title,
-		Abstract:    article.Abstract,
-		Link:        article.Link,
-		IsActive:    true,
-	}
+	articleAggregate := converters.ArticleModelToArticleAggregate(&article, true)
 
 	articleBytes, err := json.Marshal(articleAggregate)
 	if err != nil {
@@ -209,7 +200,8 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 		return nil, fmt.Errorf("failed to publish article to kafka: %w", err)
 	}
 
-	return &article, nil
+	articleResponse := converters.ArticleModelToArticleResponse(&article)
+	return &articleResponse, nil
 }
 
 func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
@@ -227,15 +219,7 @@ func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
 		return fmt.Errorf("failed to delete article: %w", err)
 	}
 
-	articleAggregate := aggregate.ArticleAggregate{
-		ID:          article.ID,
-		Category:    article.Category,
-		Subcategory: article.Subcategory,
-		Title:       article.Title,
-		Abstract:    article.Abstract,
-		Link:        article.Link,
-		IsActive:    false,
-	}
+	articleAggregate := converters.ArticleModelToArticleAggregate(&article, false)
 
 	articleBytes, err := json.Marshal(articleAggregate)
 	if err != nil {
@@ -305,16 +289,7 @@ func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) 
 	failed := make([]uint, 0)
 
 	for _, article := range articles {
-		articleAggregate := aggregate.ArticleAggregate{
-			ID:          article.ID,
-			Category:    article.Category,
-			Subcategory: article.Subcategory,
-			Title:       article.Title,
-			Abstract:    article.Abstract,
-			Link:        article.Link,
-			PublishedAt: article.PublishedAt,
-			IsActive:    true,
-		}
+		articleAggregate := converters.ArticleModelToArticleAggregate(&article, true)
 		articleBytes, err := json.Marshal(articleAggregate)
 		if err != nil {
 			log.Printf("failed to marshal article aggregate: %s", err)
