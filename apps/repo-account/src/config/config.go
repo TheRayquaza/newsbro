@@ -18,6 +18,7 @@ type Config struct {
 	OIDCRedirectFrontendURL string
 	CookieDomain            string
 	LoginRedirectURL        string
+	Environment             string
 }
 
 func Load() *Config {
@@ -41,6 +42,7 @@ func Load() *Config {
 		CookieDomain:            getEnv("COOKIE_DOMAIN", ""),
 		OIDCRedirectFrontendURL: getEnv("OIDC_REDIRECT_FRONTEND_URL", "http://localhost:3000"),
 		LoginRedirectURL:        getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000"),
+		Environment:             getEnv("ENVIRONMENT", "prod"),
 	}
 }
 
