@@ -7,7 +7,6 @@ import { Footer } from "./components/Footer";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
-import AdminPage from "./pages/AdminPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DeepSearchPage from "./pages/SearchPage";
@@ -67,11 +66,6 @@ export default function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/settings" element={<SettingsPage />} />
-              
-              {/* Admin-only routes */}
-              <Route element={<AuthRoute adminOnly />}>
-                <Route path="/admin" element={<AdminPage />} />
-              </Route>
 
               <Route element={<AuthRoute />}>
                 <Route path="/search" element={<DeepSearchPage />} />

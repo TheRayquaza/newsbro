@@ -34,7 +34,9 @@ export default function DeepSearchPage() {
     const [showFilters, setShowFilters] = useState(false);
     const [error, setError] = useState("");
 
-    useEffect(() => loadCategories(), []);
+    useEffect(() => {
+        loadCategories()
+    }, []);
 
     useEffect(() => {
         // load user feedbacks for displayed articles
@@ -124,7 +126,6 @@ export default function DeepSearchPage() {
                 <div className="mb-6 bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-6">
                     <div className="flex flex-col lg:flex-row gap-4">
                         <div className="flex-1 relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                             <input
                                 type="text"
                                 value={searchText}
@@ -135,13 +136,13 @@ export default function DeepSearchPage() {
                             />
                         </div>
 
+
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                                showFilters
+                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${showFilters
                                     ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
                                     : "bg-slate-800/50 text-slate-300 border border-blue-500/20 hover:border-blue-500/40"
-                            }`}
+                                }`}
                         >
                             <Filter className="w-5 h-5" />
                             Filters
