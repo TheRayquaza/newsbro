@@ -11,7 +11,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, user, loading: authLoading } = useContext(AuthContext);
+  const { user, loading: authLoading, refreshAuth } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +26,8 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await api.login(email, password);
+      refreshAuth();
       navigate("/");
     } catch (err) {
       setError(err.message || "Login failed");

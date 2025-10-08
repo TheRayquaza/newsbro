@@ -1,6 +1,5 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie";
-import api from "../api/api";
 import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext(null);
@@ -27,29 +26,24 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
+  const refreshAuth = useCallback(() => {
     const storedToken = Cookies.get("auth_token");
     if (storedToken) {
       const decodedUser = decodeToken(storedToken);
       if (decodedUser) {
         setToken(storedToken);
         setUser(decodedUser);
+        return;
       }
     }
-    setLoading(false);
+    setToken(null);
+    setUser(null);
   }, []);
 
-  const login = async (email, password) => {
-    const data = await api.login(email, password);
-    const authToken = data.access_token || data.token;
-
-    const decodedUser = decodeToken(authToken);
-
-    setToken(authToken);
-    setUser(decodedUser);
-
-    return data;
-  };
+  useEffect(() => {
+    refreshAuth();
+    setLoading(false);
+  }, [refreshAuth]);
 
   const logout = () => {
     setUser(null);
@@ -60,7 +54,7 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, login, logout, loading }}
+      value={{ user, token, logout, loading, refreshAuth }}
     >
       {children}
     </AuthContext.Provider>
