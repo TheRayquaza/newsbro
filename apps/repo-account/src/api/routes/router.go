@@ -21,7 +21,9 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 	router.Use(middleware.RequestID())
 	router.Use(middleware.Logger())
 	router.Use(middleware.Recover())
-	router.Use(middleware.CORSMiddleware())
+	if cfg.Environment != "dev" {
+		router.Use(middleware.CORSMiddleware(cfg.FrontendOrigin))
+	}
 	router.Use(middleware.Secure())
 
 	// Controllers

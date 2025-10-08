@@ -18,6 +18,7 @@ type Config struct {
 	OIDCRedirectFrontendURL string
 	CookieDomain            string
 	LoginRedirectURL        string
+	FrontendDomain          string
 	Environment             string
 }
 
@@ -42,6 +43,7 @@ func Load() *Config {
 		CookieDomain:            getEnv("COOKIE_DOMAIN", ""),
 		OIDCRedirectFrontendURL: getEnv("OIDC_REDIRECT_FRONTEND_URL", "http://localhost:3000"),
 		LoginRedirectURL:        getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000"),
+		FrontendOrigin:          getEnv("FRONTEND_ORIGIN", "https://app.newsbro.cc"),
 		Environment:             getEnv("ENVIRONMENT", "prod"),
 	}
 }

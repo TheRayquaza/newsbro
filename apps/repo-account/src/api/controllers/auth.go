@@ -87,6 +87,9 @@ func (ac *AuthController) Login(c *gin.Context) {
 	if ac.authService.Config.Environment == "dev" {
 		secure = false
 		httpOnly = false
+		c.SetSameSite(http.SameSiteLaxMode)
+	} else {
+		c.SetSameSite(http.SameSiteNoneMode)
 	}
 
 	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
@@ -195,6 +198,9 @@ func (ac *AuthController) OAuthCallback(c *gin.Context) {
 	if ac.authService.Config.Environment == "dev" {
 		secure = false
 		httpOnly = false
+		c.SetSameSite(http.SameSiteLaxMode)
+	} else {
+		c.SetSameSite(http.SameSiteNoneMode)
 	}
 
 	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
