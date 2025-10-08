@@ -9,6 +9,7 @@ import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminPage from "./pages/AdminPage";
 import SettingsPage from "./pages/SettingsPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const AuthRoute = ({ adminOnly = false }) => {
   const { user, loading } = useContext(AuthContext);
@@ -65,15 +66,19 @@ export default function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              
+              {/* Admin-only routes */}
+              <Route element={<AuthRoute adminOnly />}>
+                <Route path="/admin" element={<AdminPage />} />
+              </Route>
+              
+              {/* 404 for authenticated users - with navbar/footer */}
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Route>
 
-          {/* Admin-only routes */}
-          <Route element={<AuthRoute adminOnly />}>
-            <Route element={<Layout />}>
-              <Route path="/admin" element={<AdminPage />} />
-            </Route>
-          </Route>
+          {/* 404 for public routes - without navbar/footer */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

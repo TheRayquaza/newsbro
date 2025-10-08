@@ -2,19 +2,26 @@ import { ENV } from "../env";
 import ArticlesApi from './articles/src/api/ArticlesApi';
 import FeedbackApi from './articles/src/api/FeedbackApi';
 import UserApi from './users/src/api/UserApi';
-import AuthApi  from './users/src/api/AuthApi';
+import AuthApi from './users/src/api/AuthApi';
+
 import RepoAccountSrcApiDtoLoginRequest from './users/src/model/RepoAccountSrcApiDtoLoginRequest';
-import ApiClient  from "./users/src/ApiClient";
-// import { RepoAccountSrcApiDtoRegisterRequest } from './auth/src/model/RepoAccountSrcApiDtoRegisterRequest';
+import RepoAccountSrcApiDtoRegisterRequest from './users/src/model/RepoAccountSrcApiDtoRegisterRequest';
+import RepoArticleSrcApiDtoArticleCreateRequest from './articles/src/model/RepoArticleSrcApiDtoArticleCreateRequest';
+import RepoArticleSrcApiDtoArticleUpdateRequest from './articles/src/model/RepoArticleSrcApiDtoArticleUpdateRequest';
+import RepoArticleSrcApiDtoArticleTriggerIngestionRequest from './articles/src/model/RepoArticleSrcApiDtoArticleTriggerIngestionRequest';
+import RepoArticleSrcApiDtoFeedbackRequest from './articles/src/model/RepoArticleSrcApiDtoFeedbackRequest';
+
+import AccountApiClient from "./users/src/ApiClient";
+import ArticlesApiClient from "./articles/src/ApiClient";
 
 
 class ApiService {
   constructor() {
     // ---- Initialize API clients ----
-    this.articlesApi = new ArticlesApi(new ApiClient({ basePath: ENV.ARTICLE_BASE_URL + '/api/v1/' }));
-    this.feedbackApi = new FeedbackApi(new ApiClient({ basePath: ENV.ARTICLE_BASE_URL + '/api/v1/' }));
-    this.authApi = new AuthApi(new ApiClient({ basePath: ENV.ACCOUNT_BASE_URL + '/api/v1/' }));
-    this.userApi = new UserApi(new ApiClient({ basePath: ENV.ACCOUNT_BASE_URL + '/api/v1/' }));
+    this.articlesApi = new ArticlesApi(new ArticlesApiClient(ENV.ARTICLE_BASE_URL));
+    this.feedbackApi = new FeedbackApi(new ArticlesApiClient(ENV.ARTICLE_BASE_URL));
+    this.authApi = new AuthApi(new AccountApiClient(ENV.ACCOUNT_BASE_URL));
+    this.userApi = new UserApi(new AccountApiClient(ENV.ACCOUNT_BASE_URL));
   }
 
   // -------------------- AUTH --------------------
@@ -40,17 +47,8 @@ class ApiService {
     });
   }
 
-  // async oauthLogin() {
-  //   return new Promise((resolve, reject) => {
-  //     this.authApi.authOauthLoginGet((error, data) => {
-  //       if (error) return reject(error);
-  //       resolve(data);
-  //     });
-  //   });
-  // }
-
   forgeOAuthUrl() {
-    return `${ENV.API_BASE_URL}/api/v1/auth/oauth/login`;
+    return `${ENV.ACCOUNT_BASE_URL}/api/v1/auth/oauth/login`;
   }
 
   async refreshToken(token) {
@@ -63,8 +61,15 @@ class ApiService {
   }
 
   async register(userData) {
+    const registerRequest = new RepoAccountSrcApiDtoRegisterRequest();
+    registerRequest.email = userData.email;
+    registerRequest.password = userData.password;
+    registerRequest.username = userData.username;
+    registerRequest.first_name = userData.first_name;
+    registerRequest.last_name = userData.last_name;
+
     return new Promise((resolve, reject) => {
-      this.authApi.authRegisterPost(userData, (error, data) => {
+      this.authApi.authRegisterPost(registerRequest, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
@@ -98,7 +103,6 @@ class ApiService {
       });
     });
   }
-  
 
   // -------------------- ARTICLES --------------------
   async getCategories(token) {
@@ -129,8 +133,19 @@ class ApiService {
   }
 
   async createArticle(articleData, token) {
+    const createRequest = new RepoArticleSrcApiDtoArticleCreateRequest();
+    createRequest.title = articleData.title;
+    createRequest.category = articleData.category;
+    createRequest.subcategory = articleData.subcategory;
+    createRequest.link = articleData.link;
+    createRequest.published_at = articleData.published_at;
+    createRequest.abstract = articleData.abstract;
+    if (articleData.id !== undefined) {
+      createRequest.id = articleData.id;
+    }
+
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesPost(articleData, `Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesPost(createRequest, `Bearer ${token}`, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
@@ -138,8 +153,16 @@ class ApiService {
   }
 
   async updateArticle(id, articleData, token) {
+    const updateRequest = new RepoArticleSrcApiDtoArticleUpdateRequest();
+    updateRequest.id = id;
+    if (articleData.title !== undefined) updateRequest.title = articleData.title;
+    if (articleData.category !== undefined) updateRequest.category = articleData.category;
+    if (articleData.subcategory !== undefined) updateRequest.subcategory = articleData.subcategory;
+    if (articleData.link !== undefined) updateRequest.link = articleData.link;
+    if (articleData.abstract !== undefined) updateRequest.abstract = articleData.abstract;
+
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesIdPut(id, articleData, `Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesIdPut(id, updateRequest, `Bearer ${token}`, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
@@ -156,8 +179,12 @@ class ApiService {
   }
 
   async triggerIngestion(articleData, token) {
+    const ingestionRequest = new RepoArticleSrcApiDtoArticleTriggerIngestionRequest();
+    ingestionRequest.begin_date = articleData.begin_date;
+    ingestionRequest.end_date = articleData.end_date;
+
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesIngestionPost(articleData, `Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesIngestionPost(ingestionRequest, `Bearer ${token}`, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
@@ -184,8 +211,11 @@ class ApiService {
   }
 
   async createArticleFeedback(articleId, feedbackData, token) {
+    const feedbackRequest = new RepoArticleSrcApiDtoFeedbackRequest();
+    feedbackRequest.value = feedbackData.value;
+
     return new Promise((resolve, reject) => {
-      this.feedbackApi.articlesIdFeedbackPost(articleId, feedbackData, `Bearer ${token}`, (error, data) => {
+      this.feedbackApi.articlesIdFeedbackPost(articleId, feedbackRequest, `Bearer ${token}`, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });

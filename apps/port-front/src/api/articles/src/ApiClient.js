@@ -32,13 +32,13 @@ class ApiClient {
      * Overrides the default value set in spec file if present
      * @param {String} basePath
      */
-    constructor(basePath = 'http://localhost:5173') { // TODO: Make this env variable modified
+    constructor(basePath = 'http://localhost:5173') {
         /**
          * The base URL against which to resolve every API call's (relative) path.
          * @type {String}
          * @default https://article.newsbro.cc
          */
-        this.basePath = basePath.replace(/\/+$/, '');
+        this.basePath = basePath;//.replace(/\/+$/, '');
 
         /**
          * The authentication methods to be included for all API calls.
@@ -397,6 +397,7 @@ class ApiClient {
         returnType, apiBasePath, callback) {
 
         var url = this.buildUrl(path, pathParams, apiBasePath);
+        console.log(url)
         var request = superagent(httpMethod, url);
 
         if (this.plugins !== null) {

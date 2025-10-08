@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { FileText } from "lucide-react";
 import { AuthContext } from "../contexts/Auth";
+import api from "../api/api";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ const RegisterPage = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { register, login, user, loading: authLoading } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   let navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +34,7 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      await register({
+      await api.register({
         email: formData.email,
         first_name: formData.firstName,
         last_name: formData.lastName,
