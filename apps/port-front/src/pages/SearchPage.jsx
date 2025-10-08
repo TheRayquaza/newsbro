@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useEffectEvent } from "react";
+import { useContext, useState, useEffect } from "react";
 import {
     Search,
     Filter,
@@ -18,7 +18,7 @@ export default function DeepSearchPage() {
     const [searchText, setSearchText] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedSubcategory, setSelectedSubcategory] = useState("");
-    const [limit, setLimit] = useState(20);
+    const [limit, _] = useState(20);
     const [offset, setOffset] = useState(0);
     const [totalResults, setTotalResults] = useState(0);
 
@@ -33,12 +33,8 @@ export default function DeepSearchPage() {
     const [loading, setLoading] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [error, setError] = useState("");
-    const [editingArticle, setEditingArticle] = useState(null);
 
-    useEffect(() => {
-        loadCategories();
-        handleSearch(0);
-    }, []);
+    useEffect(() => loadCategories(), []);
 
     useEffect(() => {
         // load user feedbacks for displayed articles
@@ -108,12 +104,6 @@ export default function DeepSearchPage() {
         } catch {
             setError("Failed to delete article");
         }
-    };
-
-    const clearFilters = () => {
-        setSearchText("");
-        setSelectedCategory("");
-        setSelectedSubcategory("");
     };
 
     return (
@@ -248,7 +238,6 @@ export default function DeepSearchPage() {
                             onSelect={() => handleViewArticle(article)}
                             isAdmin={isAdmin}
                             onDelete={() => handleDeleteArticle(article.id)}
-                            onEdit={() => setEditingArticle(article)}
                         />
                     ))}
                 </div>
