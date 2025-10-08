@@ -18,7 +18,7 @@ type Config struct {
 	OIDCRedirectFrontendURL string
 	CookieDomain            string
 	LoginRedirectURL        string
-	FrontendDomain          string
+	FrontendOrigin          string
 	Environment             string
 }
 
