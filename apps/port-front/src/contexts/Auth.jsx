@@ -10,7 +10,6 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper to decode JWT
   const decodeToken = (token) => {
     try {
       const decoded = jwtDecode(token);
@@ -49,13 +48,7 @@ const AuthProvider = ({ children }) => {
     setToken(authToken);
     setUser(decodedUser);
 
-    // Store in cookies
-    Cookies.set("auth_token", authToken, { expires: 7 });
     return data;
-  };
-
-  const register = async (userData) => {
-    return await api.register(userData);
   };
 
   const logout = () => {
@@ -63,12 +56,11 @@ const AuthProvider = ({ children }) => {
     setToken(null);
 
     Cookies.remove("auth_token");
-    api.clearCache?.();
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, token, login, register, logout, loading }}
+      value={{ user, token, login, logout, loading }}
     >
       {children}
     </AuthContext.Provider>

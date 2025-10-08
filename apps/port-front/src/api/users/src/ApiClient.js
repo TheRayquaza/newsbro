@@ -32,7 +32,7 @@ class ApiClient {
      * Overrides the default value set in spec file if present
      * @param {String} basePath
      */
-    constructor(basePath = 'http://localhost:8080') { // TODO: same here
+    constructor(basePath = 'http://localhost:8080') {
         /**
          * The base URL against which to resolve every API call's (relative) path.
          * @type {String}
@@ -395,7 +395,6 @@ class ApiClient {
     callApi(path, httpMethod, pathParams,
         queryParams, headerParams, formParams, bodyParam, authNames, contentTypes, accepts,
         returnType, apiBasePath, callback) {
-
         var url = this.buildUrl(path, pathParams, apiBasePath);
         var request = superagent(httpMethod, url);
 
