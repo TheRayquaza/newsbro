@@ -48,7 +48,7 @@ export default defineConfig({
           });
         },
       },
-      '/api/v1/article': {
+      '/api/v1/articles': {
         target: 'http://localhost:8081',
         changeOrigin: true,
         secure: true,

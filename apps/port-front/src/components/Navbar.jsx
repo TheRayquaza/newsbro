@@ -26,7 +26,7 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/feeds", label: "Feeds", icon: Rss },
     { path: "/saved", label: "Saved", icon: Bookmark },
-    { path: "/deep-search", label: "Deep Search", icon: Search, highlight: true },
+    { path: "/search", label: "Search", icon: Search, highlight: true },
   ];
 
   return (

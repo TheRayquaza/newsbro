@@ -10,6 +10,7 @@ import DashboardPage from "./pages/DashboardPage";
 import AdminPage from "./pages/AdminPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import DeepSearchPage from "./pages/SearchPage";
 
 const AuthRoute = ({ adminOnly = false }) => {
   const { user, loading } = useContext(AuthContext);
@@ -70,6 +71,10 @@ export default function App() {
               {/* Admin-only routes */}
               <Route element={<AuthRoute adminOnly />}>
                 <Route path="/admin" element={<AdminPage />} />
+              </Route>
+
+              <Route element={<AuthRoute />}>
+                <Route path="/search" element={<DeepSearchPage />} />
               </Route>
               
               {/* 404 for authenticated users - with navbar/footer */}
