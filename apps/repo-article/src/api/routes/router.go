@@ -20,9 +20,10 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 	router.Use(middleware.RequestID())
 	router.Use(middleware.Logger())
 	router.Use(middleware.Recover())
-	router.Use(middleware.CORSMiddleware())
+	if cfg.Environment != "dev" {
+		router.Use(middleware.CORSMiddleware(cfg.FrontendOrigin))
+	}
 	router.Use(middleware.Secure())
-	router.Use(middleware.RemoveTrailingSlash())
 
 	// Controllers
 	articleController := controllers.NewArticleController(articleService)

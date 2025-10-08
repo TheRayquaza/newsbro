@@ -17,7 +17,7 @@ require (
 require (
 	github.com/IBM/sarama v1.46.1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/TheRayquaza/newsbro/apps/libs v0.4.8 // indirect
+	github.com/TheRayquaza/newsbro/apps/libs v0.4.9 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.1 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect

@@ -19,6 +19,8 @@ type Config struct {
 	KafkaGroupID                string
 	KafkaArticleAggregateTopic  string
 	KafkaFeedbackAggregateTopic string
+	FrontendOrigin              string
+	Environment                 string
 }
 
 func Load() *Config {
@@ -41,6 +43,8 @@ func Load() *Config {
 		KafkaArticleAggregateTopic:  getEnv("KAFKA_ARTICLE_AGGREGATE_TOPIC", "articles-aggregate"),
 		KafkaFeedbackAggregateTopic: getEnv("KAFKA_FEEDBACK_AGGREGATE_TOPIC", "feedback-aggregate"),
 		KafkaGroupID:                getEnv("KAFKA_GROUP_ID", "repo-article-group"),
+		FrontendOrigin:              getEnv("FRONTEND_ORIGIN", "https://app.newsbro.cc"),
+		Environment:                 getEnv("ENVIRONMENT", "prod"),
 	}
 }
 
