@@ -82,8 +82,15 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, true, true)
-	c.SetCookie("refresh_token", response.RefreshToken, 86400, "/", ac.authService.Config.CookieDomain, true, true)
+	httpOnly := true
+	secure := true
+	if ac.authService.Config.Environment == "dev" {
+		secure = false
+		httpOnly = false
+	}
+
+	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
+	c.SetCookie("refresh_token", response.RefreshToken, 86400, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
 
 	c.JSON(http.StatusOK, response)
 }
@@ -183,8 +190,15 @@ func (ac *AuthController) OAuthCallback(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, true, true)
-	c.SetCookie("refresh_token", response.RefreshToken, 86400, "/", ac.authService.Config.CookieDomain, true, true)
+	httpOnly := true
+	secure := true
+	if ac.authService.Config.Environment == "dev" {
+		secure = false
+		httpOnly = false
+	}
+
+	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
+	c.SetCookie("refresh_token", response.RefreshToken, 86400, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
 
 	c.Redirect(http.StatusFound, ac.authService.GetPostOAuthRedirectURL())
 }

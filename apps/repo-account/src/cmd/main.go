@@ -12,6 +12,10 @@ func main() {
 	// Load configuration
 	cfg := config.Load()
 
+	if cfg.Environment == "dev" {
+		log.Println("Running in development mode")
+	}
+
 	// Initialize database
 	db, err := database.Initialize(cfg.DatabaseURL)
 	if err != nil {
