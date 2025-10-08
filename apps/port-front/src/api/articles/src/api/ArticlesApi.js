@@ -128,7 +128,7 @@ export default class ArticlesApi {
       let authNames = [];
       let contentTypes = [];
       let accepts = ['application/json'];
-      let returnType = [RepoArticleSrcApiDtoArticleResponse];
+      let returnType = Object;
       return this.apiClient.callApi(
         '/api/v1/articles', 'GET',
         pathParams, queryParams, headerParams, formParams, postBody,
@@ -327,7 +327,7 @@ export default class ArticlesApi {
       let authNames = [];
       let contentTypes = [];
       let accepts = ['application/json'];
-      let returnType = {'String': Object};
+      let returnType = Object;
       return this.apiClient.callApi(
         '/api/v1/articles/ingestion', 'POST',
         pathParams, queryParams, headerParams, formParams, postBody,

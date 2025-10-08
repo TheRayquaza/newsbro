@@ -191,9 +191,17 @@ class ApiService {
     });
   }
 
-  async getSubcategories(token) {
+  async getSubcategories(token, category) {
+    if (category === undefined) {
+      return new Promise((resolve, reject) => {
+        this.articlesApi.articlesSubcategoriesGet(`Bearer ${token}`, (error, data) => {
+          if (error) return reject(error);
+          resolve(data);
+        });
+      });
+    }
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesSubcategoriesGet(`Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesSubcategoriesGet(`Bearer ${token}`, category, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
@@ -215,7 +223,7 @@ class ApiService {
     feedbackRequest.value = feedbackData.value;
 
     return new Promise((resolve, reject) => {
-      this.feedbackApi.articlesIdFeedbackPost(articleId, feedbackRequest, `Bearer ${token}`, (error, data) => {
+      this.feedbackApi.articlesIdFeedbackPost(articleId, `Bearer ${token}`, feedbackRequest, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });

@@ -556,7 +556,6 @@ class ApiClient {
                 } else if (Array.isArray(type)) {
                     // for array type like: ['String']
                     var itemType = type[0];
-
                     return data.map((item) => {
                         return ApiClient.convertToType(item, itemType);
                     });
