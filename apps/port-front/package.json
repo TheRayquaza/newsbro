@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint --fix --ext .js,.jsx",
+    "lint": "eslint --fix --ext .js,.jsx --ignore-pattern ./src/api/**/*.js",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 import { X, ThumbsUp, ThumbsDown, ExternalLink, Calendar } from "lucide-react";
 
-export default function ArticleModal({ article, onClose, isAdmin, feedback, onFeedback }) {
+export default function ArticleModal({ article, onClose, feedback, onFeedback }) {
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-blue-500/20 w-full max-w-2xl max-h-[90vh] overflow-y-auto">

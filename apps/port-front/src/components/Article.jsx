@@ -3,7 +3,7 @@ import { Calendar, Trash2, ThumbsUp, ThumbsDown, ExternalLink } from "lucide-rea
 import api from "../api/api";
 import { AuthContext } from "../contexts/Auth";
 
-const Article = ({ article, onSelect, isAdmin, onDelete, onEdit }) => {
+const Article = ({ article, onSelect, isAdmin, onDelete }) => {
     const [likes, setLikes] = useState(article.likes || 0);
     const [dislikes, setDislikes] = useState(article.dislikes || 0);
     const [userFeedback, setUserFeedback] = useState(null); // true = liked, false = disliked, null = none
@@ -46,6 +46,7 @@ const Article = ({ article, onSelect, isAdmin, onDelete, onEdit }) => {
             }
         } catch (error) {
             alert("Failed to submit feedback");
+            console.error("Failed to submit feedback", error);
         }
     };
 
