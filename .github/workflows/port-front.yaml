@@ -31,11 +31,7 @@ jobs:
 
       - name: Run ESLint
         working-directory: ./apps/port-front
-        run: npx eslint src --ext .ts,.tsx,.js,.jsx
-
-      - name: Check formatting with Prettier
-        working-directory: ./apps/port-front
-        run: npx prettier --check .
+        run: npm run lint
 
   build-docker:
     if: startsWith(github.ref, 'refs/tags/port-front-v')
