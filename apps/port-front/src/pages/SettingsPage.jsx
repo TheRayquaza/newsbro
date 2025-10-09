@@ -6,30 +6,18 @@ import { AuthContext } from "../contexts/Auth";
 import api from "../api/api";
 
 const SettingsPage = () => {
-  const { token } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
-  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const data = await api.getProfile(token);
-        setProfile(data);
-      } catch (err) {
-        setError(err.message || "Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [token, navigate]);
+    setProfile(user);
+    setLoading(false);
+  }, [user]);
 
   const handleChange = (field, value) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
@@ -38,7 +26,6 @@ const SettingsPage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!token) return;
 
     setSaving(true);
     setError("");
@@ -50,7 +37,7 @@ const SettingsPage = () => {
         last_name: profile.last_name,
         email: profile.email,
       };
-      const data = await api.updateProfile(updated, token);
+      const data = await api.updateProfile(updated);
       setProfile(data);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);

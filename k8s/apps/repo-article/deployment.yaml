@@ -12,7 +12,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1
+      maxUnavailable: 0
       maxSurge: 1
   selector:
     matchLabels:
@@ -25,11 +25,6 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090" 
-    strategy:
-      type: RollingUpdate
-      rollingUpdate:
-        maxSurge: 2
-        maxUnavailable: 1
     spec:
       imagePullSecrets:
         - name: pull-secret

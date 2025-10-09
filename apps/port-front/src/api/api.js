@@ -51,9 +51,9 @@ class ApiService {
     return `${ENV.ACCOUNT_BASE_URL}/api/v1/auth/oauth/login`;
   }
 
-  async refreshToken(token) {
+  async refresh() {
     return new Promise((resolve, reject) => {
-      this.authApi.authRefreshPost(`Bearer ${token}`, (error, data) => {
+      this.authApi.authRefreshPost((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
@@ -76,28 +76,27 @@ class ApiService {
     });
   }
 
-  async getUsers(token) {
+  async getUsers() {
     return new Promise((resolve, reject) => {
-      this.userApi.usersGet(`Bearer ${token}`, (error, data) => {
+      this.userApi.usersGet((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async getProfile(token) {
+  async getProfile() {
     return new Promise((resolve, reject) => {
-      this.userApi.usersProfileGet(`Bearer ${token}`, (error, data) => {
+      this.userApi.usersProfileGet((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async updateProfile(profileData, token) {
+  async updateProfile(profileData, ) {
     return new Promise((resolve, reject) => {
-      console.log('Updating profile with data:', profileData);
-      this.userApi.usersProfilePut(`Bearer ${token}`, profileData, (error, data) => {
+      this.userApi.usersProfilePut(profileData, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
@@ -105,34 +104,34 @@ class ApiService {
   }
 
   // -------------------- ARTICLES --------------------
-  async getCategories(token) {
+  async getCategories() {
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesCategoriesGet(`Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesCategoriesGet((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async getArticles(token, opts = {}) {
+  async getArticles(opts = {}) {
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesGet(`Bearer ${token}`, opts, (error, data) => {
+      this.articlesApi.articlesGet(opts, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async getArticleById(id, token) {
+  async getArticleById(id, ) {
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesIdGet(id, `Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesIdGet(id, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async createArticle(articleData, token) {
+  async createArticle(articleData, ) {
     const createRequest = new RepoArticleSrcApiDtoArticleCreateRequest();
     createRequest.title = articleData.title;
     createRequest.category = articleData.category;
@@ -145,14 +144,14 @@ class ApiService {
     }
 
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesPost(createRequest, `Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesPost(createRequest, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async updateArticle(id, articleData, token) {
+  async updateArticle(id, articleData, ) {
     const updateRequest = new RepoArticleSrcApiDtoArticleUpdateRequest();
     updateRequest.id = id;
     if (articleData.title !== undefined) updateRequest.title = articleData.title;
@@ -162,46 +161,46 @@ class ApiService {
     if (articleData.abstract !== undefined) updateRequest.abstract = articleData.abstract;
 
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesIdPut(id, updateRequest, `Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesIdPut(id, updateRequest, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async deleteArticle(id, token) {
+  async deleteArticle(id, ) {
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesIdDelete(id, `Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesIdDelete(id, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async triggerIngestion(articleData, token) {
+  async triggerIngestion(articleData, ) {
     const ingestionRequest = new RepoArticleSrcApiDtoArticleTriggerIngestionRequest();
     ingestionRequest.begin_date = articleData.begin_date;
     ingestionRequest.end_date = articleData.end_date;
 
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesIngestionPost(ingestionRequest, `Bearer ${token}`, (error, data) => {
+      this.articlesApi.articlesIngestionPost(ingestionRequest, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async getSubcategories(token, category) {
+  async getSubcategories(category) {
     if (category === undefined) {
       return new Promise((resolve, reject) => {
-        this.articlesApi.articlesSubcategoriesGet(`Bearer ${token}`, (error, data) => {
+        this.articlesApi.articlesSubcategoriesGet((error, data) => {
           if (error) return reject(error);
           resolve(data);
         });
       });
     }
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesSubcategoriesGet(`Bearer ${token}`, category, (error, data) => {
+      this.articlesApi.articlesSubcategoriesGet(category, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
@@ -209,75 +208,75 @@ class ApiService {
   }
 
   // -------------------- FEEDBACK --------------------
-  async getArticleFeedback(articleId, token) {
+  async getArticleFeedback(articleId) {
     return new Promise((resolve, reject) => {
-      this.feedbackApi.articlesIdFeedbackGet(articleId, `Bearer ${token}`, (error, data) => {
+      this.feedbackApi.articlesIdFeedbackGet(articleId, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async createArticleFeedback(articleId, feedbackData, token) {
+  async createArticleFeedback(articleId, feedbackData) {
     const feedbackRequest = new RepoArticleSrcApiDtoFeedbackRequest();
     feedbackRequest.value = feedbackData.value;
 
     return new Promise((resolve, reject) => {
-      this.feedbackApi.articlesIdFeedbackPost(articleId, `Bearer ${token}`, feedbackRequest, (error, data) => {
+      this.feedbackApi.articlesIdFeedbackPost(articleId, feedbackRequest, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async deleteArticleFeedback(articleId, token) {
+  async deleteArticleFeedback(articleId) {
     return new Promise((resolve, reject) => {
-      this.feedbackApi.articlesIdFeedbackDelete(articleId, `Bearer ${token}`, (error, data) => {
+      this.feedbackApi.articlesIdFeedbackDelete(articleId, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async getAllFeedback(token) {
+  async getAllFeedback() {
     return new Promise((resolve, reject) => {
-      this.feedbackApi.feedbackAllGet(`Bearer ${token}`, (error, data) => {
+      this.feedbackApi.feedbackAllGet((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async exportFeedbackCsv(token) {
+  async exportFeedbackCsv() {
     return new Promise((resolve, reject) => {
-      this.feedbackApi.feedbackCsvGet(`Bearer ${token}`, (error, data) => {
+      this.feedbackApi.feedbackCsvGet((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async triggerFeedbackIngestion(token) {
+  async triggerFeedbackIngestion() {
     return new Promise((resolve, reject) => {
-      this.feedbackApi.feedbackIngestPost(`Bearer ${token}`, (error, data) => {
+      this.feedbackApi.feedbackIngestPost((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async getMyFeedback(token) {
+  async getMyFeedback() {
     return new Promise((resolve, reject) => {
-      this.feedbackApi.feedbackMyGet(`Bearer ${token}`, (error, data) => {
+      this.feedbackApi.feedbackMyGet((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
     });
   }
 
-  async getFeedbackStats(token) {
+  async getFeedbackStats() {
     return new Promise((resolve, reject) => {
-      this.feedbackApi.feedbackStatsGet(`Bearer ${token}`, (error, data) => {
+      this.feedbackApi.feedbackStatsGet((error, data) => {
         if (error) return reject(error);
         resolve(data);
       });

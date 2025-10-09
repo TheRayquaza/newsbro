@@ -46,20 +46,15 @@ export default class UserApi {
     /**
      * Get all users
      * Get a list of all users (admin only)
-     * @param {String} authorization Insert your access token
      * @param {Object} opts Optional parameters
      * @param {Number} [limit = 10)] Limit
      * @param {Number} [offset = 0)] Offset
      * @param {module:api/UserApi~usersGetCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link Array.<module:model/RepoAccountSrcApiDtoUserResponse>}
      */
-    usersGet(authorization, opts, callback) {
+    usersGet(opts, callback) {
       opts = opts || {};
       let postBody = null;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling usersGet");
-      }
 
       let pathParams = {
       };
@@ -68,7 +63,6 @@ export default class UserApi {
         'offset': opts['offset']
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -95,23 +89,17 @@ export default class UserApi {
     /**
      * Get user profile
      * Get the profile of the authenticated user
-     * @param {String} authorization Insert your access token
      * @param {module:api/UserApi~usersProfileGetCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link module:model/RepoAccountSrcApiDtoUserResponse}
      */
-    usersProfileGet(authorization, callback) {
+    usersProfileGet(callback) {
       let postBody = null;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling usersProfileGet");
-      }
 
       let pathParams = {
       };
       let queryParams = {
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -138,17 +126,12 @@ export default class UserApi {
     /**
      * Update user profile
      * Update the profile of the authenticated user
-     * @param {String} authorization Insert your access token
      * @param {Object.<String, {String: Object}>} updateRequest Update Request
      * @param {module:api/UserApi~usersProfilePutCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link module:model/RepoAccountSrcApiDtoUserResponse}
      */
-    usersProfilePut(authorization, updateRequest, callback) {
+    usersProfilePut(updateRequest, callback) {
       let postBody = updateRequest;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling usersProfilePut");
-      }
       // verify the required parameter 'updateRequest' is set
       if (updateRequest === undefined || updateRequest === null) {
         throw new Error("Missing the required parameter 'updateRequest' when calling usersProfilePut");
@@ -159,7 +142,6 @@ export default class UserApi {
       let queryParams = {
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };

@@ -11,7 +11,7 @@ import ArticleModal from "../components/ArticleModal";
 import api from "../api/api";
 
 export default function DeepSearchPage() {
-    const { token, user } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
     const isAdmin = user?.role === "admin";
 
     // Search state
@@ -49,7 +49,7 @@ export default function DeepSearchPage() {
 
     const loadCategories = async () => {
         try {
-            const data = await api.getCategories(token);
+            const data = await api.getCategories();
             setCategories(data || []);
         } catch (err) {
             console.error("Failed to load categories:", err);
@@ -58,7 +58,7 @@ export default function DeepSearchPage() {
 
     const loadSubcategories = async (category) => {
         try {
-            const data = await api.getSubcategories(token, category);
+            const data = await api.getSubcategories(category);
             setSubcategories(data || []);
         } catch (err) {
             console.error("Failed to load subcategories:", err);
@@ -74,7 +74,7 @@ export default function DeepSearchPage() {
             if (selectedCategory) opts.category = selectedCategory;
             if (selectedSubcategory) opts.subcategory = selectedSubcategory;
 
-            const data = await api.getArticles(token, opts);
+            const data = await api.getArticles(opts);
             setArticles(data.articles || []);
             setOffset(newOffset);
             setTotalResults(data.total || 0);
@@ -89,7 +89,7 @@ export default function DeepSearchPage() {
         setSelectedArticle(article);
         if (isAdmin) {
             try {
-                const feedback = await api.getArticleFeedback(article.id, token);
+                const feedback = await api.getArticleFeedback(article.id);
                 setArticleFeedback(feedback);
             } catch (err) {
                 console.error("Failed to load feedback:", err);
@@ -100,7 +100,7 @@ export default function DeepSearchPage() {
     const handleDeleteArticle = async (id) => {
         if (!confirm("Are you sure you want to delete this article?")) return;
         try {
-            await api.deleteArticle(id, token);
+            await api.deleteArticle(id);
             setArticles(articles.filter((a) => a.id !== id));
             setSelectedArticle(null);
         } catch {
@@ -221,7 +221,7 @@ export default function DeepSearchPage() {
                         feedback={articleFeedback}
                         onFeedback={async (isPositive) => {
                             try {
-                                await api.createArticleFeedback(selectedArticle.id, { value: isPositive }, token);
+                                await api.createArticleFeedback(selectedArticle.id, { value: isPositive });
                                 setArticleFeedback(isPositive);
                             } catch (err) {
                                 console.error("Failed to submit feedback:", err);

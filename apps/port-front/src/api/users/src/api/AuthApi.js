@@ -174,23 +174,17 @@ export default class AuthApi {
     /**
      * Refresh JWT token
      * Refresh JWT token using refresh token
-     * @param {String} authorization Insert your access token
      * @param {module:api/AuthApi~authRefreshPostCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link module:model/RepoAccountSrcApiDtoLoginResponse}
      */
-    authRefreshPost(authorization, callback) {
+    authRefreshPost(callback) {
       let postBody = null;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling authRefreshPost");
-      }
 
       let pathParams = {
       };
       let queryParams = {
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };

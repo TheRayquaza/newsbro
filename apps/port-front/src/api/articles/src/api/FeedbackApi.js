@@ -49,18 +49,13 @@ export default class FeedbackApi {
      * Delete feedback for an article
      * Delete user feedback for a specific article
      * @param {Number} id Article ID
-     * @param {String} authorization Insert your access token
      * @param {module:api/FeedbackApi~articlesIdFeedbackDeleteCallback} callback The callback function, accepting three arguments: error, data, response
      */
-    articlesIdFeedbackDelete(id, authorization, callback) {
+    articlesIdFeedbackDelete(id, callback) {
       let postBody = null;
       // verify the required parameter 'id' is set
       if (id === undefined || id === null) {
         throw new Error("Missing the required parameter 'id' when calling articlesIdFeedbackDelete");
-      }
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling articlesIdFeedbackDelete");
       }
 
       let pathParams = {
@@ -69,7 +64,6 @@ export default class FeedbackApi {
       let queryParams = {
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -97,19 +91,14 @@ export default class FeedbackApi {
      * Get feedback for a specific article
      * Get feedback statistics and user's feedback for a specific article
      * @param {Number} id Article ID
-     * @param {String} authorization Insert your access token
      * @param {module:api/FeedbackApi~articlesIdFeedbackGetCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link module:model/RepoArticleSrcApiDtoFeedbackStatsResponse}
      */
-    articlesIdFeedbackGet(id, authorization, callback) {
+    articlesIdFeedbackGet(id, callback) {
       let postBody = null;
       // verify the required parameter 'id' is set
       if (id === undefined || id === null) {
         throw new Error("Missing the required parameter 'id' when calling articlesIdFeedbackGet");
-      }
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling articlesIdFeedbackGet");
       }
 
       let pathParams = {
@@ -118,7 +107,6 @@ export default class FeedbackApi {
       let queryParams = {
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -146,20 +134,15 @@ export default class FeedbackApi {
      * Create feedback for an article
      * Create or update user feedback for a specific article
      * @param {Number} id Article ID
-     * @param {String} authorization Insert your access token
      * @param {module:model/RepoArticleSrcApiDtoFeedbackRequest} feedback Feedback data
      * @param {module:api/FeedbackApi~articlesIdFeedbackPostCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link Object.<String, {String: Object}>}
      */
-    articlesIdFeedbackPost(id, authorization, feedback, callback) {
+    articlesIdFeedbackPost(id, feedback, callback) {
       let postBody = feedback;
       // verify the required parameter 'id' is set
       if (id === undefined || id === null) {
         throw new Error("Missing the required parameter 'id' when calling articlesIdFeedbackPost");
-      }
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling articlesIdFeedbackPost");
       }
       // verify the required parameter 'feedback' is set
       if (feedback === undefined || feedback === null) {
@@ -172,7 +155,6 @@ export default class FeedbackApi {
       let queryParams = {
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -199,20 +181,15 @@ export default class FeedbackApi {
     /**
      * Get all feedback
      * Get all feedback with pagination (Admin only)
-     * @param {String} authorization Insert your access token
      * @param {Object} opts Optional parameters
      * @param {Number} [page = 1)] Page number
      * @param {Number} [limit = 10)] Items per page
      * @param {module:api/FeedbackApi~feedbackAllGetCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link Array.<module:model/RepoArticleSrcApiDtoFeedbackResponse>}
      */
-    feedbackAllGet(authorization, opts, callback) {
+    feedbackAllGet(opts, callback) {
       opts = opts || {};
       let postBody = null;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling feedbackAllGet");
-      }
 
       let pathParams = {
       };
@@ -221,7 +198,6 @@ export default class FeedbackApi {
         'limit': opts['limit']
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -248,20 +224,15 @@ export default class FeedbackApi {
     /**
      * Export all feedback to CSV
      * Export all article feedback data to CSV format (Admin only)
-     * @param {String} authorization Insert your access token
      * @param {Object} opts Optional parameters
      * @param {String} [startDate] Start date (YYYY-MM-DD)
      * @param {String} [endDate] End date (YYYY-MM-DD)
      * @param {module:api/FeedbackApi~feedbackCsvGetCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link File}
      */
-    feedbackCsvGet(authorization, opts, callback) {
+    feedbackCsvGet(opts, callback) {
       opts = opts || {};
       let postBody = null;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling feedbackCsvGet");
-      }
 
       let pathParams = {
       };
@@ -270,7 +241,6 @@ export default class FeedbackApi {
         'end_date': opts['endDate']
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -297,17 +267,12 @@ export default class FeedbackApi {
     /**
      * Trigger feedback ingestion
      * Trigger ingestion of feedback data for articles within a specified date range (Admin only)
-     * @param {String} authorization Insert your access token
      * @param {module:model/RepoArticleSrcApiDtoFeedbackTriggerIngestionRequest} ingestion Ingestion date range
      * @param {module:api/FeedbackApi~feedbackIngestPostCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link Object.<String, {String: Object}>}
      */
-    feedbackIngestPost(authorization, ingestion, callback) {
+    feedbackIngestPost(ingestion, callback) {
       let postBody = ingestion;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling feedbackIngestPost");
-      }
       // verify the required parameter 'ingestion' is set
       if (ingestion === undefined || ingestion === null) {
         throw new Error("Missing the required parameter 'ingestion' when calling feedbackIngestPost");
@@ -318,7 +283,6 @@ export default class FeedbackApi {
       let queryParams = {
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -345,20 +309,15 @@ export default class FeedbackApi {
     /**
      * Get user's feedback history
      * Get all feedback given by the authenticated user
-     * @param {String} authorization Insert your access token
      * @param {Object} opts Optional parameters
      * @param {Number} [page = 1)] Page number
      * @param {Number} [limit = 10)] Items per page
      * @param {module:api/FeedbackApi~feedbackMyGetCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link Array.<module:model/RepoArticleSrcApiDtoFeedbackResponse>}
      */
-    feedbackMyGet(authorization, opts, callback) {
+    feedbackMyGet(opts, callback) {
       opts = opts || {};
       let postBody = null;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling feedbackMyGet");
-      }
 
       let pathParams = {
       };
@@ -367,7 +326,6 @@ export default class FeedbackApi {
         'limit': opts['limit']
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
@@ -394,20 +352,15 @@ export default class FeedbackApi {
     /**
      * Get feedback statistics
      * Get aggregated feedback statistics for all articles (Admin only)
-     * @param {String} authorization Insert your access token
      * @param {Object} opts Optional parameters
      * @param {Number} [page = 1)] Page number
      * @param {Number} [limit = 10)] Items per page
      * @param {module:api/FeedbackApi~feedbackStatsGetCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link Array.<module:model/RepoArticleSrcApiDtoFeedbackStatsResponse>}
      */
-    feedbackStatsGet(authorization, opts, callback) {
+    feedbackStatsGet(opts, callback) {
       opts = opts || {};
       let postBody = null;
-      // verify the required parameter 'authorization' is set
-      if (authorization === undefined || authorization === null) {
-        throw new Error("Missing the required parameter 'authorization' when calling feedbackStatsGet");
-      }
 
       let pathParams = {
       };
@@ -416,7 +369,6 @@ export default class FeedbackApi {
         'limit': opts['limit']
       };
       let headerParams = {
-        'Authorization': authorization
       };
       let formParams = {
       };
