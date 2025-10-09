@@ -1,6 +1,5 @@
 import "../assets/styles/global.css";
 import { useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router";
 import { User, Mail, AtSign, Save, AlertCircle, CheckCircle2, Shield, Bell, Palette } from "lucide-react";
 import { AuthContext } from "../contexts/Auth";
 import api from "../api/api";
