@@ -5,7 +5,7 @@ metadata:
   name: redisinsight-service
   namespace: redis
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 5540
