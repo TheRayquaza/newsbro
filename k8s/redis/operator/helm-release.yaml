@@ -10,18 +10,12 @@ spec:
   chart:
     spec:
       chart: redis-operator
-      version: v1.3.0
+      version: 3.3.0
       sourceRef:
         kind: HelmRepository
         name: helm-repo-operator
         namespace: redis
   values:
-    image:
-      repository: quay.io/spotahome/redis-operator
-      pullPolicy: IfNotPresent
-      tag: v1.3.0
-      cli_args: ""
-
     imageCredentials: {}
 
     updateStrategy:
