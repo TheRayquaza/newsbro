@@ -168,7 +168,7 @@ class ApiService {
     });
   }
 
-  async deleteArticle(id, ) {
+  async deleteArticle(id) {
     return new Promise((resolve, reject) => {
       this.articlesApi.articlesIdDelete(id, (error, data) => {
         if (error) return reject(error);

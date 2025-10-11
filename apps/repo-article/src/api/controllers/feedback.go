@@ -45,31 +45,13 @@ func (fc *FeedbackController) GetArticleFeedback(c *gin.Context) {
 		return
 	}
 
-	user, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
-		return
-	}
-	usr, ok := user.(*entities.JWTClaims)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
-		return
-	}
-
-	userID := usr.UserID
-
-	stats, userFeedback, err := fc.feedbackService.GetArticleFeedback(uint(newsID), userID)
+	stats, err := fc.feedbackService.GetArticleFeedback(uint(newsID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response := gin.H{
-		"stats":         stats,
-		"user_feedback": userFeedback,
-	}
-
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, stats)
 }
 
 // CreateFeedback godoc

@@ -86,7 +86,15 @@ func (ac *ArticleController) GetArticle(c *gin.Context) {
 		return
 	}
 
-	article, err := ac.articleService.GetArticleByID(uint(id))
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+
+	userID := user.(*entities.JWTClaims).UserID
+
+	article, err := ac.articleService.GetArticleByID(userID, uint(id))
 	if err != nil {
 		if err.Error() == "article with id "+idParam+" not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -121,6 +129,14 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 		return
 	}
 
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+
+	userID := user.(*entities.JWTClaims).UserID
+
 	if filters.Limit <= 0 {
 		filters.Limit = 10
 	}
@@ -137,7 +153,7 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 		return
 	}
 
-	articles, total, err := ac.articleService.GetArticles(&filters)
+	articles, total, err := ac.articleService.GetArticles(userID, &filters)
 	if err != nil {
 		switch err.(type) {
 		case *dto.ErrBadRequest:

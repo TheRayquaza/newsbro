@@ -70,7 +70,7 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 				articles.DELETE("/:id", authMiddleware.AdminMiddleware(), articleController.DeleteArticle)
 
 				// Article feedback routes
-				articles.GET("/:id/feedback", feedbackController.GetArticleFeedback)
+				articles.GET("/:id/feedback", authMiddleware.AdminMiddleware(), feedbackController.GetArticleFeedback)
 				articles.POST("/:id/feedback", feedbackController.CreateFeedback)
 				articles.DELETE("/:id/feedback", feedbackController.DeleteFeedback)
 			}
