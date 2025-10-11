@@ -1,0 +1,21 @@
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: redisinsight
+  namespace: redis
+  labels:
+    app: redisinsight
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: redis.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: redisinsight-service
+                port:
+                  number: 80
