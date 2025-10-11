@@ -2,13 +2,46 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: redis
+  name: redis-operator
   namespace: redis
 spec:
   interval: 1m
-  path: ./k8s/redis
+  path: ./k8s/redis/operator
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: redis
+  namespace: redis
+spec:
+  interval: 1m
+  path: ./k8s/redis/redis
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  dependsOn:
+  - name: redis-operator
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: redisinsight
+  namespace: redis
+spec:
+  interval: 1m
+  path: ./k8s/redis/insight
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  dependsOn:
+  - name: redis-operator
+  - name: redis
