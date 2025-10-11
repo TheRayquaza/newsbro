@@ -1,6 +1,40 @@
-import { X, ThumbsUp, ThumbsDown, ExternalLink, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import api from "../api/api";
+import { X, Calendar, ExternalLink, Trash2 } from "lucide-react";
 
-export default function ArticleModal({ article, onClose, feedback, onFeedback }) {
+const ArticleModal = ({ article, onClose, isAdmin }) => {
+    const [feedback, setFeedback] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadFeedback = async () => {
+            if (!article?.id) return;
+            try {
+                const data = await api.getArticleFeedback(article.id);
+                console.log(data)
+                setFeedback(data);
+            } catch (error) {
+                console.error("Failed to load article feedback", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (isAdmin) loadFeedback();
+        else setLoading(false)
+    }, [article?.id, isAdmin]);
+
+    const handleDelete = async () => {
+        try {
+            await api.deleteArticle(article.id);
+            onClose();
+        } catch (error) {
+            alert("Failed to delete article");
+            console.error("Failed to delete article", error);
+        }
+    };
+
+    if (loading) return <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center"><div className="text-slate-300">Loading...</div></div>;
+
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-blue-500/20 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -11,7 +45,8 @@ export default function ArticleModal({ article, onClose, feedback, onFeedback })
                             <X className="w-6 h-6" />
                         </button>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-xs mb-3">
+
+                    <div className="flex flex-wrap items-center gap-2 text-xs mb-4">
                         <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full">{article.category}</span>
                         {article.subcategory && (
                             <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full">
@@ -25,7 +60,9 @@ export default function ArticleModal({ article, onClose, feedback, onFeedback })
                             </span>
                         )}
                     </div>
+
                     <p className="text-slate-300 mb-4">{article.abstract}</p>
+
                     {article.link && (
                         <a
                             href={article.link}
@@ -37,27 +74,38 @@ export default function ArticleModal({ article, onClose, feedback, onFeedback })
                             View Original Article
                         </a>
                     )}
-                    {(
-                        <div className="flex items-center gap-3 mt-4">
+
+                    {isAdmin && feedback && (
+                        <div className="bg-slate-800/50 rounded-lg p-4 mb-4 border border-slate-700">
+                            <h4 className="text-sm font-semibold text-slate-300 mb-3">Feedback Stats</h4>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p className="text-slate-400">Likes</p>
+                                    <p className="text-lg font-bold text-green-400">{feedback.like_count}</p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-400">Dislikes</p>
+                                    <p className="text-lg font-bold text-red-400">{feedback.dislike_count}</p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-400">Total</p>
+                                    <p className="text-lg font-bold text-blue-400">{feedback.total_count}</p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-400">Like Ratio</p>
+                                    <p className="text-lg font-bold text-cyan-400">{(feedback.like_ratio).toFixed(1)}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {isAdmin && (
+                        <div className="flex justify-end">
                             <button
-                                onClick={() => onFeedback(true)}
-                                className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-all ${feedback === true
-                                    ? "text-green-400 hover:text-green-300 hover:bg-green-500/10"
-                                    : "bg-green-500 text-white border border-green-600 shadow-lg scale-105"
-                                    }`}
+                                onClick={handleDelete}
+                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition"
                             >
-                                <ThumbsUp className="w-4 h-4" />
-                                {feedback === true ? "Liked" : "Like"}
-                            </button>
-                            <button
-                                onClick={() => onFeedback(false)}
-                                className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-all ${feedback === false
-                                    ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                    : "bg-red-500 text-white border border-red-600 shadow-lg scale-105"
-                                    }`}
-                            >
-                                <ThumbsDown className="w-4 h-4" />
-                                {feedback === false ? "Disliked" : "Dislike"}
+                                <Trash2 className="w-4 h-4" />
                             </button>
                         </div>
                     )}
@@ -65,4 +113,6 @@ export default function ArticleModal({ article, onClose, feedback, onFeedback })
             </div>
         </div>
     );
-}
+};
+
+export default ArticleModal;

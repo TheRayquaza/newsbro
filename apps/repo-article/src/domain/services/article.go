@@ -84,42 +84,57 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 	return &articleResponse, nil
 }
 
-func (as *ArticleService) GetArticleByID(id uint) (*dto.ArticleResponse, error) {
+func (as *ArticleService) GetArticleByID(userID, id uint) (*dto.ArticleResponse, error) {
 	var article models.Article
+
 	if err := as.Db.First(&article, id).Error; err != nil {
 		log.Printf("failed to get article: %s", err)
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("article with id %d not found", id)
+			return nil, dto.NewNotFound(fmt.Sprintf("article with id %d not found", id))
 		}
 		return nil, fmt.Errorf("failed to get article: %w", err)
 	}
 
 	articleResponse := converters.ArticleModelToArticleResponse(&article)
+
+	var feedback models.Feedback
+	err := as.Db.Where("user_id = ? AND news_id = ?", userID, article.ID).First(&feedback).Error
+	if err == nil {
+		articleResponse.Value = feedback.Value
+	} else if err != gorm.ErrRecordNotFound {
+		log.Printf("failed to get feedback for article id %d: %s", article.ID, err)
+		return nil, fmt.Errorf("failed to get feedback for article id %d: %w", article.ID, err)
+	} else {
+		articleResponse.Value = -1
+	}
+
 	return &articleResponse, nil
 }
 
-func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]dto.ArticleResponse, int64, error) {
+func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) ([]dto.ArticleResponse, int64, error) {
 	var articles []models.Article
 	var total int64
+
 	query := as.Db.Model(&models.Article{})
 
+	// Filtering
 	if filters.Category != "" {
 		query = query.Where("category = ?", filters.Category)
 	}
-
 	if filters.Subcategory != "" {
 		query = query.Where("subcategory = ?", filters.Subcategory)
 	}
-
 	if filters.Search != "" {
 		searchTerm := "%" + strings.ToLower(filters.Search) + "%"
 		query = query.Where("LOWER(title) LIKE ? OR LOWER(abstract) LIKE ?", searchTerm, searchTerm)
 	}
 
+	// Count total results
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count articles: %w", err)
 	}
 
+	// Pagination
 	if err := query.Order("created_at DESC").
 		Limit(int(filters.Limit)).
 		Offset(int(filters.Offset)).
@@ -127,9 +142,41 @@ func (as *ArticleService) GetArticles(filters *dto.ArticleFilters) ([]dto.Articl
 		return nil, 0, fmt.Errorf("failed to get articles: %w", err)
 	}
 
-	var articleResponses []dto.ArticleResponse
+	if len(articles) == 0 {
+		return nil, total, nil
+	}
+
+	articleIDs := make([]uint, len(articles))
+	for i, a := range articles {
+		articleIDs[i] = a.ID
+	}
+
+	feedbackMap := make(map[uint]int)
+
+	if userID != 0 {
+		var feedbacks []models.Feedback
+		if err := as.Db.Model(&models.Feedback{}).
+			Where("user_id = ? AND news_id IN ?", userID, articleIDs).
+			Find(&feedbacks).Error; err != nil {
+			return nil, 0, fmt.Errorf("failed to fetch feedbacks: %w", err)
+		}
+
+		for _, f := range feedbacks {
+			feedbackMap[f.NewsID] = f.Value
+		}
+	}
+
+	articleResponses := make([]dto.ArticleResponse, 0, len(articles))
 	for _, article := range articles {
-		articleResponses = append(articleResponses, converters.ArticleModelToArticleResponse(&article))
+		resp := converters.ArticleModelToArticleResponse(&article)
+
+		if val, ok := feedbackMap[article.ID]; ok {
+			resp.Value = val
+		} else {
+			resp.Value = -1
+		}
+
+		articleResponses = append(articleResponses, resp)
 	}
 
 	return articleResponses, total, nil

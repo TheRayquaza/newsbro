@@ -31,13 +31,12 @@ func NewFeedbackService(db *gorm.DB, producer sarama.SyncProducer, config *confi
 	}
 }
 
-func (fs *FeedbackService) GetArticleFeedback(newsID, userID uint) (*dto.FeedbackStatsResponse, *models.Feedback, error) {
+func (fs *FeedbackService) GetArticleFeedback(newsID uint) (*dto.FeedbackStatsResponse, error) {
 	var stats dto.FeedbackStatsResponse
-	var userFeedback *models.Feedback
 
 	err := fs.Db.Raw(`
 		SELECT 
-			? as news_id,
+			news_id,
 			COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) as like_count,
 			COALESCE(SUM(CASE WHEN value = 0 THEN 1 ELSE 0 END), 0) as dislike_count,
 			COALESCE(COUNT(*), 0) as total_count,
@@ -45,32 +44,16 @@ func (fs *FeedbackService) GetArticleFeedback(newsID, userID uint) (*dto.Feedbac
 				WHEN COUNT(*) > 0 THEN ROUND((SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*)), 2)
 				ELSE 0 
 			END as like_ratio
-		FROM feedbacks 
-		WHERE news_id = ? AND deleted_at IS NULL
-	`, newsID, newsID).Scan(&stats).Error
+		FROM feedbacks
+		WHERE news_id = ?
+		GROUP BY news_id
+	`, int(newsID)).Scan(&stats).Error
 
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get feedback statistics: %w", err)
+		return nil, fmt.Errorf("failed to get feedback statistics: %w", err)
 	}
 
-	var feedback models.Feedback
-	err = fs.Db.Where("user_id = ? AND news_id = ?", userID, newsID).First(&feedback).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil, fmt.Errorf("failed to get user feedback: %w", err)
-	}
-
-	if err == nil {
-		userFeedback = &models.Feedback{
-			ID:        feedback.ID,
-			UserID:    feedback.UserID,
-			NewsID:    feedback.NewsID,
-			Value:     feedback.Value,
-			CreatedAt: feedback.CreatedAt,
-			UpdatedAt: feedback.UpdatedAt,
-		}
-	}
-
-	return &stats, userFeedback, nil
+	return &stats, nil
 }
 
 func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int) (*dto.FeedbackResponse, error) {
