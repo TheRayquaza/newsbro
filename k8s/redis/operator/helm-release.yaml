@@ -52,22 +52,3 @@ spec:
         cpu: 100m
         memory: 256Mi
 
-    monitoring:
-      enabled: false
-      serviceMonitor: false
-      serviceAnnotations: {}
-      prometheus:
-        name: unknown
-
-    annotations: {}
-
-    nodeSelector: {}
-
-    tolerations: []
-
-    affinity: {}
-
-    crds:
-      annotations: {}
-
-    priorityClassName: ""
