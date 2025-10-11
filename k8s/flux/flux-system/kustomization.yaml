@@ -7,6 +7,7 @@ resources:
 - capacitor.yaml
 - postgres.yaml
 - mlflow.yaml
+- redis.yaml
 - qdrant.yaml
 - apps.yaml
 - external-secrets.yaml

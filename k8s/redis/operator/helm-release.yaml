@@ -1,0 +1,79 @@
+---
+# https://fluxcd.io/flux/components/helm/helmreleases/
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: helm-release-operator
+  namespace: redis
+spec:
+  interval: 10m0s
+  chart:
+    spec:
+      chart: redis-operator
+      version: v1.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: helm-repo-operator
+        namespace: redis
+  values:
+    image:
+      repository: quay.io/spotahome/redis-operator
+      pullPolicy: IfNotPresent
+      tag: v1.3.0
+      cli_args: ""
+
+    imageCredentials: {}
+
+    updateStrategy:
+      type: RollingUpdate
+
+    replicas: 1
+
+    nameOverride: ""
+    fullnameOverride: ""
+    namespace: redis
+
+    serviceAccount:
+      create: true
+      annotations: {}
+      name: ""
+
+    service:
+      type: ClusterIP
+      port: 9710
+
+    container:
+      port: 9710
+
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
+
+    monitoring:
+      enabled: false
+      serviceMonitor: false
+      serviceAnnotations: {}
+      prometheus:
+        name: unknown
+
+    annotations: {}
+
+    nodeSelector: {}
+
+    tolerations: []
+
+    affinity: {}
+
+    crds:
+      annotations: {}
+
+    priorityClassName: ""
