@@ -6,10 +6,10 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Bookmark,
   Rss,
   Search,
   ChevronDown,
+  History,
   Sparkles
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -25,7 +25,7 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
   const navItems = [
     { path: "/", label: "Dashboard", icon: Home },
     { path: "/feeds", label: "Feeds", icon: Rss },
-    { path: "/saved", label: "Saved", icon: Bookmark },
+    { path: "/history", label: "My History", icon: History },
     { path: "/search", label: "Search", icon: Search, highlight: true },
   ];
 

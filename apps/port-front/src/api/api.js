@@ -122,6 +122,15 @@ class ApiService {
     });
   }
 
+  async getArticleHistory(opts = {}) {
+    return new Promise((resolve, reject) => {
+      this.articlesApi.articleHistoryGet(opts, (error, data) => {
+        if (error) return reject(error);
+        resolve(data);
+      });
+    });
+  }
+
   async getArticleById(id, ) {
     return new Promise((resolve, reject) => {
       this.articlesApi.articlesIdGet(id, (error, data) => {

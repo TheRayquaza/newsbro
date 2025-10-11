@@ -172,6 +172,68 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 	})
 }
 
+// @Summary Get user's history on all articles
+// @Description Get a list of articles with optional filtering and pagination
+// @Tags Articles
+// @Produce json
+// @Param limit query int false "Limit number of results" default(10)
+// @Param offset query int false "Offset for pagination" default(0)
+// @Success 200 {array} dto.ArticleResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Security JWT
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /articles/history [get]
+func (ac *ArticleController) GetArticleHistory(c *gin.Context) {
+	var filters dto.ArticleHistoryFilters
+	if err := c.ShouldBindQuery(&filters); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+
+	userID := user.(*entities.JWTClaims).UserID
+
+	if filters.Limit <= 0 {
+		filters.Limit = 10
+	}
+	if filters.Limit > 100 {
+		filters.Limit = 100
+	}
+
+	if filters.Limit < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "limit must be >= 0"})
+		return
+	}
+	if filters.Offset < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "offset must be >= 0"})
+		return
+	}
+
+	articles, total, err := ac.articleService.GetArticleHistory(userID, &filters)
+	if err != nil {
+		switch err.(type) {
+		case *dto.ErrBadRequest:
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"articles": articles,
+		"total":    total,
+		"limit":    filters.Limit,
+		"offset":   filters.Offset,
+	})
+}
+
 // @Summary Update article
 // @Description Update an existing article by ID
 // @Tags Articles
