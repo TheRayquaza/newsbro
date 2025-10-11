@@ -3,6 +3,7 @@ apiVersion: databases.spotahome.com/v1
 kind: RedisFailover
 metadata:
   name: kv
+  namespace: redis
   labels:
     component: kv
 spec:
