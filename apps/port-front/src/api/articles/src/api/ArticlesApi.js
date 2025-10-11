@@ -128,6 +128,42 @@ export default class ArticlesApi {
   }
 
   /**
+   * Get history for user
+   * Get a list of articles with optional filtering and pagination
+
+   * @param {Object} opts Optional parameters
+   * @param {Number} [limit = 10)] Limit number of results
+   * @param {Number} [offset = 0)] Offset for pagination
+   * @param {module:api/ArticlesApi~articlesGetCallback} callback The callback function, accepting three arguments: error, data, response
+   * data is of type: {@link Array.<module:model/RepoArticleSrcApiDtoArticleResponse>}
+   */
+  articleHistoryGet(opts, callback) {
+    opts = opts || {};
+    let postBody = null;
+
+    let pathParams = {
+    };
+    let queryParams = {
+      'limit': opts['limit'],
+      'offset': opts['offset']
+    };
+    let headerParams = {
+    };
+    let formParams = {
+    };
+
+    let authNames = [];
+    let contentTypes = [];
+    let accepts = ['application/json'];
+    let returnType = Object;
+    return this.apiClient.callApi(
+      '/api/v1/articles/history', 'GET',
+      pathParams, queryParams, headerParams, formParams, postBody,
+      authNames, contentTypes, accepts, returnType, null, callback
+    );
+  }
+
+  /**
    * Callback function to receive the result of the articlesIdDelete operation.
    * @callback module:api/ArticlesApi~articlesIdDeleteCallback
    * @param {String} error Error message, if any.

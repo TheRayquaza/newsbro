@@ -63,6 +63,7 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 				articles.GET("", articleController.GetArticles)
 				articles.GET("/categories", articleController.GetCategories)
 				articles.GET("/subcategories", articleController.GetSubcategories)
+				articles.GET("/history", articleController.GetArticleHistory)
 				articles.POST("/ingestion", authMiddleware.AdminMiddleware(), articleController.TriggerArticleIngestion)
 				articles.GET("/:id", articleController.GetArticle)
 				articles.POST("", authMiddleware.AdminMiddleware(), articleController.CreateArticle)

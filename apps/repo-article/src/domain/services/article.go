@@ -107,8 +107,69 @@ func (as *ArticleService) GetArticleByID(userID, id uint) (*dto.ArticleResponse,
 	} else {
 		articleResponse.Value = -1
 	}
+	articleResponse.LastInteraction = feedback.UpdatedAt
 
 	return &articleResponse, nil
+}
+
+func (as *ArticleService) GetArticleHistory(userID uint, filters *dto.ArticleHistoryFilters) ([]dto.ArticleResponse, int64, error) {
+	var articles []models.Article
+	var total int64
+
+	query := as.Db.Model(&models.Article{}).
+		Joins("INNER JOIN feedbacks ON feedbacks.news_id = articles.id").
+		Where("feedbacks.user_id = ?", userID).
+		Preload("Feedbacks", "user_id = ?", userID)
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count articles: %w", err)
+	}
+
+	orderClause := fmt.Sprintf("(SELECT COALESCE(MAX(updated_at), '1970-01-01') FROM feedbacks WHERE feedbacks.news_id = articles.id AND feedbacks.user_id = %d) DESC", userID)
+
+	if err := query.
+		Order(orderClause).
+		Limit(int(filters.Limit)).
+		Offset(int(filters.Offset)).
+		Find(&articles).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to get articles: %w", err)
+	}
+
+	if len(articles) == 0 {
+		return nil, total, nil
+	}
+
+	feedbackMap := make(map[uint]int)
+	feedbackInteractionMap := make(map[uint]time.Time)
+
+	// Build feedback maps from preloaded data
+	for _, article := range articles {
+		for _, feedback := range article.Feedbacks {
+			if feedback.UserID == userID {
+				feedbackMap[article.ID] = feedback.Value
+				feedbackInteractionMap[article.ID] = feedback.UpdatedAt
+				break
+			}
+		}
+	}
+
+	articleResponses := make([]dto.ArticleResponse, 0, len(articles))
+	for _, article := range articles {
+		resp := converters.ArticleModelToArticleResponse(&article)
+		if val, ok := feedbackMap[article.ID]; ok {
+			resp.Value = val
+		} else {
+			resp.Value = -1
+		}
+		if last, ok := feedbackInteractionMap[article.ID]; ok {
+			resp.LastInteraction = last
+		} else {
+			resp.LastInteraction = time.Time{}
+		}
+		articleResponses = append(articleResponses, resp)
+	}
+
+	return articleResponses, total, nil
 }
 
 func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) ([]dto.ArticleResponse, int64, error) {
@@ -152,6 +213,7 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 	}
 
 	feedbackMap := make(map[uint]int)
+	feedbackInteractionMap := make(map[uint]time.Time)
 
 	if userID != 0 {
 		var feedbacks []models.Feedback
@@ -163,6 +225,7 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 
 		for _, f := range feedbacks {
 			feedbackMap[f.NewsID] = f.Value
+			feedbackInteractionMap[f.NewsID] = f.UpdatedAt
 		}
 	}
 
@@ -174,6 +237,11 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 			resp.Value = val
 		} else {
 			resp.Value = -1
+		}
+		if last, ok := feedbackInteractionMap[article.ID]; ok {
+			resp.LastInteraction = last
+		} else {
+			resp.LastInteraction = time.Time{}
 		}
 
 		articleResponses = append(articleResponses, resp)
