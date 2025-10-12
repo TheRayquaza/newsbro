@@ -2,29 +2,29 @@
 
 Distributed resilient architecture for news recommendation
 
-## Table of Contents
-- [App](#App)
-- [Project Structure](#project-structure)
-- [Documentation](#documentation)
-- [Architecture](#architecture)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Deployment Specifications](#deployment-specifications)
-
-## App
-
-A small react web app has been designed to interact with articles.
-
-Feel free to have a look at https://app.newsbro.cc website to create your account
+Feel free to have a look at our [website](https://app.newsbro.cc) to create your account
 and interact with 100k+ articles.
-
-We provide automatic update everyday (9am / 6pm UTC), 10k articles ingested
-from various sources, list can be found ./k8s/apps/srvc-scrapping/configmap.yaml
 
 ![login page](./assets/login.png)
 
+We provide automatic update everyday (9am / 6pm UTC), 10k articles ingested
+from various sources. We also provide new recommendation based on your liked articles.
+
 Feel free to open issues if you see anything relevant that could be added.
-App will be down at the end of our project (~ Jan. 2026)
+
+⚠ App will be down at the end of our project (~ Jan. 2026)
+
+## Table of Contents
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+    - [User Feed](#handling-user-feeds)
+- [Development](#dev)
+    - [Backends](#working-with-backends)
+    - [Frontend](#working-with-frontend)
+    - [CI/CD](#cicd)
+    - [Commits](#commits)
+- [Deployment](#deployment)
+    - [Deployment Specifications](#deployment-specifications)
 
 ### Privacy Note
 
@@ -60,6 +60,7 @@ All internal data will be securely erased once the project concludes.
 │   ├── mlflow
 │   ├── postgres                 # CNPG CRD, database definition, user definition
 │   ├── qdrant                   # Vector database
+│   ├── redis                    # Redis Operator, Insight and Sentinels
 │   └── vault                    # Vault server to store secrets, act as authenticator for SA in kubernetes
 ├── .github/workflows/
 └── README.md
@@ -73,33 +74,78 @@ The project is built with a microservices architecture including the following c
 - `repo-article`: Article & feedbacks management
 - `srvc-scrapping`: Scrapping for articles, ingest to kafka
 - `srvc-search`: Search service
-- `srvc-inference`: Inference service to provide use recommendation
+- `srvc-inference`: Inference service to provide update user feeds
+- `srvc-recommendation`: Service providing the user feed
 - `port-front`: main frontend
 
-![Architecture Diagram](docs/archi/archi_v1.0.png)
+![Architecture Diagram](docs/archi/archi_v1.1.png)
 
-## Testing
+### Handling user feeds
 
-Individual service tests can be run by navigating to the specific service directory and executing:
+![User Feed](docs/misc/user_feed.png)
+
+## Dev
+
+We provide a generic docker compose to run a minimal stack at `apps/docker-compose.yml`
+
+### Working with backends
+
+- For go app:
 
 ```bash
+cd apps/$SRVC
 docker compose up -d
-cd apps/<service-name> # TODO
-cd ../..
+go run src/cmd/main.go
 docker compose down
+```
+
+- For python app:
+
+```bash
+cd apps/$SRVC
+docker compose up -d
+# TODO
+docker compose down
+```
+
+### Working with frontend
+
+- We use a vite proxy to handle requests to our backends
+- Backends should be up
+- `apps/docker-compose.yml` should be up
+
+```bash
+cd apps/port-front
+npm ci
+npm run dev
+```
+
+### CI/CD
+
+- Our CI/CD will lint, build and test backend codes.
+- To deploy a new version just tag `<srvc-name>-vx.x.x`.
+
+### Commits
+
+Example of commit we use:
+
+```
+k8s: redis: increase redis sentinel for minimal config
+apps: port-front: now using get profile to retrieve user info as cookies could not be read by frontend
+apps: review swagger, specify dto for errors
 ```
 
 ## Deployment
 
-Our Project is deployed on Kubernetes. The deployment process is handled through our CI/CD pipeline.
+Our Project is deployed with Kubernetes. We [FluxCD](https://fluxcd.io/) as GitOps tool to automate the deployment of our new manifests.
 
 To deploy the whole stack, just use:
 
 ```bash
-kubectl apply -k k8s/ # TODO
+kubectl apply -k k8s/flux/flux-system
 ```
 
-## Deployment Specifications
+### Deployment Specifications
 
 TODO
 
