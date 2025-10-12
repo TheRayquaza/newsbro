@@ -209,7 +209,8 @@ class ApiService {
       });
     }
     return new Promise((resolve, reject) => {
-      this.articlesApi.articlesSubcategoriesGet(category, (error, data) => {
+      var opts = { category: category };
+      this.articlesApi.articlesSubcategoriesGet(opts, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
