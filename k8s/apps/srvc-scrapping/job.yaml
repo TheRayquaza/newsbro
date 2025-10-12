@@ -22,11 +22,8 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: srvc-scrapping
-              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.1.1
+              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.1.2
               imagePullPolicy: IfNotPresent
-              ports:
-                - containerPort: 8080
-                  name: http
               envFrom:
                 - configMapRef:
                     name: srvc-scrapping-config
