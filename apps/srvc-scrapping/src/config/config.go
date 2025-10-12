@@ -15,6 +15,7 @@ type Config struct {
 	KafkaBrokers []string
 	KafkaTopic   string
 	RSSFeedURL   []string
+	WebhookURL   string
 }
 
 func Map[T, U any](ts []T, f func(T) U) []U {
@@ -41,6 +42,7 @@ func Load() *Config {
 		KafkaBrokers: strings.Split(getEnv("KAFKA_BROKERS", "localhost:9092"), ","),
 		KafkaTopic:   getEnv("KAFKA_TOPIC", "new-articles-command"),
 		RSSFeedURL:   Map(strings.FieldsFunc(getEnv("RSS_FEED_URLS", ""), func(r rune) bool { return r == ',' || r == '\n' }), func(s string) string { return strings.TrimSpace(s) }),
+		WebhookURL:   getEnv("WEBHOOK_URL", ""),
 	}
 }
 
