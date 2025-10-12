@@ -3,7 +3,8 @@ import {
     Search,
     Filter,
     Sparkles,
-    RefreshCw
+    RefreshCw,
+    Calendar
 } from "lucide-react";
 import { AuthContext } from "../contexts/Auth";
 import Article from "../components/Article";
@@ -14,10 +15,24 @@ export default function DeepSearchPage() {
     const { user } = useContext(AuthContext);
     const isAdmin = user?.role === "admin";
 
+    // Initialize dates: begin = today, end = 30 days ago
+    const getDefaultBeginDate = () => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    };
+
+    const getDefaultEndDate = () => {
+        const date = new Date();
+        date.setDate(date.getDate() - 30);
+        return date.toISOString().split('T')[0];
+    };
+
     // Search state
     const [searchText, setSearchText] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedSubcategory, setSelectedSubcategory] = useState("");
+    const [beginDate, setBeginDate] = useState(getDefaultBeginDate());
+    const [endDate, setEndDate] = useState(getDefaultEndDate());
     const [limit, _] = useState(20);
     const [offset, setOffset] = useState(0);
     const [totalResults, setTotalResults] = useState(0);
@@ -37,10 +52,6 @@ export default function DeepSearchPage() {
     useEffect(() => {
         loadCategories()
     }, []);
-
-    useEffect(() => {
-        // load user feedbacks for displayed articles
-    }, [articles])
 
     useEffect(() => {
         loadSubcategories(selectedCategory);
@@ -73,6 +84,8 @@ export default function DeepSearchPage() {
             if (searchText) opts.search = searchText;
             if (selectedCategory) opts.category = selectedCategory;
             if (selectedSubcategory) opts.subcategory = selectedSubcategory;
+            if (beginDate) opts.beginDate = beginDate;
+            if (endDate) opts.endDate = endDate;
 
             const data = await api.getArticles(opts);
             setArticles(data.articles || []);
@@ -136,7 +149,6 @@ export default function DeepSearchPage() {
                             />
                         </div>
 
-
                         <button
                             onClick={() => setShowFilters(!showFilters)}
                             className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${showFilters
@@ -168,7 +180,7 @@ export default function DeepSearchPage() {
                     </div>
 
                     {showFilters && (
-                        <div className="mt-6 pt-6 border-t border-blue-500/20 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="mt-6 pt-6 border-t border-blue-500/20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">Category</label>
                                 <select
@@ -202,6 +214,32 @@ export default function DeepSearchPage() {
                                     </select>
                                 </div>
                             )}
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-1">
+                                    <Calendar className="w-4 h-4" />
+                                    Begin Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={beginDate}
+                                    onChange={(e) => setBeginDate(e.target.value)}
+                                    className="w-full px-4 py-2 bg-slate-800/50 border border-blue-500/30 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-1">
+                                    <Calendar className="w-4 h-4" />
+                                    End Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="w-full px-4 py-2 bg-slate-800/50 border border-blue-500/30 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                />
+                            </div>
                         </div>
                     )}
                 </div>

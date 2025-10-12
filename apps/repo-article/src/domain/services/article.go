@@ -189,6 +189,12 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 		searchTerm := "%" + strings.ToLower(filters.Search) + "%"
 		query = query.Where("LOWER(title) LIKE ? OR LOWER(abstract) LIKE ?", searchTerm, searchTerm)
 	}
+	if filters.BeginDate != (time.Time{}) {
+		query = query.Where("published_at >= ?", filters.BeginDate)
+	}
+	if filters.EndDate != (time.Time{}) {
+		query = query.Where("published_at <= ?", filters.EndDate)
+	}
 
 	// Count total results
 	if err := query.Count(&total).Error; err != nil {
