@@ -184,7 +184,7 @@ func generateMessageChunks(stats []FeedProcessingStats, totalProcessed int, tota
 	var header strings.Builder
 	header.WriteString(fmt.Sprintf("📰 **Feed Report** (finished at %s)\n", time.Now().Format("15:04:05")))
 	header.WriteString(fmt.Sprintf("✅ **%d** processed in %d feeds, done in %vs \n", totalProcessed, len(stats), totalTime.Round(time.Second).Seconds()))
-	
+
 	currentChunk := header.String()
 
 	var summaryBuilder strings.Builder
@@ -203,12 +203,12 @@ func generateMessageChunks(stats []FeedProcessingStats, totalProcessed int, tota
 		if stat.LanguageSkipped > 0 {
 			lineIcons += fmt.Sprintf("   %d 🌍", stat.LanguageSkipped)
 		}
-		
-		if lineIcons == "" {
-            continue
-        } 
 
-        line := fmt.Sprintf("• %s: %d ✅%s\n", stat.FeedURL, stat.ProcessedCount, lineIcons)
+		if lineIcons == "" {
+			continue
+		}
+
+		line := fmt.Sprintf("• %s: %d ✅%s\n", stat.FeedURL, stat.ProcessedCount, lineIcons)
 
 		if len(currentChunk)+len(line) > DISCORD_MAX_LENGTH {
 			chunks = append(chunks, currentChunk)
@@ -225,17 +225,17 @@ func generateMessageChunks(stats []FeedProcessingStats, totalProcessed int, tota
 
 	if len(errors) > 0 {
 		errorHeader := "\n⚠️ **Errors:**\n"
-		
+
 		if len(currentChunk)+len(errorHeader)+50 > DISCORD_MAX_LENGTH {
 			chunks = append(chunks, currentChunk)
 			currentChunk = ""
 		}
-		
+
 		currentChunk += errorHeader
-		
+
 		for _, err := range errors {
 			errorLine := fmt.Sprintf("• %s\n", err)
-			
+
 			if len(currentChunk)+len(errorLine) > DISCORD_MAX_LENGTH {
 				chunks = append(chunks, currentChunk)
 				currentChunk = "..." + errorLine
@@ -258,10 +258,10 @@ func (u *RSSService) sendDetailedDiscordMessage(stats []FeedProcessingStats, tot
 	}
 
 	messageChunks := generateMessageChunks(stats, totalProcessed, totalTime, errors)
-	
+
 	username := USERNAME
 	var combinedError error
-	
+
 	for _, chunk := range messageChunks {
 		content := chunk
 
@@ -269,7 +269,7 @@ func (u *RSSService) sendDetailedDiscordMessage(stats []FeedProcessingStats, tot
 			Username: &username,
 			Content:  &content,
 		})
-		
+
 		if err != nil {
 			if combinedError == nil {
 				combinedError = err
