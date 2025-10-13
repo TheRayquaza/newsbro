@@ -23,10 +23,10 @@ type RSSService interface {
 	ProcessFeed(ctx context.Context) (int, error)
 }
 
-type rSSService struct {
+type rssService struct {
 	articleRepo repository.ArticleRepository
 	producer    sarama.SyncProducer
-	config      *config.Config
+	cfg         *config.Config
 	categorizer *ArticleCategorizer
 	detector    lingua.LanguageDetector
 }
@@ -42,10 +42,10 @@ func NewRSSService(articleRepo repository.ArticleRepository, producer sarama.Syn
 		FromLanguages(languages...).
 		Build()
 
-	return &rSSService{
+	return &rssService{
 		articleRepo: articleRepo,
 		producer:    producer,
-		config:      cfg,
+		cfg:         cfg,
 		categorizer: NewArticleCategorizer(),
 		detector:    detector,
 	}
@@ -62,7 +62,7 @@ type FeedProcessingStats struct {
 	LanguageSkipped int
 }
 
-func (u *rSSService) ProcessFeed(ctx context.Context) (int, error) {
+func (u *rssService) ProcessFeed(ctx context.Context) (int, error) {
 	fp := gofeed.NewParser()
 	startTime := time.Now()
 
@@ -70,7 +70,7 @@ func (u *rSSService) ProcessFeed(ctx context.Context) (int, error) {
 	feedStats := make([]FeedProcessingStats, 0)
 	globalErrors := make([]string, 0)
 
-	for _, feedURL := range u.config.RSSFeedURL {
+	for _, feedURL := range u.cfg.RSSFeedURL {
 		feedStartTime := time.Now()
 		stats := FeedProcessingStats{
 			FeedURL:      feedURL,
@@ -180,6 +180,7 @@ func (u *rSSService) ProcessFeed(ctx context.Context) (int, error) {
 
 func generateMessageChunks(stats []FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) []string {
 	var chunks []string
+	const DISCORD_MAX_LENGTH = 2000
 
 	var header strings.Builder
 	header.WriteString(fmt.Sprintf("📰 **Feed Report** (finished at %s)\n", time.Now().Format("15:04:05")))
@@ -252,20 +253,20 @@ func generateMessageChunks(stats []FeedProcessingStats, totalProcessed int, tota
 	return chunks
 }
 
-func (u *RSSService) sendDetailedDiscordMessage(stats []FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) error {
-	if u.config.WebhookURL == "" {
+func (u *rssService) sendDetailedDiscordMessage(stats []FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) error {
+	if u.cfg.WebhookURL == "" {
 		return nil
 	}
 
 	messageChunks := generateMessageChunks(stats, totalProcessed, totalTime, errors)
 
-	username := USERNAME
+	username := "Albert - The News Bro"
 	var combinedError error
 
 	for _, chunk := range messageChunks {
 		content := chunk
 
-		err := discordwebhook.SendMessage(u.config.WebhookURL, Message{
+		err := discordwebhook.SendMessage(u.cfg.WebhookURL, discordwebhook.Message{
 			Username: &username,
 			Content:  &content,
 		})
@@ -282,7 +283,7 @@ func (u *RSSService) sendDetailedDiscordMessage(stats []FeedProcessingStats, tot
 	return combinedError
 }
 
-func (u *rSSService) sendToKafka(message *command.NewArticleCommand) error {
+func (u *rssService) sendToKafka(message *command.NewArticleCommand) error {
 	payload, err := json.Marshal(message)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
@@ -290,7 +291,7 @@ func (u *rSSService) sendToKafka(message *command.NewArticleCommand) error {
 
 	msg := &sarama.ProducerMessage{
 		Key:   sarama.StringEncoder(message.Link),
-		Topic: u.config.KafkaTopic,
+		Topic: u.cfg.KafkaTopic,
 		Value: sarama.ByteEncoder(payload),
 	}
 
