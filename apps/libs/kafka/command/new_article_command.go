@@ -5,6 +5,7 @@ import "time"
 type NewArticleCommand struct {
 	Title       string    `json:"title"`
 	Link        string    `json:"link"`
+	RSSLink     string    `json:"rss_link"`
 	Description string    `json:"description"`
 	Content     string    `json:"content"`
 	Author      string    `json:"author"`
