@@ -178,57 +178,108 @@ func (u *rSSService) ProcessFeed(ctx context.Context) (int, error) {
 	return totalCount, nil
 }
 
-func (u *rSSService) sendDetailedDiscordMessage(stats []FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) error {
-	if u.config.WebhookURL == "" {
-		return nil
-	}
+func generateMessageChunks(stats []FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) []string {
+	var chunks []string
 
-	var msg strings.Builder
-	msg.WriteString(fmt.Sprintf("📰 **Feed Report** (finished at %s)\n", time.Now().Format("15:04:05")))
-	msg.WriteString(fmt.Sprintf("✅ **%d** processed in %d feeds, done in %vs \n", totalProcessed, len(stats), totalTime.Round(time.Second).Seconds()))
+	var header strings.Builder
+	header.WriteString(fmt.Sprintf("📰 **Feed Report** (finished at %s)\n", time.Now().Format("15:04:05")))
+	header.WriteString(fmt.Sprintf("✅ **%d** processed in %d feeds, done in %vs \n", totalProcessed, len(stats), totalTime.Round(time.Second).Seconds()))
+	
+	currentChunk := header.String()
 
-	// Compact feed summary
+	var summaryBuilder strings.Builder
 	for _, stat := range stats {
 		if stat.ProcessedCount == 0 && stat.ErrorCount == 0 {
 			continue
 		}
 
-		line := ""
+		lineIcons := ""
 		if stat.ErrorCount > 0 {
-			line += fmt.Sprintf("   %d ⚠️", stat.ErrorCount)
+			lineIcons += fmt.Sprintf("   %d ⚠️", stat.ErrorCount)
 		}
 		if stat.SkippedCount > 0 {
-			line += fmt.Sprintf("   %d ⏭️", stat.SkippedCount)
+			lineIcons += fmt.Sprintf("   %d ⏭️", stat.SkippedCount)
 		}
 		if stat.LanguageSkipped > 0 {
-			line += fmt.Sprintf("   %d 🌍", stat.LanguageSkipped)
+			lineIcons += fmt.Sprintf("   %d 🌍", stat.LanguageSkipped)
 		}
-		if line == "" {
-			continue
+		
+		if lineIcons == "" {
+            continue
+        } 
+
+        line := fmt.Sprintf("• %s: %d ✅%s\n", stat.FeedURL, stat.ProcessedCount, lineIcons)
+
+		if len(currentChunk)+len(line) > DISCORD_MAX_LENGTH {
+			chunks = append(chunks, currentChunk)
+			currentChunk = "..." + line
 		} else {
-			line = fmt.Sprintf("• %s: %d ✅%s", stat.FeedURL, stat.ProcessedCount, line)
-			msg.WriteString(line + "\n")
+			currentChunk += line
 		}
 	}
 
-	// Critical errors only
-	if len(errors) > 0 && len(errors) <= 3 {
-		msg.WriteString("\n⚠️ **Errors:**\n")
+	if len(currentChunk) > len(header.String()) {
+		summaryBuilder.WriteString(currentChunk)
+		currentChunk = summaryBuilder.String()
+	}
+
+	if len(errors) > 0 {
+		errorHeader := "\n⚠️ **Errors:**\n"
+		
+		if len(currentChunk)+len(errorHeader)+50 > DISCORD_MAX_LENGTH {
+			chunks = append(chunks, currentChunk)
+			currentChunk = ""
+		}
+		
+		currentChunk += errorHeader
+		
 		for _, err := range errors {
-			if len(msg.String())+len(err) > 1900 {
-				break
+			errorLine := fmt.Sprintf("• %s\n", err)
+			
+			if len(currentChunk)+len(errorLine) > DISCORD_MAX_LENGTH {
+				chunks = append(chunks, currentChunk)
+				currentChunk = "..." + errorLine
+			} else {
+				currentChunk += errorLine
 			}
-			msg.WriteString(fmt.Sprintf("• %s\n", err))
 		}
 	}
 
-	username := "Albert - The News Bro"
-	content := msg.String()
+	if currentChunk != "" {
+		chunks = append(chunks, currentChunk)
+	}
 
-	return discordwebhook.SendMessage(u.config.WebhookURL, discordwebhook.Message{
-		Username: &username,
-		Content:  &content,
-	})
+	return chunks
+}
+
+func (u *RSSService) sendDetailedDiscordMessage(stats []FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) error {
+	if u.config.WebhookURL == "" {
+		return nil
+	}
+
+	messageChunks := generateMessageChunks(stats, totalProcessed, totalTime, errors)
+	
+	username := USERNAME
+	var combinedError error
+	
+	for _, chunk := range messageChunks {
+		content := chunk
+
+		err := discordwebhook.SendMessage(u.config.WebhookURL, Message{
+			Username: &username,
+			Content:  &content,
+		})
+		
+		if err != nil {
+			if combinedError == nil {
+				combinedError = err
+			} else {
+				combinedError = fmt.Errorf("%w; %w", combinedError, err)
+			}
+		}
+	}
+
+	return combinedError
 }
 
 func (u *rSSService) sendToKafka(message *command.NewArticleCommand) error {
