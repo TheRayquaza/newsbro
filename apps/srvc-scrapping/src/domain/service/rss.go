@@ -139,6 +139,7 @@ func (u *rSSService) ProcessFeed(ctx context.Context) (int, error) {
 			message := command.NewArticleCommand{
 				Title:       item.Title,
 				Link:        item.Link,
+				RSSLink:     feedURL,
 				Description: description,
 				Content:     content,
 				Author:      getAuthor(item),

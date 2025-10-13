@@ -13,7 +13,7 @@ import (
 	docs "repo_article/docs"
 )
 
-func SetupRouter(cfg *config.Config, articleService *services.ArticleService, feedbackService *services.FeedbackService) *gin.Engine {
+func SetupRouter(cfg *config.Config, articleService *services.ArticleService, feedbackService *services.FeedbackService, rssService *services.RSSService) *gin.Engine {
 	router := gin.Default()
 
 	// Middleware
@@ -28,6 +28,7 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 	// Controllers
 	articleController := controllers.NewArticleController(articleService)
 	feedbackController := controllers.NewFeedbackController(feedbackService)
+	rssController := controllers.NewRSSController(rssService)
 
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
@@ -87,6 +88,17 @@ func SetupRouter(cfg *config.Config, articleService *services.ArticleService, fe
 				feedback.GET("/stats", authMiddleware.AdminMiddleware(), feedbackController.GetFeedbackStats)
 				feedback.GET("/all", authMiddleware.AdminMiddleware(), feedbackController.GetAllFeedback)
 				feedback.POST("/ingest", authMiddleware.AdminMiddleware(), feedbackController.TriggerIngestFeedback)
+			}
+
+			// Rss routes
+			rss := protected.Group("/rss")
+			{
+				rss.GET("", rssController.GetRSS)
+				rss.GET("/tree", rssController.GetTreeRSS)
+				rss.GET("/:name", rssController.GetRSSByName) // not "tree"
+				rss.POST("", authMiddleware.AdminMiddleware(), rssController.CreateRSS)
+				rss.PUT("/:name", authMiddleware.AdminMiddleware(), rssController.UpdateRSS)
+				rss.DELETE("/:name", authMiddleware.AdminMiddleware(), rssController.DeleteRSS)
 			}
 		}
 	}

@@ -19,6 +19,7 @@ type Config struct {
 	KafkaGroupID                string
 	KafkaArticleAggregateTopic  string
 	KafkaFeedbackAggregateTopic string
+	KafkaRSSAggregateTopic      string
 	FrontendOrigin              string
 	Environment                 string
 }
@@ -42,6 +43,7 @@ func Load() *Config {
 		KafkaArticleCommandTopic:    getEnv("KAFKA_ARTICLE_COMMAND_TOPIC", "new-articles-command"),
 		KafkaArticleAggregateTopic:  getEnv("KAFKA_ARTICLE_AGGREGATE_TOPIC", "articles-aggregate"),
 		KafkaFeedbackAggregateTopic: getEnv("KAFKA_FEEDBACK_AGGREGATE_TOPIC", "feedback-aggregate"),
+		KafkaRSSAggregateTopic:      getEnv("KAFKA_RSS_AGGREGATE_TOPIC", "rss-aggregate"),
 		KafkaGroupID:                getEnv("KAFKA_GROUP_ID", "repo-article-group"),
 		FrontendOrigin:              getEnv("FRONTEND_ORIGIN", "https://app.newsbro.cc"),
 		Environment:                 getEnv("ENVIRONMENT", "prod"),

@@ -1,0 +1,507 @@
+rss_meta_feeds:
+  - name: "Tech"
+    description: "Technology news and updates"
+  - name: "Politics"
+    description: "Political news and analysis"
+  - name: "Business"
+    description: "Business news and market updates"
+  - name: "Health"
+    description: "Health news and medical research"
+  - name: "Science"
+    description: "Science news and discoveries"
+  - name: "Sports"
+    description: "Sports news and scores"
+  - name: "Entertainment"
+    description: "Entertainment news and celebrity gossip, culture, and gaming"
+  - name: "Travel"
+    description: "Travel news and tips"
+  - name: "Lifestyle"
+    description: "Lifestyle news and trends, including fashion and photography"
+  - name: "World"
+    description: "Global news and events"
+  - name: "UK"
+    description: "News from the United Kingdom"
+    parents: ["World"]
+  - name: "Canada"
+    description: "News from Canada"
+    parents: ["World"]
+  - name: "Australia"
+    description: "News from Australia"
+    parents: ["World"]
+  - name: "India"
+    description: "News from India"
+    parents: ["World"]
+  - name: "US"
+    description: "News from the United States"
+    parents: ["World"]
+  - name: "Development"
+    description: "Web Development, Coding, and CMS news"
+
+rss_feeds:
+  # News/World Feeds
+  - name: "BBC News"
+    link: "https://feeds.bbci.co.uk/news/rss.xml"
+    description: "General top stories and headlines from the BBC, a major UK and world news source."
+    parents: ["UK", "World"]
+  - name: "CNN"
+    link: "http://rss.cnn.com/rss/edition.rss"
+    description: "Top international stories from the Cable News Network."
+    parents: ["US", "World"]
+  - name: "The Guardian"
+    link: "https://www.theguardian.com/world/rss"
+    description: "World and global news coverage from the UK-based newspaper."
+    parents: ["UK", "World"]
+  - name: "Al Jazeera"
+    link: "https://www.aljazeera.com/xml/rss/all.xml"
+    description: "Comprehensive coverage of international news, with a focus on the Middle East."
+    parents: ["World", "Politics"]
+  - name: "NPR"
+    link: "https://feeds.npr.org/1001/rss.xml"
+    description: "National Public Radio's main news feed for US and world events."
+    parents: ["US", "World"]
+  - name: "DW"
+    link: "https://rss.dw.com/rdf/rss-en-all"
+    description: "Global headlines from Deutsche Welle, Germany's international broadcaster."
+    parents: ["World"]
+  - name: "NY Times"
+    link: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
+    description: "The New York Times' main homepage feed for top news stories."
+    parents: ["US", "World"]
+  - name: "ABC News"
+    link: "http://feeds.abcnews.com/abcnews/usheadlines"
+    description: "Headlines focused on national news within the United States."
+    parents: ["US"]
+  - name: "Reuters (World)"
+    link: "http://feeds.reuters.com/reuters/worldnews"
+    description: "The official Reuters feed for all global and international news."
+    parents: ["World"]
+  - name: "Fox News Latest"
+    link: "http://feeds.foxnews.com/foxnews/latest?format=xml"
+    description: "The most recent headlines from Fox News."
+    parents: ["US", "Politics"]
+  - name: "France24 (World)"
+    link: "https://www.france24.com/en/rss"
+    description: "International news and analysis from the French state-owned news network."
+    parents: ["World"]
+  - name: "SMH (Australia)"
+    link: "https://www.smh.com.au/rss/feed.xml"
+    description: "The main news feed from The Sydney Morning Herald."
+    parents: ["Australia"]
+  - name: "ABC Australia"
+    link: "https://www.abc.net.au/news/feed/1948/rss.xml"
+    description: "General news from the Australian Broadcasting Corporation."
+    parents: ["Australia"]
+  - name: "Mediapart"
+    link: "https://www.mediapart.fr/articles/feed"
+    description: "Investigative and political news from the independent French online journal."
+    parents: ["World", "Politics"]
+
+  # Tech Feeds
+  - name: "Wired"
+    link: "https://www.wired.com/feed/rss"
+    description: "Coverage on how technology changes culture, business, and science."
+    parents: ["Tech", "Science"]
+  - name: "The Verge"
+    link: "https://www.theverge.com/rss/index.xml"
+    description: "News on consumer electronics, gadgets, and the intersection of tech and lifestyle."
+    parents: ["Tech", "Entertainment"]
+  - name: "Ars Technica"
+    link: "http://feeds.arstechnica.com/arstechnica/index/"
+    description: "In-depth news and analysis on technology, science, and policy."
+    parents: ["Tech", "Science"]
+  - name: "Mashable"
+    link: "http://feeds.mashable.com/Mashable"
+    description: "Digital culture, social media, and tech news."
+    parents: ["Tech", "Entertainment"]
+  - name: "Gizmodo"
+    link: "https://gizmodo.com/rss"
+    description: "News on design, technology, science, and science fiction."
+    parents: ["Tech", "Science"]
+  - name: "BBC Technology"
+    link: "http://feeds.bbci.co.uk/news/technology/rss.xml"
+    description: "Technology news and developments from the BBC."
+    parents: ["Tech", "UK"]
+  - name: "NYTimes Tech"
+    link: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
+    description: "Technology news section from The New York Times."
+    parents: ["Tech", "US"]
+
+  # Business/Finance Feeds
+  - name: "Bloomberg ETF Report"
+    link: "https://www.bloomberg.com/feed/podcast/etf-report.xml"
+    description: "A podcast feed providing updates and analysis on Exchange-Traded Funds (ETFs)."
+    parents: ["Business"]
+  - name: "Forbes Business"
+    link: "https://www.forbes.com/business/feed/"
+    description: "Business news, company profiles, and market commentary from Forbes."
+    parents: ["Business"]
+  - name: "CNBC"
+    link: "https://www.cnbc.com/id/100003114/device/rss/rss.html"
+    description: "Real-time financial news, market data, and business headlines."
+    parents: ["Business", "US"]
+  - name: "Financial Times"
+    link: "https://www.ft.com/?format=rss"
+    description: "Global business and finance news from the Financial Times."
+    parents: ["Business", "UK", "World"]
+  - name: "The Economist"
+    link: "https://www.economist.com/latest/rss.xml"
+    description: "Latest articles covering global politics, business, and finance."
+    parents: ["Business", "Politics", "World"]
+  - name: "MarketWatch"
+    link: "https://www.marketwatch.com/rss/topstories"
+    description: "Top stories and analysis on the stock market and personal finance."
+    parents: ["Business"]
+  - name: "Wall Street Journal Markets"
+    link: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"
+    description: "Main market and finance headlines from the Wall Street Journal."
+    parents: ["Business", "US"]
+  - name: "France24 Business"
+    link: "https://www.france24.com/en/business/rss"
+    description: "Business and economy news from France24."
+    parents: ["Business"]
+
+  # Sports Feeds
+  - name: "ESPN"
+    link: "https://www.espn.com/espn/rss/news"
+    description: "Latest sports news, scores, and highlights from ESPN."
+    parents: ["Sports", "US"]
+  - name: "BBC Sport"
+    link: "https://feeds.bbci.co.uk/sport/rss.xml"
+    description: "General sports news and results from the BBC."
+    parents: ["Sports", "UK"]
+  - name: "Sky Sports"
+    link: "https://www.skysports.com/rss/12040"
+    description: "Sports news and analysis, particularly focused on UK and European events."
+    parents: ["Sports", "UK"]
+  - name: "BBC Sport (UK)"
+    link: "http://feeds.bbci.co.uk/sport/0/rss.xml?edition=uk"
+    description: "BBC Sport's specific feed tailored for a UK audience."
+    parents: ["Sports", "UK"]
+  - name: "France24 Sport"
+    link: "https://www.france24.com/en/sport/rss"
+    description: "International sports news from France24."
+    parents: ["Sports"]
+
+  # Entertainment/Culture Feeds
+  - name: "Rolling Stone Music"
+    link: "https://www.rollingstone.com/music/music-news/feed/"
+    description: "Latest news, reviews, and features on music and the music industry."
+    parents: ["Entertainment", "Lifestyle"]
+  - name: "Billboard"
+    link: "https://www.billboard.com/feed/"
+    description: "Music charts, industry news, and album/song reviews."
+    parents: ["Entertainment"]
+  - name: "E! Online"
+    link: "https://www.eonline.com/syndication/feeds/rssfeeds/topstories"
+    description: "Celebrity gossip, entertainment news, and pop culture updates."
+    parents: ["Entertainment"]
+  - name: "IGN"
+    link: "https://feeds.ign.com/ign/all"
+    description: "All-encompassing news, reviews, and previews for video games and entertainment."
+    parents: ["Entertainment", "Tech"]
+  - name: "France24 Culture"
+    link: "https://www.france24.com/en/culture/rss"
+    description: "Cultural news, arts, and cinema from France24."
+    parents: ["Entertainment"]
+
+  # Health Feeds
+  - name: "NHS England"
+    link: "https://www.england.nhs.uk/feed/"
+    description: "Updates and news from the National Health Service in England."
+    parents: ["Health", "UK"]
+  - name: "BBC Health"
+    link: "http://feeds.bbci.co.uk/news/health/rss.xml?edition=us"
+    description: "Health news and features from the BBC."
+    parents: ["Health", "UK"]
+  - name: "New Scientist"
+    link: "http://feeds.newscientist.com/health"
+    description: "Coverage of medical and health-related research and science."
+    parents: ["Health", "Science"]
+  - name: "France24 Health"
+    link: "https://www.france24.com/en/health/rss"
+    description: "International health and medical news from France24."
+    parents: ["Health"]
+
+  # Science Feeds
+  - name: "Nature"
+    link: "https://www.nature.com/nature.rss"
+    description: "The main feed from the multidisciplinary science journal, Nature."
+    parents: ["Science"]
+  - name: "TED Talks"
+    link: "https://feeds.feedburner.com/tedtalks_video"
+    description: "Videos of inspirational and educational talks on a wide range of topics."
+    parents: ["Science", "Tech", "Lifestyle"]
+  - name: "Science Magazine"
+    link: "https://www.sciencemag.org/rss/current.xml"
+    description: "Current issue articles and breakthroughs from the American Association for the Advancement of Science."
+    parents: ["Science"]
+  - name: "Live Science"
+    link: "https://www.livescience.com/feeds/all"
+    description: "General science, technology, and health news."
+    parents: ["Science"]
+  - name: "The Conversation"
+    link: "https://theconversation.com/us/articles.atom"
+    description: "News and analysis written by academics and researchers for the public."
+    parents: ["Science", "Politics", "World"]
+  - name: "Scientific American"
+    link: "http://rss.sciam.com/ScientificAmerican-Global"
+    description: "Science and technology news from a global perspective."
+    parents: ["Science"]
+  - name: "Phys.org"
+    link: "http://phys.org/rss-feed/"
+    description: "News and research updates in physics, earth science, and technology."
+    parents: ["Science", "Tech"]
+  - name: "Science Daily"
+    link: "http://feeds.sciencedaily.com/sciencedaily"
+    description: "A wide variety of science, health, and technology news releases."
+    parents: ["Science"]
+  - name: "Nature (Current)"
+    link: "http://feeds.nature.com/nature/rss/current"
+    description: "Current issue articles and research from Nature."
+    parents: ["Science"]
+
+  # Travel Feeds
+  - name: "Conde Nast Traveler"
+    link: "https://www.cntraveler.com/feed/rss"
+    description: "Luxury travel, destination guides, and lifestyle content."
+    parents: ["Travel", "Lifestyle"]
+  - name: "Nomadic Matt"
+    link: "https://www.nomadicmatt.com/feed/"
+    description: "Budget travel tips, advice, and destination stories."
+    parents: ["Travel", "Lifestyle"]
+  - name: "The Points Guy"
+    link: "https://thepointsguy.com/feed/"
+    description: "Credit card, loyalty program, and airline points/miles advice."
+    parents: ["Travel", "Business"]
+  - name: "Adventure Journal"
+    link: "https://www.adventure-journal.com/feed/"
+    description: "Stories, gear reviews, and news focusing on outdoor adventure."
+    parents: ["Travel", "Sports", "Lifestyle"]
+
+  # Lifestyle/Fashion Feeds
+  - name: "Vogue"
+    link: "https://www.vogue.com/feed/rss"
+    description: "Fashion, beauty, culture, and celebrity news from Vogue."
+    parents: ["Lifestyle"]
+  - name: "Elle"
+    link: "https://www.elle.com/rss/all.xml/"
+    description: "Fashion, beauty, and women's lifestyle content."
+    parents: ["Lifestyle"]
+  - name: "The Guardian Fashion"
+    link: "https://www.theguardian.com/fashion/rss"
+    description: "Fashion news, reviews, and industry insights from The Guardian."
+    parents: ["Lifestyle", "UK"]
+
+  # Photography/Development Feeds
+  - name: "PetaPixel"
+    link: "https://petapixel.com/feed/"
+    description: "Photography news, reviews, and tutorials for photographers."
+    parents: ["Lifestyle", "Tech"]
+  - name: "WP Tavern"
+    link: "https://wptavern.com/feed/"
+    description: "News and discussion about WordPress and the larger web development community."
+    parents: ["Development", "Tech"]
+  - name: "CSS-Tricks"
+    link: "https://css-tricks.com/feed/"
+    description: "Tips, tutorials, and articles on all things related to web development and design."
+    parents: ["Development", "Tech"]
+  - name: "Smashing Magazine"
+    link: "https://www.smashingmagazine.com/feed/"
+    description: "Professional resources and articles for web designers and developers."
+    parents: ["Development", "Tech"]
+  - name: "WPMayor"
+    link: "https://wpmayor.com/feed/"
+    description: "WordPress themes, plugins, and news reviews."
+    parents: ["Development", "Tech"]
+
+  # Politics-Specific Feeds
+  - name: "Washington Post Politics"
+    link: "http://feeds.washingtonpost.com/rss/rss_election-2012"
+    description: "Political news, analysis, and election coverage from the Washington Post."
+    parents: ["Politics", "US"]
+
+  # Additional Feeds (Consolidated and Categorized)
+  - name: "CNN Top Stories"
+    link: "http://rss.cnn.com/rss/cnn_topstories.rss"
+    description: "CNN's general top headlines and breaking news."
+    parents: ["US", "World"]
+  - name: "CBS News Latest"
+    link: "http://www.cbsnews.com/latest/rss/main"
+    description: "The latest news feed from CBS News."
+    parents: ["US", "World"]
+  - name: "Christian Science Monitor (USA)"
+    link: "http://rss.csmonitor.com/feeds/usa"
+    description: "US-focused news and perspective from the Christian Science Monitor."
+    parents: ["US", "World"]
+  - name: "NBC News Top Stories"
+    link: "http://feeds.nbcnews.com/feeds/topstories"
+    description: "The main top news stories feed from NBC News."
+    parents: ["US", "World"]
+  - name: "NBC News World"
+    link: "http://feeds.nbcnews.com/feeds/worldnews"
+    description: "International and global news coverage from NBC News."
+    parents: ["World"]
+  - name: "Yahoo News World"
+    link: "http://rss.news.yahoo.com/rss/world"
+    description: "Global news aggregated by Yahoo News."
+    parents: ["World"]
+  - name: "The Daily Beast"
+    link: "http://feeds.feedburner.com/thedailybeast/articles"
+    description: "A blend of political, cultural, and entertainment news."
+    parents: ["Politics", "Entertainment"]
+  - name: "Quartz"
+    link: "http://qz.com/feed"
+    description: "Global business news, economic analysis, and future trends."
+    parents: ["Business", "World"]
+  - name: "The New Yorker News"
+    link: "http://www.newyorker.com/feed/news"
+    description: "In-depth articles and commentary on news, politics, and current events."
+    parents: ["Politics", "Entertainment"]
+  - name: "LATimes Nation"
+    link: "http://www.latimes.com/nation/rss2.0.xml"
+    description: "National news coverage from the Los Angeles Times."
+    parents: ["US"]
+  - name: "LATimes World"
+    link: "http://www.latimes.com/world/rss2.0.xml"
+    description: "World and international news from the Los Angeles Times."
+    parents: ["World"]
+  - name: "Salon News"
+    link: "http://www.salon.com/category/news/feed/rss/"
+    description: "Political, cultural, and opinion pieces."
+    parents: ["Politics", "Entertainment"]
+  - name: "Time News"
+    link: "http://time.com/newsfeed/feed/"
+    description: "General news and top headlines from Time magazine."
+    parents: ["World"]
+  - name: "CNN Politics"
+    link: "http://rss.cnn.com/rss/cnn_allpolitics.rss"
+    description: "Political news and analysis from CNN."
+    parents: ["Politics", "US"]
+  - name: "BuzzFeed Politics"
+    link: "http://www.buzzfeed.com/politics.xml"
+    description: "Political news and social justice reporting from BuzzFeed."
+    parents: ["Politics"]
+  - name: "NYTimes Politics"
+    link: "http://rss.nytimes.com/services/xml/rss/nyt/Politics.xml"
+    description: "The politics section of The New York Times."
+    parents: ["Politics", "US"]
+  - name: "Reddit r/politics"
+    link: "http://www.reddit.com/r/politics/.rss"
+    description: "Top posts from the popular Reddit community focused on political news and discussion."
+    parents: ["Politics"]
+  - name: "NYTimes Business"
+    link: "http://www.nytimes.com/services/xml/rss/nyt/Business.xml"
+    description: "Business and finance news section of The New York Times."
+    parents: ["Business", "US"]
+  - name: "Harvard Business Review"
+    link: "http://feeds.harvardbusiness.org/harvardbusiness?format=xml"
+    description: "Management and leadership ideas from Harvard Business Review."
+    parents: ["Business"]
+  - name: "CNN Health"
+    link: "http://rss.cnn.com/rss/cnn_health.rss"
+    description: "Health, medical, and wellness news from CNN."
+    parents: ["Health"]
+  - name: "NYTimes Health"
+    link: "http://www.nytimes.com/services/xml/rss/nyt/Health.xml"
+    description: "The health and fitness section of The New York Times."
+    parents: ["Health", "US"]
+  - name: "ABC News Health"
+    link: "http://feeds.abcnews.com/abcnews/healthheadlines"
+    description: "Health-related headlines from ABC News."
+    parents: ["Health", "US"]
+  - name: "The Guardian Health"
+    link: "http://www.theguardian.com/society/health/rss"
+    description: "Social and public health news from The Guardian."
+    parents: ["Health", "UK"]
+  - name: "Time Health"
+    link: "http://time.com/health/feed/"
+    description: "Health, medical, and scientific news from Time magazine."
+    parents: ["Health"]
+  - name: "NYTimes Science"
+    link: "http://rss.nytimes.com/services/xml/rss/nyt/Science.xml"
+    description: "The science section of The New York Times."
+    parents: ["Science", "US"]
+  - name: "LA Times Health"
+    link: "http://www.latimes.com/health/rss2.0.xml"
+    description: "Health and medical news from the Los Angeles Times."
+    parents: ["Health", "US"]
+  - name: "Scientific American News"
+    link: "http://rss.sciam.com/ScientificAmerican-News"
+    description: "Latest news and developments across all fields of science."
+    parents: ["Science"]
+  - name: "Ars Technica Science"
+    link: "http://feeds.arstechnica.com/arstechnica/science"
+    description: "In-depth scientific and research news from Ars Technica."
+    parents: ["Science", "Tech"]
+  - name: "The Guardian Science"
+    link: "http://www.theguardian.com/science/rss"
+    description: "Science news, environment, and research articles from The Guardian."
+    parents: ["Science", "UK"]
+  - name: "NYTimes Sports"
+    link: "http://rss.nytimes.com/services/xml/rss/nyt/Sports.xml"
+    description: "Sports news and scores section of The New York Times."
+    parents: ["Sports", "US"]
+  - name: "CNN Tech"
+    link: "http://rss.cnn.com/rss/cnn_tech.rss"
+    description: "Technology news, reviews, and analysis from CNN."
+    parents: ["Tech", "US"]
+  - name: "Wired Index"
+    link: "http://feeds.wired.com/wired/index"
+    description: "The main feed for all articles published on Wired."
+    parents: ["Tech", "Science"]
+  - name: "CNET News"
+    link: "http://www.cnet.com/rss/news/"
+    description: "General technology and product news from CNET."
+    parents: ["Tech"]
+  - name: "TechCrunch"
+    link: "http://feeds.feedburner.com/Techcrunch/social?format=xml"
+    description: "News on startups, technology, and venture capital funding."
+    parents: ["Tech", "Business"]
+  - name: "LA Times Entertainment"
+    link: "http://www.latimes.com/entertainment/rss2.0.xml"
+    description: "Entertainment and Hollywood news from the Los Angeles Times."
+    parents: ["Entertainment", "US"]
+  - name: "Vulture (NY Mag)"
+    link: "http://feeds.feedburner.com/nymag/vulture"
+    description: "Culture, movies, music, and TV commentary from New York Magazine."
+    parents: ["Entertainment"]
+  - name: "TMZ"
+    link: "http://www.tmz.com/rss.xml"
+    description: "Breaking celebrity news and gossip."
+    parents: ["Entertainment"]
+  - name: "Giant Bomb"
+    link: "http://www.giantbomb.com/feeds/mashup/"
+    description: "Video game news, reviews, and features from Giant Bomb."
+    parents: ["Entertainment", "Tech"]
+  - name: "GameSpot"
+    link: "http://www.gamespot.com/feeds/mashup/"
+    description: "Video game news, reviews, and trailers from GameSpot."
+    parents: ["Entertainment", "Tech"]
+  - name: "Polygon"
+    link: "http://www.polygon.com/rss/index.xml"
+    description: "Video game reviews, features, and pop culture news."
+    parents: ["Entertainment", "Tech"]
+  - name: "Global News (Canada)"
+    link: "https://globalnews.ca/feed/"
+    description: "General news coverage from Global News in Canada."
+    parents: ["Canada", "World"]
+  - name: "Business Post (Canada)"
+    link: "http://business.financialpost.com/feed/"
+    description: "Business and financial news focused on Canadian markets."
+    parents: ["Canada", "Business"]
+  - name: "The Guardian (Australia)"
+    link: "http://www.theguardian.com/au/rss"
+    description: "All news and features from The Guardian Australia."
+    parents: ["Australia", "World"]
+  - name: "The Independent (UK)"
+    link: "http://www.independent.co.uk/news/uk/rss"
+    description: "News headlines specifically from the UK edition of The Independent."
+    parents: ["UK", "World"]
+  - name: "The Daily Mail (UK)"
+    link: "http://www.dailymail.co.uk/news/index.rss"
+    description: "General news headlines from The Daily Mail."
+    parents: ["UK"]
+  - name: "The Observer (UK)"
+    link: "http://www.theguardian.com/observer/rss"
+    description: "The Sunday newspaper edition of The Guardian, with features and commentary."
+    parents: ["UK", "World"]
