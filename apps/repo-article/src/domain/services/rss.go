@@ -187,7 +187,7 @@ func (as *RSSService) buildTreeDTO(feed *models.RSSSource, visited map[string]bo
 			childDTO := as.buildTreeDTO(&child, visited)
 			treeDTO.Children = append(treeDTO.Children, childDTO)
 		}
-	}	
+	}
 	log.Printf("Visiting: %s, %d children found", treeDTO.Name, len(treeDTO.Children))
 
 	return treeDTO
