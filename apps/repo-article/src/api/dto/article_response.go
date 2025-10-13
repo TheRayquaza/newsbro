@@ -9,6 +9,7 @@ type ArticleResponse struct {
 	Title           string    `json:"title"`
 	Abstract        string    `json:"abstract"`
 	Link            string    `json:"link" gorm:"not null;uniqueIndex"`
+	RSSLink         string    `json:"rss_link"`
 	Value           int       `json:"liked_value"`
 	LastInteraction time.Time `json:"last_interaction"`
 	PublishedAt     time.Time `json:"published_at"`

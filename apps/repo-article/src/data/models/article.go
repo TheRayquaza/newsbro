@@ -11,6 +11,8 @@ type Article struct {
 	Title       string     `json:"title" gorm:"not null"`
 	Abstract    string     `json:"abstract" gorm:"type:text"`
 	Link        string     `json:"link" gorm:"not null;uniqueIndex"`
+	RSSID       *uint      `json:"rss_id" gorm:"index"`
+	RSS         RSSSource  `json:"rss" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	PublishedAt time.Time  `json:"published_at" gorm:"not null;index"`
 	Feedbacks   []Feedback `json:"feedbacks,omitempty" gorm:"foreignKey:NewsID;references:ID"`
 	CreatedAt   time.Time  `json:"created_at"`

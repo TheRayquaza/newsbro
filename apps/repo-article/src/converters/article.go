@@ -14,6 +14,7 @@ func ArticleModelToArticleResponse(article *models.Article) dto.ArticleResponse 
 		Category:    article.Category,
 		Subcategory: article.Subcategory,
 		Link:        article.Link,
+		RSSLink:     article.RSS.Link,
 		PublishedAt: article.PublishedAt,
 	}
 }
@@ -26,6 +27,7 @@ func ArticleModelToArticleAggregate(article *models.Article, active bool) aggreg
 		Title:       article.Title,
 		Abstract:    article.Abstract,
 		Link:        article.Link,
+		RSSLink:     article.RSS.Link,
 		PublishedAt: article.PublishedAt,
 		IsActive:    active,
 	}

@@ -39,6 +39,8 @@ definitions:
         type: string
       published_at:
         type: string
+      rss_link:
+        type: string
       subcategory:
         type: string
       title:
@@ -120,6 +122,67 @@ definitions:
     required:
     - begin_date
     - end_date
+    type: object
+  repo_article_src_api_dto.RSSCreateRequest:
+    properties:
+      description:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      parent:
+        type: string
+    required:
+    - link
+    - name
+    type: object
+  repo_article_src_api_dto.RSSResponse:
+    properties:
+      active:
+        type: boolean
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  repo_article_src_api_dto.RSSUpdateRequest:
+    properties:
+      description:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+    type: object
+  repo_article_src_api_dto.TreeRSSResponse:
+    properties:
+      active:
+        type: boolean
+      children:
+        items:
+          $ref: '#/definitions/repo_article_src_api_dto.TreeRSSResponse'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
     type: object
 info:
   contact: {}
@@ -791,4 +854,252 @@ paths:
       summary: Get feedback statistics
       tags:
       - feedback
+  /rss:
+    get:
+      description: Get a list of rss with optional filtering
+      parameters:
+      - description: Filter by begin date (YYYY-MM-DD)
+        in: query
+        name: begin_at
+        type: string
+      - description: Filter by end date (YYYY-MM-DD)
+        in: query
+        name: end_at
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo_article_src_api_dto.RSSResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Get all rss
+      tags:
+      - RSS
+    post:
+      consumes:
+      - application/json
+      description: Create a new rss with the provided data
+      parameters:
+      - description: RSS data
+        in: body
+        name: rss
+        required: true
+        schema:
+          $ref: '#/definitions/repo_article_src_api_dto.RSSCreateRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.RSSResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Create a new rss
+      tags:
+      - RSS
+  /rss/{id}:
+    delete:
+      description: Delete an rss by ID
+      parameters:
+      - description: RSS ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Delete rss
+      tags:
+      - RSS
+    get:
+      description: Get a specific rss by its ID
+      parameters:
+      - description: RSS ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.RSSResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Get rss by ID
+      tags:
+      - RSS
+    put:
+      consumes:
+      - application/json
+      description: Update an existing rss by ID
+      parameters:
+      - description: RSS ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Rss update data
+        in: body
+        name: rss
+        required: true
+        schema:
+          $ref: '#/definitions/repo_article_src_api_dto.RSSUpdateRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.RSSResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Update rss
+      tags:
+      - RSS
+  /rss/tree:
+    get:
+      description: Get the tree structure of rss feeds with optional filtering
+      parameters:
+      - description: Filter by begin date (YYYY-MM-DD)
+        in: query
+        name: begin_at
+        type: string
+      - description: Filter by end date (YYYY-MM-DD)
+        in: query
+        name: end_at
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/repo_article_src_api_dto.TreeRSSResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_article_src_api_dto.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Get tree rss
+      tags:
+      - RSS
 swagger: "2.0"

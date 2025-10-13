@@ -17,6 +17,7 @@ func Initialize(databaseURL string) (*gorm.DB, error) {
 	err = db.AutoMigrate(
 		&models.Article{},
 		&models.Feedback{},
+		&models.RSSSource{},
 	)
 	if err != nil {
 		return nil, err

@@ -35,6 +35,7 @@ func main() {
 	// Initialize services
 	articleService := services.NewArticleService(db, producer, cfg)
 	feedbackService := services.NewFeedbackService(db, producer, cfg)
+	rssService := services.NewRSSService(db, producer, cfg)
 
 	// Setup Kafka consumer
 	ctx, cancel := context.WithCancel(context.Background())
@@ -54,7 +55,7 @@ func main() {
 	}
 
 	// Setup routes
-	router := routes.SetupRouter(cfg, articleService, feedbackService)
+	router := routes.SetupRouter(cfg, articleService, feedbackService, rssService)
 
 	// Handle graceful shutdown
 	go func() {
