@@ -11,6 +11,7 @@ type ArticleAggregate struct {
 	Title       string    `json:"title"`
 	Abstract    string    `json:"abstract"`
 	Link        string    `json:"link"`
+	RSSLink     string    `json:"rss_link"`
 	PublishedAt time.Time `json:"published_at"`
 	IsActive    bool      `json:"is_active"`
 }
