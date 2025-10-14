@@ -28,8 +28,13 @@ func NewRSSService(db *gorm.DB, producer sarama.SyncProducer, config *config.Con
 	}
 }
 func (as *RSSService) CreateRSS(req *dto.RSSCreateRequest, userID uint) (*dto.RSSResponse, error) {
+	if req.DisplayName == "" {
+		req.DisplayName = req.Name
+	}
+
 	rss := &models.RSSSource{
 		Name:        req.Name,
+		DisplayName: req.DisplayName,
 		Description: req.Description,
 		Link:        req.Link,
 		Active:      true,
@@ -172,6 +177,7 @@ func (as *RSSService) buildTreeDTO(feed *models.RSSSource, visited map[string]bo
 
 	treeDTO := dto.TreeRSSResponse{
 		Name:        feed.Name,
+		DisplayName: feed.DisplayName,
 		Description: feed.Description,
 		Link:        feed.Link,
 		Active:      feed.Active,
@@ -182,13 +188,11 @@ func (as *RSSService) buildTreeDTO(feed *models.RSSSource, visited map[string]bo
 
 	for i := range feed.Children {
 		child := feed.Children[i]
-		log.Printf("Processing child: %s of parent: %s", child.Name, feed.Name)
 		if !visited[child.Name] {
 			childDTO := as.buildTreeDTO(&child, visited)
 			treeDTO.Children = append(treeDTO.Children, childDTO)
 		}
 	}
-	log.Printf("Visiting: %s, %d children found", treeDTO.Name, len(treeDTO.Children))
 
 	return treeDTO
 }
@@ -208,6 +212,9 @@ func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RS
 	if req.Link != nil {
 		rss.Link = *req.Link
 	}
+	if req.DisplayName != nil {
+		rss.DisplayName = *req.DisplayName
+	}
 	if req.Parents != nil {
 		var parents []models.RSSSource
 		if len(*req.Parents) > 0 {
@@ -220,7 +227,6 @@ func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RS
 			}
 			rss.Parents = parents
 		} else {
-			// Clear parents if empty list provided
 			if err := as.Db.Model(&rss).Association("RSSParents").Clear(); err != nil {
 				log.Printf("failed to clear parent rss: %s", err)
 				return nil, fmt.Errorf("failed to clear parent rss: %w", err)
