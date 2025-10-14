@@ -304,6 +304,16 @@ class ApiService {
       });
     });
   }
+
+  async getArticlesByFeed(feedName, opts = {}) {
+    return new Promise((resolve, reject) => {
+      opts.feed = feedName;
+      this.articlesApi.articlesGet(opts, (error, data) => {
+        if (error) return reject(error);
+        resolve(data);
+      });
+    });
+  }
 }
 
 const api = new ApiService();

@@ -54,6 +54,19 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 		article.ID = req.ID
 	}
 
+	// Fetch RSS source to get its name
+	var rss *models.RSSSource
+	err := as.Db.First(&rss, "link = ?", req.RSSLink).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			log.Printf("RSS source with link %s not found", req.RSSLink)
+			return nil, dto.NewBadRequest(fmt.Sprintf("RSS source with link %s not found", req.RSSLink))
+		}
+		log.Printf("failed to fetch RSS source: %s", err)
+		return nil, fmt.Errorf("failed to fetch RSS source: %w", err)
+	}
+	article.RSSName = &rss.Name
+
 	if err := as.Db.Create(article).Error; err != nil {
 		log.Printf("failed to create article: %s", err)
 		return nil, fmt.Errorf("failed to create article: %w", err)
@@ -194,6 +207,9 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 	}
 	if filters.EndDate != nil {
 		query = query.Where("published_at <= ?", filters.EndDate)
+	}
+	if filters.FeedName != "" {
+		query = query.Where("rss_name = ?", filters.FeedName) // TODO: make something smarter here
 	}
 
 	// Count total results
