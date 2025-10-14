@@ -9,5 +9,6 @@ type ArticleCreateRequest struct {
 	Title       string    `json:"title" binding:"required"`
 	Abstract    string    `json:"abstract"`
 	Link        string    `json:"link" binding:"required,url"`
+	RSSLink     string    `json:"rss_link" binding:"required,url"`
 	PublishedAt time.Time `json:"published_at" binding:"required"`
 }

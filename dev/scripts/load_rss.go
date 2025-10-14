@@ -15,9 +15,8 @@ import (
 
 // --- Configuration ---
 const (
-	// !! IMPORTANT: Replace with your actual API details !!
 	API_ENDPOINT      = "http://localhost:8081/api/v1/rss" 
-	AUTH_TOKEN_HEADER = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6InRlc3RAdGVzdHRzdC5jb20iLCJmaXJzdF9uYW1lIjoidGVzdFRlc3QiLCJsYXN0X25hbWUiOiJ0ZXMiLCJ1c2VybmFtZSI6InRlc3QiLCJyb2xlIjoiYWRtaW4iLCJpc3MiOiJyZXBvLWFjY291bnQiLCJzdWIiOiIxIiwiZXhwIjoxNzYwMzUwOTQ3LCJpYXQiOjE3NjAzNDczNDd9.qE3VcEGjZrHtdG3YJQcPIU07YI0Oh3QCBbbwNTJDGXA" // !! REPLACE THIS !!
+	AUTH_TOKEN_HEADER = "Bearer xxx"
 	YAML_FILE         = "rss.yaml"
 )
 
@@ -26,6 +25,7 @@ const (
 // RSSCreateRequest for both MetaFeeds and actual RssFeeds
 type RSSCreateRequest struct {
 	Name        string   `json:"name"`
+	DisplayName string   `json:"display_name,omitempty"`
 	Link        string   `json:"link"`
 	Description string   `json:"description"`
 	Parents     []string `json:"parents"`
@@ -43,11 +43,13 @@ type YamlRegistry struct {
 }
 type MetaFeed struct {
 	Name        string   `yaml:"name"`
+	DisplayName string   `yaml:"display_name"`
 	Description string   `yaml:"description"`
 	Parents     []string `yaml:"parents"`
 }
 type RssFeed struct {
 	Name        string   `yaml:"name"`
+	DisplayName string   `yaml:"display_name"`
 	Link        string   `yaml:"link"`
 	Description string   `yaml:"description"`
 	Parents     []string `yaml:"parents"`
@@ -86,11 +88,10 @@ func callCreateRSS(client *http.Client, reqBody RSSCreateRequest) error {
 		}
 		return nil
 	} else if resp.StatusCode == http.StatusConflict {
-		// Conflict is common for existing meta-feeds/categories
 		var errResponse ErrorResponse
 		json.Unmarshal(responseBody, &errResponse)
 		log.Printf("⚠️  Skipped '%s' (Status: %s). Reason: %s", reqBody.Name, resp.Status, errResponse.Error)
-		return nil // Treat conflicts as success/skipped for idempotent creation
+		return nil
 	} else {
 		var errResponse ErrorResponse
 		if err := json.Unmarshal(responseBody, &errResponse); err != nil {
@@ -99,8 +100,6 @@ func callCreateRSS(client *http.Client, reqBody RSSCreateRequest) error {
 		return fmt.Errorf("failed (Status: %s). Reason: %s", resp.Status, errResponse.Error)
 	}
 }
-
-// --- Main Script Logic ---
 
 func main() {
 	log.SetFlags(0)
@@ -117,19 +116,16 @@ func main() {
 	}
 
 	client := &http.Client{Timeout: 10 * time.Second}
-	
-	// =======================================================
-	// PASS 1: Create Meta-Feeds (Categories)
-	// =======================================================
+
 	log.Println("\n==================================================")
 	log.Printf("PASS 1: Creating %d Meta-Feeds (Categories)...", len(registry.MetaFeeds))
 	log.Println("==================================================")
 
 	for _, meta := range registry.MetaFeeds {
-		// Link is intentionally empty for meta-feeds/categories
 		reqBody := RSSCreateRequest{
 			Name:        meta.Name,
 			Description: meta.Description,
+			DisplayName: meta.DisplayName,
 			Link:        "", 
 			Parents:     meta.Parents,
 		}
@@ -149,6 +145,7 @@ func main() {
 		reqBody := RSSCreateRequest{
 			Name:        feed.Name,
 			Description: feed.Description,
+			DisplayName: feed.DisplayName,
 			Link:        feed.Link, 
 			Parents:     feed.Parents,
 		}

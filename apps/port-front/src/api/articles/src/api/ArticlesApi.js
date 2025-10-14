@@ -92,6 +92,7 @@ export default class ArticlesApi {
    * @param {Object} opts Optional parameters
    * @param {String} [category] Filter by category
    * @param {String} [subcategory] Filter by subcategory
+   * @param {String} [feed_name] Filter by feed_name
    * @param {String} [search] Search in title and abstract
    * @param {Number} [limit = 10)] Limit number of results
    * @param {Number} [offset = 0)] Offset for pagination
@@ -107,6 +108,7 @@ export default class ArticlesApi {
     let queryParams = {
       'category': opts['category'],
       'subcategory': opts['subcategory'],
+      'feed_name': opts['feed_name'],
       'search': opts['search'],
       'limit': opts['limit'],
       'offset': opts['offset']

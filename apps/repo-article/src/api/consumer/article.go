@@ -92,6 +92,7 @@ func (h *consumerGroupHandler) processMessage(data []byte) {
 	req := &dto.ArticleCreateRequest{
 		Title:       cmd.Title,
 		Link:        cmd.Link,
+		RSSLink:     cmd.RSSLink,
 		Abstract:    cmd.Description,
 		Category:    cmd.Category,
 		Subcategory: cmd.Subcategory,
