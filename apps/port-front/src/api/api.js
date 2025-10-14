@@ -1,6 +1,7 @@
 import { ENV } from "../env";
 import ArticlesApi from './articles/src/api/ArticlesApi';
 import FeedbackApi from './articles/src/api/FeedbackApi';
+import RSSApi from './articles/src/api/RSSApi';
 import UserApi from './users/src/api/UserApi';
 import AuthApi from './users/src/api/AuthApi';
 
@@ -20,6 +21,7 @@ class ApiService {
     // ---- Initialize API clients ----
     this.articlesApi = new ArticlesApi(new ArticlesApiClient(ENV.ARTICLE_BASE_URL));
     this.feedbackApi = new FeedbackApi(new ArticlesApiClient(ENV.ARTICLE_BASE_URL));
+    this.rssApi = new RSSApi(new ArticlesApiClient(ENV.ARTICLE_BASE_URL));
     this.authApi = new AuthApi(new AccountApiClient(ENV.ACCOUNT_BASE_URL));
     this.userApi = new UserApi(new AccountApiClient(ENV.ACCOUNT_BASE_URL));
   }
@@ -287,6 +289,16 @@ class ApiService {
   async getFeedbackStats() {
     return new Promise((resolve, reject) => {
       this.feedbackApi.feedbackStatsGet((error, data) => {
+        if (error) return reject(error);
+        resolve(data);
+      });
+    });
+  }
+
+  // -------------------- RSS --------------------
+  async getRssTree(opts = {}) {
+    return new Promise((resolve, reject) => {
+      this.rssApi.rssTreeGet(opts, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });

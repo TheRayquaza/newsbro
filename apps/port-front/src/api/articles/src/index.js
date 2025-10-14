@@ -22,8 +22,13 @@ import RepoArticleSrcApiDtoFeedbackRequest from './model/RepoArticleSrcApiDtoFee
 import RepoArticleSrcApiDtoFeedbackResponse from './model/RepoArticleSrcApiDtoFeedbackResponse';
 import RepoArticleSrcApiDtoFeedbackStatsResponse from './model/RepoArticleSrcApiDtoFeedbackStatsResponse';
 import RepoArticleSrcApiDtoFeedbackTriggerIngestionRequest from './model/RepoArticleSrcApiDtoFeedbackTriggerIngestionRequest';
+import RepoArticleSrcApiDtoRSSCreateRequest from './model/RepoArticleSrcApiDtoRSSCreateRequest';
+import RepoArticleSrcApiDtoRSSResponse from './model/RepoArticleSrcApiDtoRSSResponse';
+import RepoArticleSrcApiDtoRSSUpdateRequest from './model/RepoArticleSrcApiDtoRSSUpdateRequest';
+import RepoArticleSrcApiDtoTreeRSSResponse from './model/RepoArticleSrcApiDtoTreeRSSResponse';
 import ArticlesApi from './api/ArticlesApi';
 import FeedbackApi from './api/FeedbackApi';
+import RSSApi from './api/RSSApi';
 
 
 /**
@@ -119,6 +124,30 @@ export {
     RepoArticleSrcApiDtoFeedbackTriggerIngestionRequest,
 
     /**
+     * The RepoArticleSrcApiDtoRSSCreateRequest model constructor.
+     * @property {module:model/RepoArticleSrcApiDtoRSSCreateRequest}
+     */
+    RepoArticleSrcApiDtoRSSCreateRequest,
+
+    /**
+     * The RepoArticleSrcApiDtoRSSResponse model constructor.
+     * @property {module:model/RepoArticleSrcApiDtoRSSResponse}
+     */
+    RepoArticleSrcApiDtoRSSResponse,
+
+    /**
+     * The RepoArticleSrcApiDtoRSSUpdateRequest model constructor.
+     * @property {module:model/RepoArticleSrcApiDtoRSSUpdateRequest}
+     */
+    RepoArticleSrcApiDtoRSSUpdateRequest,
+
+    /**
+     * The RepoArticleSrcApiDtoTreeRSSResponse model constructor.
+     * @property {module:model/RepoArticleSrcApiDtoTreeRSSResponse}
+     */
+    RepoArticleSrcApiDtoTreeRSSResponse,
+
+    /**
     * The ArticlesApi service constructor.
     * @property {module:api/ArticlesApi}
     */
@@ -128,5 +157,11 @@ export {
     * The FeedbackApi service constructor.
     * @property {module:api/FeedbackApi}
     */
-    FeedbackApi
+    FeedbackApi,
+
+    /**
+     * The RSSApi service constructor.
+     * @property {module:api/RSSApi}
+     */
+    RSSApi,
 };

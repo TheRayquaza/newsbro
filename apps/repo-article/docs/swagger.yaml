@@ -186,6 +186,7 @@ definitions:
     type: object
 info:
   contact: {}
+  title: "Repo-Article"
 paths:
   /articles:
     get:
