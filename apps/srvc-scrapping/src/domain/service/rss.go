@@ -8,30 +8,29 @@ import (
 	"strings"
 	"time"
 
+	"srvc_scrapping/src/api/dto"
 	"srvc_scrapping/src/config"
 	"srvc_scrapping/src/data/models"
 	"srvc_scrapping/src/data/repository"
 
 	"github.com/IBM/sarama"
+	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/command"
 	"github.com/gtuk/discordwebhook"
 	"github.com/mmcdole/gofeed"
 	"github.com/pemistahl/lingua-go"
 )
 
-type RSSService interface {
-	ProcessFeed(ctx context.Context) (int, error)
-}
-
-type rssService struct {
+type RSSService struct {
 	articleRepo repository.ArticleRepository
+	rssRepo     repository.RSSRepository
 	producer    sarama.SyncProducer
 	cfg         *config.Config
 	categorizer *ArticleCategorizer
 	detector    lingua.LanguageDetector
 }
 
-func NewRSSService(articleRepo repository.ArticleRepository, producer sarama.SyncProducer, cfg *config.Config) RSSService {
+func NewRSSService(articleRepo repository.ArticleRepository, rssRepo repository.RSSRepository, producer sarama.SyncProducer, cfg *config.Config) *RSSService {
 	languages := []lingua.Language{
 		lingua.Arabic, lingua.Chinese, lingua.English,
 		lingua.French, lingua.German, lingua.Hindi, lingua.Japanese,
@@ -42,8 +41,9 @@ func NewRSSService(articleRepo repository.ArticleRepository, producer sarama.Syn
 		FromLanguages(languages...).
 		Build()
 
-	return &rssService{
+	return &RSSService{
 		articleRepo: articleRepo,
+		rssRepo:     rssRepo,
 		producer:    producer,
 		cfg:         cfg,
 		categorizer: NewArticleCategorizer(),
@@ -51,28 +51,23 @@ func NewRSSService(articleRepo repository.ArticleRepository, producer sarama.Syn
 	}
 }
 
-type FeedProcessingStats struct {
-	FeedURL         string
-	TotalItems      int
-	ProcessedCount  int
-	SkippedCount    int
-	ErrorCount      int
-	ErrorDetails    []string
-	ProcessingTime  time.Duration
-	LanguageSkipped int
-}
-
-func (u *rssService) ProcessFeed(ctx context.Context) (int, error) {
+func (u *RSSService) ProcessFeed(ctx context.Context) (int, error) {
 	fp := gofeed.NewParser()
 	startTime := time.Now()
 
 	totalCount := 0
-	feedStats := make([]FeedProcessingStats, 0)
+	feedStats := make([]dto.FeedProcessingStats, 0)
 	globalErrors := make([]string, 0)
 
-	for _, feedURL := range u.cfg.RSSFeedURL {
+	RSSFeedURL, err := u.rssRepo.GetAllLinks(ctx)
+	if err != nil {
+		log.Printf("Error retrieving RSS feed URLs: %v", err)
+		return 0, fmt.Errorf("failed to retrieve RSS feed URLs: %w", err)
+	}
+
+	for _, feedURL := range RSSFeedURL {
 		feedStartTime := time.Now()
-		stats := FeedProcessingStats{
+		stats := dto.FeedProcessingStats{
 			FeedURL:      feedURL,
 			ErrorDetails: make([]string, 0),
 		}
@@ -178,7 +173,7 @@ func (u *rssService) ProcessFeed(ctx context.Context) (int, error) {
 	return totalCount, nil
 }
 
-func generateMessageChunks(stats []FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) []string {
+func generateMessageChunks(stats []dto.FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) []string {
 	var chunks []string
 	const DISCORD_MAX_LENGTH = 2000
 
@@ -253,7 +248,7 @@ func generateMessageChunks(stats []FeedProcessingStats, totalProcessed int, tota
 	return chunks
 }
 
-func (u *rssService) sendDetailedDiscordMessage(stats []FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) error {
+func (u *RSSService) sendDetailedDiscordMessage(stats []dto.FeedProcessingStats, totalProcessed int, totalTime time.Duration, errors []string) error {
 	if u.cfg.WebhookURL == "" {
 		return nil
 	}
@@ -283,7 +278,7 @@ func (u *rssService) sendDetailedDiscordMessage(stats []FeedProcessingStats, tot
 	return combinedError
 }
 
-func (u *rssService) sendToKafka(message *command.NewArticleCommand) error {
+func (u *RSSService) sendToKafka(message *command.NewArticleCommand) error {
 	payload, err := json.Marshal(message)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
@@ -291,10 +286,17 @@ func (u *rssService) sendToKafka(message *command.NewArticleCommand) error {
 
 	msg := &sarama.ProducerMessage{
 		Key:   sarama.StringEncoder(message.Link),
-		Topic: u.cfg.KafkaTopic,
+		Topic: u.cfg.KafkaArticleCommandTopic,
 		Value: sarama.ByteEncoder(payload),
 	}
 
 	_, _, err = u.producer.SendMessage(msg)
+	return err
+}
+
+func (u *RSSService) HandleRSSAggregate(agg *aggregate.RSSAggregate) error {
+	err := u.rssRepo.Create(context.Background(), &models.RSS{
+		Link: agg.Link,
+	})
 	return err
 }

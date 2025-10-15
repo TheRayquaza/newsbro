@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Link } from 'lucide-react';
 import { AuthContext } from '../contexts/Auth';
 import DashboardBreadcrumb from '../components/DashboardBreadcrumb';
 import Article from '../components/Article';
@@ -156,10 +156,20 @@ const Dashboard = () => {
           <div className="space-y-6">
             {/* Feed Header */}
             <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-6">
-              <h2 className="text-2xl font-bold text-blue-300 mb-2">{currentLevel?.name}</h2>
+              <h2 className="text-2xl font-bold text-blue-300 mb-2">{currentLevel?.display_name}</h2>
               <p className="text-slate-400 text-sm">
                 {currentLevel?.description}
               </p>
+              {currentLevel?.link && (
+                <a
+                  href={currentLevel.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-2 text-xs text-green-400 hover:underline"
+                >
+                  <Link className="inline-block align-middle mr-2" size={14} /> RSS Feed
+                </a>
+              )}
             </div>
 
             {/* Articles List */}
