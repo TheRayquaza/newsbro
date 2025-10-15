@@ -307,7 +307,7 @@ class ApiService {
 
   async getArticlesByFeed(feedName, opts = {}) {
     return new Promise((resolve, reject) => {
-      opts.feed = feedName;
+      opts.feed_name = feedName;
       this.articlesApi.articlesGet(opts, (error, data) => {
         if (error) return reject(error);
         resolve(data);

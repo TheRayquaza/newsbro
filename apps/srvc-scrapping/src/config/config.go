@@ -10,12 +10,13 @@ import (
 )
 
 type Config struct {
-	Port         string
-	DatabaseURL  string
-	KafkaBrokers []string
-	KafkaTopic   string
-	RSSFeedURL   []string
-	WebhookURL   string
+	Port                     string
+	DatabaseURL              string
+	KafkaBrokers             []string
+	KafkaRSSAggregateTopic   string
+	KafkaArticleCommandTopic string
+	KafkaGroupID             string
+	WebhookURL               string
 }
 
 func Map[T, U any](ts []T, f func(T) U) []U {
@@ -39,10 +40,11 @@ func Load() *Config {
 			getEnv("DATABASE_HOST", "localhost:5432"),
 			getEnv("DATABASE_NAME", "repo_account"),
 		),
-		KafkaBrokers: strings.Split(getEnv("KAFKA_BROKERS", "localhost:9092"), ","),
-		KafkaTopic:   getEnv("KAFKA_TOPIC", "new-articles-command"),
-		RSSFeedURL:   Map(strings.FieldsFunc(getEnv("RSS_FEED_URLS", ""), func(r rune) bool { return r == ',' || r == '\n' }), func(s string) string { return strings.TrimSpace(s) }),
-		WebhookURL:   getEnv("WEBHOOK_URL", ""),
+		KafkaBrokers:             strings.Split(getEnv("KAFKA_BROKERS", "localhost:9092"), ","),
+		KafkaRSSAggregateTopic:   getEnv("KAFKA_RSS_AGGREGATE_TOPIC", "rss-aggregate"),
+		KafkaGroupID:             getEnv("KAFKA_GROUP_ID", "srvc-scrapping-group"),
+		KafkaArticleCommandTopic: getEnv("KAFKA_ARTICLE_COMMAND_TOPIC", "new-articles-command"),
+		WebhookURL:               getEnv("WEBHOOK_URL", ""),
 	}
 }
 

@@ -100,7 +100,7 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 func (as *ArticleService) GetArticleByID(userID, id uint) (*dto.ArticleResponse, error) {
 	var article models.Article
 
-	if err := as.Db.First(&article, id).Error; err != nil {
+	if err := as.Db.Preload("RSS").First(&article, id).Error; err != nil {
 		log.Printf("failed to get article: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return nil, dto.NewNotFound(fmt.Sprintf("article with id %d not found", id))
@@ -144,6 +144,7 @@ func (as *ArticleService) GetArticleHistory(userID uint, filters *dto.ArticleHis
 		Order(orderClause).
 		Limit(int(filters.Limit)).
 		Offset(int(filters.Offset)).
+		Preload("RSS").
 		Find(&articles).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to get articles: %w", err)
 	}
@@ -209,6 +210,7 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 		query = query.Where("published_at <= ?", filters.EndDate)
 	}
 	if filters.FeedName != "" {
+		query = query.Preload("RSS")
 		query = query.Where("rss_name = ?", filters.FeedName) // TODO: make something smarter here
 	}
 
@@ -226,7 +228,7 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 	}
 
 	if len(articles) == 0 {
-		return nil, total, nil
+		return make([]dto.ArticleResponse, 0, 0), total, nil
 	}
 
 	articleIDs := make([]uint, len(articles))
