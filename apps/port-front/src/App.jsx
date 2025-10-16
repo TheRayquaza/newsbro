@@ -6,7 +6,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
+import HomePage from "./pages/HomePage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DeepSearchPage from "./pages/SearchPage";
@@ -65,7 +65,7 @@ export default function App() {
           {/* Protected routes (user & admin) */}
           <Route element={<AuthRoute />}>
             <Route element={<Layout />}>
-              <Route path="/" element={<DashboardPage />} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/settings" element={<SettingsPage />} />
 
               <Route element={<AuthRoute />}>

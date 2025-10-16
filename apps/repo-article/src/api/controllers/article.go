@@ -153,6 +153,21 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 		return
 	}
 
+	if filters.Count == true {
+		total, err := ac.articleService.GetCountArticles(&filters)
+		if err != nil {
+			switch err.(type) {
+			case *dto.ErrBadRequest:
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			}
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"count": total})
+		return
+	}
+
 	articles, total, err := ac.articleService.GetArticles(userID, &filters)
 	if err != nil {
 		switch err.(type) {

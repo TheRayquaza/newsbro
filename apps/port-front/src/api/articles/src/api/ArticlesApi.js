@@ -96,6 +96,7 @@ export default class ArticlesApi {
    * @param {String} [search] Search in title and abstract
    * @param {Number} [limit = 10)] Limit number of results
    * @param {Number} [offset = 0)] Offset for pagination
+   * @param {Boolean} [count = false] Whether to include the total count of articles in the response
    * @param {module:api/ArticlesApi~articlesGetCallback} callback The callback function, accepting three arguments: error, data, response
    * data is of type: {@link Array.<module:model/RepoArticleSrcApiDtoArticleResponse>}
    */
@@ -111,7 +112,8 @@ export default class ArticlesApi {
       'feed_name': opts['feed_name'],
       'search': opts['search'],
       'limit': opts['limit'],
-      'offset': opts['offset']
+      'offset': opts['offset'],
+      'count': opts['count']
     };
     let headerParams = {
     };
