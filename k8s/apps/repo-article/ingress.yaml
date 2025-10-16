@@ -35,6 +35,13 @@ spec:
           port: 80
       middlewares:
         - name: rate-limit-repo-account
+    - match: Host(`localhost`) && PathPrefix(`/api/v1/rss`)
+      kind: Rule
+      services:
+        - name: repo-article
+          port: 80
+      middlewares:
+        - name: rate-limit-repo-account
     - match: Host(`localhost`) && PathPrefix(`/swagger`)
       kind: Rule
       services:
@@ -65,6 +72,13 @@ spec:
       middlewares:
         - name: rate-limit-repo-account
     - match: Host(`article.newsbro.cc`) && PathPrefix(`/api/v1/feedback`)
+      kind: Rule
+      services:
+        - name: repo-article
+          port: 80
+      middlewares:
+        - name: rate-limit-repo-account
+    - match: Host(`article.newsbro.cc`) && PathPrefix(`/api/v1/rss`)
       kind: Rule
       services:
         - name: repo-article
