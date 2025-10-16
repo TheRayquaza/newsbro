@@ -24,6 +24,9 @@ spec:
         secretAccessKey:
           name: minio-creds
           key: MINIO_SECRET_KEY
+  bootstrap:
+    recovery:
+      source: postgres-cluster
   managed:
     roles:
     - name: admin
