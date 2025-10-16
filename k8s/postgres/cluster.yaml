@@ -13,6 +13,17 @@ spec:
   logLevel: info
   maxSyncReplicas: 0
   minSyncReplicas: 0
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://postgres/
+      endpointURL: http://minio-new.minio.svc.cluster.local:9000
+      s3Credentials:
+        accessKeyId:
+          name: minio-creds
+          key: MINIO_ACCESS_KEY
+        secretAccessKey:
+          name: minio-creds
+          key: MINIO_SECRET_KEY
   managed:
     roles:
     - name: admin
