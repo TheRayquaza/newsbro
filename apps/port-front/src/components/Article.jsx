@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Calendar, ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
+import { Calendar, ThumbsUp, ThumbsDown, ExternalLink, Link } from "lucide-react";
 import api from "../api/api";
 import { AuthContext } from "../contexts/Auth";
 
@@ -65,17 +65,29 @@ const Article = ({ article, onSelect, isAdmin }) => {
                 </a>
             )}
 
+            {article.rss_link && (
+                <a
+                    href={article.rss_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-blue-400 text-sm hover:text-cyan-400 mb-3"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <Link className="w-4 h-4" />
+                    RSS
+                </a>
+            )}
+
             <div className="flex items-center gap-3">
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         handleFeedback(true);
                     }}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${
-                        userFeedback === true
+                    className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${userFeedback === true
                             ? "text-green-400 hover:text-green-300 hover:bg-green-500/10"
                             : "bg-green-500 text-white border border-green-600 shadow-lg scale-105"
-                    }`}
+                        }`}
                 >
                     <ThumbsUp className="w-4 h-4" />
                     {isAdmin && article.likes}
@@ -86,11 +98,10 @@ const Article = ({ article, onSelect, isAdmin }) => {
                         e.stopPropagation();
                         handleFeedback(false);
                     }}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${
-                        userFeedback === false
+                    className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${userFeedback === false
                             ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
                             : "bg-red-500 text-white border border-red-600 shadow-lg scale-105"
-                    }`}
+                        }`}
                 >
                     <ThumbsDown className="w-4 h-4" />
                     {isAdmin && article.dislikes}

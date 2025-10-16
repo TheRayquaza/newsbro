@@ -23,7 +23,7 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
   const isActive = (path) => location.pathname === path;
 
   const navItems = [
-    { path: "/", label: "Dashboard", icon: Home },
+    { path: "/", label: "Home", icon: Home },
     { path: "/feeds", label: "Feeds", icon: Rss },
     { path: "/history", label: "My History", icon: History },
     { path: "/search", label: "Search", icon: Search, highlight: true },

@@ -274,6 +274,41 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 	return articleResponses, total, nil
 }
 
+func (as *ArticleService) GetCountArticles(filters *dto.ArticleFilters) (int64, error) {
+	var total int64
+
+	query := as.Db.Model(&models.Article{})
+
+	// Filtering
+	if filters.Category != "" {
+		query = query.Where("category = ?", filters.Category)
+	}
+	if filters.Subcategory != "" {
+		query = query.Where("subcategory = ?", filters.Subcategory)
+	}
+	if filters.Search != "" {
+		searchTerm := "%" + strings.ToLower(filters.Search) + "%"
+		query = query.Where("LOWER(title) LIKE ? OR LOWER(abstract) LIKE ?", searchTerm, searchTerm)
+	}
+	if filters.BeginDate != nil {
+		query = query.Where("published_at >= ?", filters.BeginDate)
+	}
+	if filters.EndDate != nil {
+		query = query.Where("published_at <= ?", filters.EndDate)
+	}
+	if filters.FeedName != "" {
+		query = query.Preload("RSS")
+		query = query.Where("rss_name = ?", filters.FeedName) // TODO: make something smarter here
+	}
+
+	// Count total results
+	if err := query.Count(&total).Error; err != nil {
+		return 0, fmt.Errorf("failed to count articles: %w", err)
+	}
+
+	return total, nil
+}
+
 func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, userID uint) (*dto.ArticleResponse, error) {
 	var article models.Article
 	if err := as.Db.First(&article, id).Error; err != nil {
