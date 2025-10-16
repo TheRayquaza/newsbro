@@ -48,7 +48,7 @@ services:
   article-consumer:
     build:
       context: .
-      dockerfile: Dockerfile.consumer
+      dockerfile: Dockerfile
     container_name: article-consumer
     depends_on:
       redpanda:
@@ -64,54 +64,10 @@ services:
       - BATCH_INTERVAL=2
       - TFIDF_MAX_FEATURES=512
       - CSV_DATA_PATH=/app/data/news_cleaned.csv
-    command: python article_consumer.py
     restart: unless-stopped
+    env_file: ".env"
     networks:
       - recommendation-network
-
-  # Feedback Consumer Service
-  feedback-consumer:
-    build:
-      context: .
-      dockerfile: Dockerfile.consumer
-    container_name: feedback-consumer
-    depends_on:
-      redpanda:
-        condition: service_healthy
-      qdrant:
-        condition: service_healthy
-    environment:
-      - QDRANT_URL=http://qdrant:6333
-      - KAFKA_BOOTSTRAP_SERVERS=redpanda:29092
-      - FEEDBACK_RETENTION_DAYS=30
-    command: python feedback_consumer.py
-    restart: unless-stopped
-    networks:
-      - recommendation-network
-
-  # FastAPI Recommendation Service
-  recommendation-api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
-    container_name: recommendation-api
-    depends_on:
-      qdrant:
-        condition: service_healthy
-    ports:
-      - "8000:8000"
-    environment:
-      - QDRANT_URL=http://qdrant:6333
-      - API_PORT=8000
-      - TOP_N_RECOMMENDATIONS=10
-    restart: unless-stopped
-    networks:
-      - recommendation-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
   qdrant_storage:

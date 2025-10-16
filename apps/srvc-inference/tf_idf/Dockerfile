@@ -6,10 +6,10 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy API script
-COPY api.py .
-COPY .env .
+# Copy consumer scripts
+COPY article_consumer.py feedback_consumer.py api.py ./
 
 EXPOSE 8000
 
+# Default command (overridden in docker-compose)
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
