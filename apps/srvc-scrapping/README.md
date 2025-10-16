@@ -63,12 +63,15 @@ godoc -http=:6060
 
 ## Variables
 
-| Name                 | Value                                 |
-| -------------------- | ------------------------------------- |
-| DATABASE_USERNAME    | `username`                            |
-| DATABASE_PASSWORD    | `password`                            |
-| DATABASE_HOST        | `localhost:5432`                      |
-| DATABASE_NAME        | `repo_article`                        |
-| KAFKA_BROKERS        | `localhost:9092`                      |
-| KAFKA_TOPIC          | `new-article-command`                 |
-| RSS_FEED_URLS        | `link1,link2`                         |
+| Name                            | Default Value / Example |
+| ------------------------------- | ----------------------- |
+| **PORT**                        | `8080`                  |
+| **DATABASE_USERNAME**           | `username`              |
+| **DATABASE_PASSWORD**           | `password`              |
+| **DATABASE_HOST**               | `localhost:5432`        |
+| **DATABASE_NAME**               | `repo_account`          |
+| **KAFKA_BROKERS**               | `localhost:9092`        |
+| **KAFKA_RSS_AGGREGATE_TOPIC**   | `rss-aggregate`         |
+| **KAFKA_GROUP_ID**              | `srvc-scrapping-group`  |
+| **KAFKA_ARTICLE_COMMAND_TOPIC** | `new-articles-command`  |
+| **WEBHOOK_URL**                 | *(empty)*               |

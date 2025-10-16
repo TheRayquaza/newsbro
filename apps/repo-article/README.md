@@ -68,14 +68,17 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 
 ## Variables
 
-| Name                 | Value                                 |
-| -------------------- | ------------------------------------- |
-| DATABASE_USERNAME    | `username`                            |
-| DATABASE_PASSWORD    | `password`                            |
-| DATABASE_HOST        | `localhost:5432`                      |
-| DATABASE_NAME        | `repo_article`                        |
-| JWT_SECRET           | `your-secret-key`                     |
-| LOGIN_REDIRECT_URL   | `http://localhost:8080`               |
-| KAFKA_BROKERS        | `localhost:9092`                      |
-| KAFKA_TOPIC          | `new-article-command`                 |
-| KAFKA_GROUP_ID       | `repo-article-group`                  |
+| Name                               | Value                   |
+| ---------------------------------- | ----------------------- |
+| **DATABASE_USERNAME**              | `username`              |
+| **DATABASE_PASSWORD**              | `password`              |
+| **DATABASE_HOST**                  | `localhost:5432`        |
+| **DATABASE_NAME**                  | `repo_article`          |
+| **JWT_SECRET**                     | `your-secret-key`       |
+| **LOGIN_REDIRECT_URL**             | `http://localhost:8080` |
+| **KAFKA_BROKERS**                  | `localhost:9092`        |
+| **KAFKA_ARTICLE_COMMAND_TOPIC**    | `new-article-command`   |
+| **KAFKA_ARTICLE_AGGREGATE_TOPIC**  | `articles-aggregate`    |
+| **KAFKA_FEEDBACK_AGGREGATE_TOPIC** | `feedback-aggregate`    |
+| **KAFKA_RSS_AGGREGATE_TOPIC**      | `rss-aggregate`         |
+| **KAFKA_GROUP_ID**                 | `repo-article-group`    |

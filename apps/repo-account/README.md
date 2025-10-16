@@ -68,18 +68,20 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 
 ## Variables
 
-| Name                       | Value                                     |
-| -------------------------- | ----------------------------------------- |
-| DATABASE_USERNAME          | `username`                                |
-| DATABASE_PASSWORD          | `password`                                |
-| DATABASE_HOST              | `localhost:5432`                          |
-| DATABASE_NAME              | `repo_account`                            |
-| JWT_SECRET                 | `your-secret-key`                         |
-| OIDC_ISSUER_URL            | `http://localhost:8080`                   |
-| OIDC_CLIENT_ID             | *(empty)*                                 |
-| OIDC_CLIENT_SECRET         | *(empty)*                                 |
-| OIDC_REDIRECT_URL          | `http://localhost:8080/auth/callback`     |
-| COOKIE_DOMAIN              | ` `                                       |
-| LOGIN_REDIRECT_URL         | `http://localhost:8080/api/v1/auth/login` |
-| ENVIRONMENT                | `dev or prod (enable secure cookie ...)`  |
-
+| Name                           | Default Value / Example               |
+| ------------------------------ | ------------------------------------- |
+| **PORT**                       | `8080`                                |
+| **DATABASE_USERNAME**          | `username`                            |
+| **DATABASE_PASSWORD**          | `password`                            |
+| **DATABASE_HOST**              | `localhost:5432`                      |
+| **DATABASE_NAME**              | `repo_account`                        |
+| **JWT_SECRET**                 | `your-secret-key`                     |
+| **OIDC_ISSUER_URL**            | *(empty)*                             |
+| **OIDC_CLIENT_ID**             | *(empty)*                             |
+| **OIDC_CLIENT_SECRET**         | *(empty)*                             |
+| **OIDC_REDIRECT_URL**          | `http://localhost:8080/auth/callback` |
+| **COOKIE_DOMAIN**              | *(empty)*                             |
+| **OIDC_REDIRECT_FRONTEND_URL** | `http://localhost:3000`               |
+| **LOGIN_REDIRECT_URL**         | `http://localhost:3000`               |
+| **FRONTEND_ORIGIN**            | `https://app.newsbro.cc`              |
+| **ENVIRONMENT**                | `prod`                                |
