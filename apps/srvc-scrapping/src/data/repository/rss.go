@@ -42,3 +42,7 @@ func (r *rssRepository) GetAllLinks(ctx context.Context) ([]string, error) {
 	}
 	return links, err
 }
+
+func (r *rssRepository) DeleteByLink(ctx context.Context, link string) error {
+	return r.db.WithContext(ctx).Where("link = ?", link).Delete(&models.RSS{}).Error
+}

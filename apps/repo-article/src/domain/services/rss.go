@@ -88,7 +88,7 @@ func (as *RSSService) CreateRSS(req *dto.RSSCreateRequest, userID uint) (*dto.RS
 func (as *RSSService) GetRSSByName(name string) (*dto.RSSResponse, error) {
 	var rss models.RSSSource
 
-	if err := as.Db.First(&rss, name).Error; err != nil {
+	if err := as.Db.Where("name = ?", name).Where("active = ?", true).First(&rss).Error; err != nil {
 		log.Printf("failed to get rss: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return nil, dto.NewNotFound(fmt.Sprintf("rss with name %s not found", name))
@@ -103,7 +103,7 @@ func (as *RSSService) GetRSSByName(name string) (*dto.RSSResponse, error) {
 
 func (as *RSSService) GetRSS(userID uint, filters *dto.RSSFilters) ([]dto.RSSResponse, error) {
 	var rss []models.RSSSource
-	query := as.Db.Model(&models.RSSSource{})
+	query := as.Db.Model(&models.RSSSource{}).Where("active = ?", true)
 
 	// Filtering
 	if filters.BeginDate != nil {
@@ -129,7 +129,7 @@ func (as *RSSService) GetRSS(userID uint, filters *dto.RSSFilters) ([]dto.RSSRes
 
 func (as *RSSService) GetTreeRSS(userID uint, filters *dto.RSSFilters) ([]dto.TreeRSSResponse, error) {
 	var allFeeds []models.RSSSource
-	query := as.Db.Model(&models.RSSSource{})
+	query := as.Db.Model(&models.RSSSource{}).Where("active = ?", true)
 
 	if filters.BeginDate != nil {
 		query = query.Where("created_at >= ?", filters.BeginDate)
@@ -266,7 +266,8 @@ func (as *RSSService) DeleteRSS(name string) error {
 		}
 		return fmt.Errorf("failed to get rss: %w", err)
 	}
-	if err := as.Db.Delete(&rss).Error; err != nil {
+	rss.Active = false
+	if err := as.Db.Save(&rss).Error; err != nil {
 		log.Printf("failed to delete rss: %s", err)
 		return fmt.Errorf("failed to delete rss: %w", err)
 	}

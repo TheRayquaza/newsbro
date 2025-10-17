@@ -22,7 +22,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: srvc-scrapping
-              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.2.0
+              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.2.1
               imagePullPolicy: IfNotPresent
               envFrom:
                 - configMapRef:

@@ -15,7 +15,7 @@ import (
 
 // --- Configuration ---
 const (
-	API_ENDPOINT      = "http://localhost:8081/api/v1/rss" 
+	API_ENDPOINT      = "https://article.newsbro.cc/api/v1/rss" 
 	AUTH_TOKEN_HEADER = "Bearer xxx"
 	YAML_FILE         = "rss.yaml"
 )
