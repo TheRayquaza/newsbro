@@ -11,6 +11,7 @@ import SettingsPage from "./pages/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DeepSearchPage from "./pages/SearchPage";
 import HistoryPage from "./pages/HistoryPage";
+import FeedPage from "./pages/FeedPage";
 
 const AuthRoute = ({ adminOnly = false }) => {
   const { user, loading } = useContext(AuthContext);
@@ -74,6 +75,10 @@ export default function App() {
 
               <Route element={<AuthRoute />}>
                 <Route path="/history" element={<HistoryPage />} />
+              </Route>
+
+              <Route element={<AuthRoute />}>
+                <Route path="/feeds" element={<FeedPage />} />
               </Route>
               
               {/* 404 for authenticated users - with navbar/footer */}
