@@ -21,28 +21,28 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`localhost`) && PathPrefix(`/api/v1/article`)
+    - match: Host(`article.localhost`) && PathPrefix(`/api/v1/article`)
       kind: Rule
       services:
         - name: repo-article
           port: 80
       middlewares:
         - name: rate-limit-repo-account
-    - match: Host(`localhost`) && PathPrefix(`/api/v1/feedback`)
+    - match: Host(`article.localhost`) && PathPrefix(`/api/v1/feedback`)
       kind: Rule
       services:
         - name: repo-article
           port: 80
       middlewares:
         - name: rate-limit-repo-account
-    - match: Host(`localhost`) && PathPrefix(`/api/v1/rss`)
+    - match: Host(`article.localhost`) && PathPrefix(`/api/v1/rss`)
       kind: Rule
       services:
         - name: repo-article
           port: 80
       middlewares:
         - name: rate-limit-repo-account
-    - match: Host(`localhost`) && PathPrefix(`/swagger`)
+    - match: Host(`article.localhost`) && PathPrefix(`/swagger`)
       kind: Rule
       services:
         - name: repo-article
