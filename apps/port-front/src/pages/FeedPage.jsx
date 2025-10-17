@@ -120,10 +120,9 @@ const FeedPage = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [currentIndex, articles.length, removing, isMobile]);
 
-    const currentArticle = articles[currentIndex];
-
     const handleSwipe = (direction) => {
         if (removing) return;
+        if (direction !== 'left' && direction !== 'right') return;
 
         setRemoving(true);
 
@@ -143,6 +142,10 @@ const FeedPage = () => {
                 cardRef.current.style.transform = '';
             }
         }, isMobile ? 300 : 0);
+
+        if (currentIndex === articles.length - 1) {
+            setCurrentIndex(prev => Math.max(0, prev - 1));
+        }
     };
 
     const handlePrevious = () => {
@@ -241,29 +244,29 @@ const FeedPage = () => {
                                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
                                     <div className="p-12">
                                         <h2 className="text-4xl font-bold text-white mb-6 leading-tight">
-                                            {currentArticle.title}
+                                            {articles[currentIndex].title}
                                         </h2>
 
                                         <p className="text-slate-300 text-xl mb-8 leading-relaxed">
-                                            {currentArticle.abstract}
+                                            {articles[currentIndex].abstract}
                                         </p>
 
                                         <div className="flex flex-wrap gap-3 mb-6">
                                             <span className="px-6 py-2 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 border border-purple-500/30 text-purple-300 rounded-full text-sm font-semibold">
-                                                {currentArticle.category}
+                                                {articles[currentIndex].category}
                                             </span>
-                                            {currentArticle.subcategory && (
+                                            {articles[currentIndex].subcategory && (
                                                 <span className="px-6 py-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-300 rounded-full text-sm font-semibold">
-                                                    {currentArticle.subcategory}
+                                                    {articles[currentIndex].subcategory}
                                                 </span>
                                             )}
                                         </div>
 
-                                        {currentArticle.published_at && (
+                                        {articles[currentIndex].published_at && (
                                             <div className="flex items-center gap-2 text-slate-400 mb-8">
                                                 <Calendar className="w-5 h-5" />
                                                 <span className="font-medium">
-                                                    {new Date(currentArticle.published_at).toLocaleDateString('en-US', {
+                                                    {new Date(articles[currentIndex].published_at).toLocaleDateString('en-US', {
                                                         year: 'numeric',
                                                         month: 'long',
                                                         day: 'numeric'
@@ -273,9 +276,9 @@ const FeedPage = () => {
                                         )}
 
                                         <div className="flex gap-4">
-                                            {currentArticle.link && (
+                                            {articles[currentIndex].link && (
                                                 <a
-                                                    href={currentArticle.link}
+                                                    href={articles[currentIndex].link}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 transition-all hover:scale-105 hover:underline underline-offset-4"
@@ -385,29 +388,29 @@ const FeedPage = () => {
 
                                         <div className="flex-1 flex flex-col justify-center">
                                             <h2 className="text-2xl font-bold text-white mb-4 leading-tight">
-                                                {currentArticle.title}
+                                                {articles[currentIndex].title}
                                             </h2>
 
                                             <p className="text-slate-300 text-base mb-6 leading-relaxed">
-                                                {currentArticle.abstract}
+                                                {articles[currentIndex].abstract}
                                             </p>
 
                                             <div className="flex flex-wrap gap-2 mb-4">
                                                 <span className="px-4 py-1.5 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 border border-purple-500/30 text-purple-300 rounded-full text-xs font-semibold">
-                                                    {currentArticle.category}
+                                                    {articles[currentIndex].category}
                                                 </span>
-                                                {currentArticle.subcategory && (
+                                                {articles[currentIndex].subcategory && (
                                                     <span className="px-4 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-300 rounded-full text-xs font-semibold">
-                                                        {currentArticle.subcategory}
+                                                        {articles[currentIndex].subcategory}
                                                     </span>
                                                 )}
                                             </div>
 
-                                            {currentArticle.published_at && (
+                                            {articles[currentIndex].published_at && (
                                                 <div className="flex items-center gap-2 text-slate-400 mb-4">
                                                     <Calendar className="w-4 h-4" />
                                                     <span className="text-sm font-medium">
-                                                        {new Date(currentArticle.published_at).toLocaleDateString('en-US', {
+                                                        {new Date(articles[currentIndex].published_at).toLocaleDateString('en-US', {
                                                             year: 'numeric',
                                                             month: 'long',
                                                             day: 'numeric'
@@ -416,9 +419,9 @@ const FeedPage = () => {
                                                 </div>
                                             )}
 
-                                            {currentArticle.link && (
+                                            {articles[currentIndex].link && (
                                                 <a
-                                                    href={currentArticle.link}
+                                                    href={articles[currentIndex].link}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center justify-center gap-2 text-white px-6 py-3  text-transparent bg-clip-text rounded-full font-semibold transition-all shadow-lg"
