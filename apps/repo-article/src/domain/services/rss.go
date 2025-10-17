@@ -138,7 +138,7 @@ func (as *RSSService) GetTreeRSS(userID uint, filters *dto.RSSFilters) ([]dto.Tr
 		query = query.Where("created_at <= ?", filters.EndDate)
 	}
 
-	if err := query.Preload("Children.Children").Preload("Parents").Order("link ASC").Find(&allFeeds).Error; err != nil {
+	if err := query.Preload("Children.Children").Preload("Parents").Order("link ASC").Find(&allFeeds).Error; err != nil { // TODO: make something smarter
 		log.Printf("failed to get rss tree: %s", err)
 		return nil, fmt.Errorf("failed to get rss tree: %w", err)
 	}
@@ -199,7 +199,7 @@ func (as *RSSService) buildTreeDTO(feed *models.RSSSource, visited map[string]bo
 
 func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RSSResponse, error) {
 	var rss models.RSSSource
-	if err := as.Db.First(&rss, name).Error; err != nil {
+	if err := as.Db.Where("name = ?", name).First(&rss).Error; err != nil {
 		log.Printf("failed to get rss: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return nil, dto.NewNotFound(fmt.Sprintf("rss with name %s not found", name))
@@ -259,7 +259,7 @@ func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RS
 
 func (as *RSSService) DeleteRSS(name string) error {
 	var rss models.RSSSource
-	if err := as.Db.First(&rss, name).Error; err != nil {
+	if err := as.Db.Where("name = ?", name).First(&rss).Error; err != nil {
 		log.Printf("failed to get rss: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return dto.NewNotFound(fmt.Sprintf("rss with name %s not found", name))

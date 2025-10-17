@@ -1217,7 +1217,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/rss/{id}": {
+        "/rss/{name}": {
             "get": {
                 "security": [
                     {
@@ -1234,9 +1234,9 @@ const docTemplate = `{
                 "summary": "Get rss by ID",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "RSS ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "RSS Name",
+                        "name": "name",
                         "in": "path",
                         "required": true
                     },
@@ -1282,7 +1282,7 @@ const docTemplate = `{
                         "JWT": []
                     }
                 ],
-                "description": "Update an existing rss by ID",
+                "description": "Update an existing rss by name",
                 "consumes": [
                     "application/json"
                 ],
@@ -1295,9 +1295,9 @@ const docTemplate = `{
                 "summary": "Update rss",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "RSS ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "RSS Name",
+                        "name": "name",
                         "in": "path",
                         "required": true
                     },
@@ -1365,9 +1365,9 @@ const docTemplate = `{
                 "summary": "Delete rss",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "RSS ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "RSS Name",
+                        "name": "name",
                         "in": "path",
                         "required": true
                     },
@@ -1419,6 +1419,7 @@ const docTemplate = `{
                 "category",
                 "link",
                 "published_at",
+                "rss_link",
                 "subcategory",
                 "title"
             ],
@@ -1437,6 +1438,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "published_at": {
+                    "type": "string"
+                },
+                "rss_link": {
                     "type": "string"
                 },
                 "subcategory": {
@@ -1603,11 +1607,13 @@ const docTemplate = `{
         "repo_article_src_api_dto.RSSCreateRequest": {
             "type": "object",
             "required": [
-                "link",
                 "name"
             ],
             "properties": {
                 "description": {
+                    "type": "string"
+                },
+                "display_name": {
                     "type": "string"
                 },
                 "link": {
@@ -1616,8 +1622,11 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "parent": {
-                    "type": "string"
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1633,8 +1642,8 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "display_name": {
+                    "type": "string"
                 },
                 "link": {
                     "type": "string"
@@ -1653,11 +1662,20 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "display_name": {
+                    "type": "string"
+                },
                 "link": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1679,8 +1697,8 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "display_name": {
+                    "type": "string"
                 },
                 "link": {
                     "type": "string"

@@ -12,6 +12,8 @@ definitions:
         type: string
       published_at:
         type: string
+      rss_link:
+        type: string
       subcategory:
         type: string
       title:
@@ -20,6 +22,7 @@ definitions:
     - category
     - link
     - published_at
+    - rss_link
     - subcategory
     - title
     type: object
@@ -127,14 +130,17 @@ definitions:
     properties:
       description:
         type: string
+      display_name:
+        type: string
       link:
         type: string
       name:
         type: string
-      parent:
-        type: string
+      parents:
+        items:
+          type: string
+        type: array
     required:
-    - link
     - name
     type: object
   repo_article_src_api_dto.RSSResponse:
@@ -145,8 +151,8 @@ definitions:
         type: string
       description:
         type: string
-      id:
-        type: integer
+      display_name:
+        type: string
       link:
         type: string
       name:
@@ -158,10 +164,16 @@ definitions:
     properties:
       description:
         type: string
+      display_name:
+        type: string
       link:
         type: string
       name:
         type: string
+      parents:
+        items:
+          type: string
+        type: array
     type: object
   repo_article_src_api_dto.TreeRSSResponse:
     properties:
@@ -175,8 +187,8 @@ definitions:
         type: string
       description:
         type: string
-      id:
-        type: integer
+      display_name:
+        type: string
       link:
         type: string
       name:
@@ -186,7 +198,6 @@ definitions:
     type: object
 info:
   contact: {}
-  title: "Repo-Article"
 paths:
   /articles:
     get:
@@ -936,15 +947,15 @@ paths:
       summary: Create a new rss
       tags:
       - RSS
-  /rss/{id}:
+  /rss/{name}:
     delete:
       description: Delete an rss by ID
       parameters:
-      - description: RSS ID
+      - description: RSS Name
         in: path
-        name: id
+        name: name
         required: true
-        type: integer
+        type: string
       - default: Bearer <Add access token here>
         description: Insert your access token
         in: header
@@ -978,11 +989,11 @@ paths:
     get:
       description: Get a specific rss by its ID
       parameters:
-      - description: RSS ID
+      - description: RSS Name
         in: path
-        name: id
+        name: name
         required: true
-        type: integer
+        type: string
       - default: Bearer <Add access token here>
         description: Insert your access token
         in: header
@@ -1016,13 +1027,13 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update an existing rss by ID
+      description: Update an existing rss by name
       parameters:
-      - description: RSS ID
+      - description: RSS Name
         in: path
-        name: id
+        name: name
         required: true
-        type: integer
+        type: string
       - description: Rss update data
         in: body
         name: rss
