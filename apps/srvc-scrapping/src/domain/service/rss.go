@@ -298,10 +298,13 @@ func (u *RSSService) HandleRSSAggregate(agg *aggregate.RSSAggregate) error {
 	if agg.Active == false {
 		return u.rssRepo.DeleteByLink(context.Background(), agg.Link)
 	}
-	if exists, err := u.rssRepo.Exists(context.Background(), agg.Link); err != nil {
+	exists, err := u.rssRepo.Exists(context.Background(), agg.Link)
+	if err != nil {
 		return err
+	} else if exists {
+		return nil
 	}
-	err := u.rssRepo.Create(context.Background(), &models.RSS{
+	err = u.rssRepo.Create(context.Background(), &models.RSS{
 		Link: agg.Link,
 	})
 	return err

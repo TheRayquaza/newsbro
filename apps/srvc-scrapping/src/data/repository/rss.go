@@ -10,6 +10,7 @@ type RSSRepository interface {
 	Exists(ctx context.Context, link string) (bool, error)
 	Create(ctx context.Context, rss *models.RSS) error
 	GetAllLinks(ctx context.Context) ([]string, error)
+	DeleteByLink(ctx context.Context, link string) error
 }
 
 type rssRepository struct {
