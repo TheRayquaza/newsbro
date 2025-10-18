@@ -6,14 +6,11 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
-	"os"
-	"os/signal"
 	"srvc_scrapping/src/api/consumer"
 	"srvc_scrapping/src/config"
 	"srvc_scrapping/src/data/models"
 	"srvc_scrapping/src/data/repository"
 	"srvc_scrapping/src/domain/service"
-	"syscall"
 	"time"
 )
 
@@ -23,17 +20,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-
 	producer, err := initKafkaProducer(cfg)
 	if err != nil {
 		log.Fatalf("Failed to create Kafka producer: %v", err)
 	}
 	defer producer.Close()
-
 	articleRepo := repository.NewArticleRepository(db)
 	rssRepo := repository.NewRSSRepository(db)
 	rssService := service.NewRSSService(articleRepo, rssRepo, producer, cfg)
-
 	log.Println("Starting RSS consumer to catch up with existing messages...")
 	rssConsumer, err := consumer.NewRSSConsumer(
 		cfg.KafkaBrokers,
@@ -44,17 +38,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create RSS consumer: %v", err)
 	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
 	log.Println("Consuming existing RSS messages...")
 	if err := rssConsumer.ConsumeUntilEmpty(ctx, 10*time.Second); err != nil {
 		log.Printf("Error during initial consume: %v", err)
 	}
 	log.Println("Finished consuming existing messages")
-
-	go rssConsumer.Start(ctx)
 
 	log.Println("Starting feed processing...")
 	count, err := rssService.ProcessFeed(ctx)
@@ -63,22 +53,11 @@ func main() {
 	}
 	log.Printf("Processed %d new articles", count)
 
-	log.Println("Service running. Press Ctrl+C to exit...")
-	sigterm := make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
-	<-sigterm
-
-	log.Println("Shutting down server...")
-	cancel()
-
-	_, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer shutdownCancel()
-
 	if err := rssConsumer.Close(); err != nil {
 		log.Printf("Error closing consumer: %v", err)
 	}
 
-	log.Println("Server exited")
+	log.Println("Processing complete. Exiting...")
 }
 
 func initDB(cfg *config.Config) (*gorm.DB, error) {
