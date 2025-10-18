@@ -21,7 +21,6 @@ const Home = () => {
   const [articles, setArticles] = useState([]);
 
   // Caching State
-  const [articleCountCache, setArticleCountCache] = useState({});
   const [articlesCache, setArticlesCache] = useState({});
   const [feedbackCache, setFeedbackCache] = useState({});
   const rssTreeCache = useRef(null);
@@ -163,25 +162,10 @@ const Home = () => {
         setArticlesCache(prev => ({ ...prev, [currentFeedName]: updatedArticles }));
       }
 
-      invalidateCountCache(currentFeedName);
-
       setSelectedArticle(null);
     } catch {
       alert("Failed to delete article.");
     }
-  };
-
-  const invalidateCountCache = (feedName) => {
-    setArticleCountCache(prev => {
-      const newCache = { ...prev };
-      delete newCache[feedName];
-
-      breadcrumb.forEach(item => {
-        delete newCache[item.name];
-      });
-
-      return newCache;
-    });
   };
 
   const getFeedCount = (item) => {
