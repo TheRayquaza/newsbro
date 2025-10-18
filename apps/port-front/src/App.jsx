@@ -13,22 +13,32 @@ import DeepSearchPage from "./pages/SearchPage";
 import HistoryPage from "./pages/HistoryPage";
 import FeedPage from "./pages/FeedPage";
 
-const AuthRoute = ({ adminOnly = false }) => {
+const AuthRoute = () => {
   const { user, loading } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/login");
-    } else if (!loading && adminOnly && user?.role !== "admin") {
-      navigate("/");
     }
-  }, [user, loading, navigate, adminOnly]);
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-blue-400 text-xl">Loading...</div>
+      <div className="min-h-screen min-w-screen flex items-center justify-center">
+        <div className="relative">
+          <div className="w-24 h-24 border-4 border-cyan-200/20 border-t-cyan-500 rounded-full animate-spin"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-4 border-blue-200/20 border-b-blue-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }}></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full animate-pulse"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl animate-pulse"></div>
+        </div>
+
+        <p className="absolute top-full mt-8 left-1/2 -translate-x-1/2 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 text-xl font-semibold tracking-wider animate-pulse whitespace-nowrap">
+          Loading
+          <span className="inline-block animate-bounce" style={{ animationDelay: '0s' }}>.</span>
+          <span className="inline-block animate-bounce" style={{ animationDelay: '0.2s' }}>.</span>
+          <span className="inline-block animate-bounce" style={{ animationDelay: '0.4s' }}>.</span>
+        </p>
       </div>
     );
   }
@@ -80,7 +90,7 @@ export default function App() {
               <Route element={<AuthRoute />}>
                 <Route path="/feeds" element={<FeedPage />} />
               </Route>
-              
+
               {/* 404 for authenticated users - with navbar/footer */}
               <Route path="*" element={<NotFoundPage />} />
             </Route>

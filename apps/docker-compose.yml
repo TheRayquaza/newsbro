@@ -73,6 +73,66 @@ services:
         wait $pid;
       "
 
+  repo-account:
+    image: ghcr.io/therayquaza/newsbro/repo-account:repo-account-v1.2.7
+    environment:
+      DATABASE_HOST: postgres:5432
+      PORT: 8080
+      KAFKA_BROKER: redpanda:29092
+      DATABASE_USERNAME: "username"
+      DATABASE_PASSWORD: "password"
+      DATABASE_NAME: "account"
+      JWT_SECRET: "your-secret-key"
+      OIDC_ISSUER_URL: "https://cri.epita.fr"
+      OIDC_CLIENT_ID: "125070"
+      OIDC_CLIENT_SECRET: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      OIDC_REDIRECT_URL: "http://localhost:8080/complete/epita/"
+      COOKIE_DOMAIN: ""
+      LOGIN_REDIRECT_URL: "http://localhost:8080/api/v1/auth/login"
+      OIDC_REDIRECT_FRONTEND_URL: "http://localhost:5173"
+      ENVIRONMENT: "dev"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redpanda
+    networks:
+      - data-net
+
+  repo-article:
+    image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.4.2
+    env_file:
+      - repo-article/.env
+    environment:
+      DATABASE_HOST: postgres:5432
+      PORT: 8081
+      KAFKA_BROKERS: redpanda:29092
+      DATABASE_USERNAME: "username"
+      DATABASE_PASSWORD: "password"
+      DATABASE_NAME: "article"
+      JWT_SECRET: "your-secret-key"
+      KAFKA_TOPIC: "new-articles-command"
+      KAFKA_GROUP_ID: "repo-article-group"
+      ENVIRONMENT: "dev"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - redpanda
+    networks:
+      - data-net
 
 volumes:
   redpanda:
