@@ -4,10 +4,8 @@ import { Link, FileText, Folder } from "lucide-react";
 const RSS = ({
   item,
   handleItemClick,
-  getCountOfArticle,
   getFeedCount
 }) => {
-  const [articleCount, setArticleCount] = useState(null);
   const [feedCount, setFeedCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -17,8 +15,6 @@ const RSS = ({
   useEffect(() => {
     const loadCounts = async () => {
       setLoading(true);
-      const count = await getCountOfArticle(item);
-      setArticleCount(count);
       
       if (isMetaFeed) {
         const feeds = getFeedCount(item);
@@ -28,7 +24,7 @@ const RSS = ({
     };
 
     loadCounts();
-  }, [item, getFeedCount, getCountOfArticle, isMetaFeed]);
+  }, [item, getFeedCount, isMetaFeed]);
 
   return (
     <button
@@ -54,21 +50,9 @@ const RSS = ({
             ) : (
               <>
                 {isMetaFeed && (
-                  <>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 group-hover:bg-blue-500/30 text-blue-300 rounded-lg text-sm font-medium transition">
-                      <FileText className="w-4 h-4" />
-                      {articleCount} {articleCount === 1 ? 'article' : 'articles'}
-                    </div>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 group-hover:bg-purple-500/30 text-purple-300 rounded-lg text-sm font-medium transition">
-                      <Link className="w-4 h-4" />
-                      {feedCount} {feedCount === 1 ? 'feed' : 'feeds'}
-                    </div>
-                  </>
-                )}
-                {isFeed && articleCount !== null && (
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 group-hover:bg-blue-500/30 text-blue-300 rounded-lg text-sm font-medium transition">
-                    <FileText className="w-4 h-4" />
-                    {articleCount} {articleCount === 1 ? 'article' : 'articles'}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 group-hover:bg-purple-500/30 text-purple-300 rounded-lg text-sm font-medium transition">
+                    <Link className="w-4 h-4" />
+                    {feedCount} {feedCount === 1 ? 'feed' : 'feeds'}
                   </div>
                 )}
                 {!isMetaFeed && !isFeed && item.children && (

@@ -69,11 +69,9 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Protected routes (user & admin) */}
           <Route element={<AuthRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />
@@ -91,12 +89,10 @@ export default function App() {
                 <Route path="/feeds" element={<FeedPage />} />
               </Route>
 
-              {/* 404 for authenticated users - with navbar/footer */}
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Route>
 
-          {/* 404 for public routes - without navbar/footer */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>

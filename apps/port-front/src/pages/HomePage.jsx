@@ -184,55 +184,6 @@ const Home = () => {
     });
   };
 
-  const getCountOfArticle = async (item) => {
-    if (articleCountCache[item.name] !== undefined) {
-      return articleCountCache[item.name];
-    }
-
-    if (pendingRequests.current.counts[item.name]) {
-      return pendingRequests.current.counts[item.name];
-    }
-
-    let countPromise;
-
-    if (item.link && item.link !== "") {
-      const startOfWeek = getStartOfWeek();
-      countPromise = api.getArticles({
-        "count": true,
-        "feed_name": item.name,
-        "start_date": startOfWeek.toISOString()
-      })
-        .then(res => {
-          const count = res.count || 0;
-          setArticleCountCache(prev => ({ ...prev, [item.name]: count }));
-          delete pendingRequests.current.counts[item.name];
-          return count;
-        })
-        .catch(() => {
-          setArticleCountCache(prev => ({ ...prev, [item.name]: 0 }));
-          delete pendingRequests.current.counts[item.name];
-          return 0;
-        });
-    } else {
-      if (item.children && item.children.length > 0) {
-        countPromise = Promise.all(
-          item.children.map(child => getCountOfArticle(child))
-        ).then(childCounts => {
-          const count = childCounts.reduce((sum, c) => sum + c, 0);
-          setArticleCountCache(prev => ({ ...prev, [item.name]: count }));
-          delete pendingRequests.current.counts[item.name];
-          return count;
-        });
-      } else {
-        countPromise = Promise.resolve(0);
-        setArticleCountCache(prev => ({ ...prev, [item.name]: 0 }));
-      }
-    }
-
-    pendingRequests.current.counts[item.name] = countPromise;
-    return countPromise;
-  };
-
   const getFeedCount = (item) => {
     if (!item.children || item.children.length === 0) return 0;
 
@@ -300,7 +251,6 @@ const Home = () => {
                   key={item.name}
                   item={item}
                   handleItemClick={handleItemClick}
-                  getCountOfArticle={getCountOfArticle}
                   getFeedCount={getFeedCount}
                 />
               ))}
@@ -322,7 +272,6 @@ const Home = () => {
         {/* Articles View */}
         {isArticlesView && (
           <div className="space-y-6">
-            {/* Feed Header */}
             <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-6">
               <h2 className="text-2xl font-bold text-blue-300 mb-2">{currentLevel?.display_name}</h2>
               <p className="text-slate-400 text-sm">
