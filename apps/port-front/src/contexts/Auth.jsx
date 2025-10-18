@@ -7,15 +7,18 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshAuth = useCallback(() => {
-    api.getProfile().then((profile) => {
+  const refreshAuth = useCallback(async () => {
+    try {
+      const profile = await api.getProfile();
       setUser(profile);
-    }).catch(() => {});
+    } catch { 
+      setUser(null);
+    }
   }, []);
 
   useEffect(() => {
-    refreshAuth();
-    setLoading(false);
+    setLoading(true);
+    refreshAuth().finally(() => setLoading(false))
   }, [refreshAuth]);
 
   const logout = () => {
