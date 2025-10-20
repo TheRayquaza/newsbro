@@ -8,8 +8,6 @@ metadata:
 spec:
   instances: 1
   imagePullPolicy: IfNotPresent
-  bootstrap:
-    initdb: {}
   logLevel: info
   maxSyncReplicas: 0
   minSyncReplicas: 0
