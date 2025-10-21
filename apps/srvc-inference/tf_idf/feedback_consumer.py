@@ -1,86 +1,111 @@
 import os
-import json
-import logging
-from kafka import KafkaConsumer
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import PointStruct, Distance, VectorParams, Filter, FieldCondition, Range
+from qdrant_client.http.models import Distance, VectorParams, Filter, FieldCondition, Range
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
+from typing import List
+import logging
 
-load_dotenv()
+from abstract.producer import InferenceProducer
+from abstract.message import FeedbackAggregate
+from abstract.mlflow_model import MlflowModel
+from abstract.consumer import InferenceConsumerConfig, InferenceConsumer
 
-# --- Configuration from ENV ---
-QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
-KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-FEEDBACK_RETENTION_DAYS = int(os.getenv("FEEDBACK_RETENTION_DAYS", "30"))
-
-# --- Logging ---
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-logger = logging.getLogger(__name__)
-
-# --- Qdrant Client ---
-qdrant = QdrantClient(url=QDRANT_URL)
-QDRANT_COLLECTION = "feedbacks"
-
-# Create collection if not exists
-def create_feedback_collection():
-    """Create feedback collection with proper configuration"""
+def health_hook(consumer: InferenceConsumer) -> bool:
     try:
-        collections = [c.name for c in qdrant.get_collections().collections]
-        if QDRANT_COLLECTION not in collections:
-            qdrant.create_collection(
-                collection_name=QDRANT_COLLECTION,
+        consumer.state["qdrant"].get_collections()
+        return True
+    except Exception as e:
+        consumer.logger.error(f"Health check failed: {e}")
+        return False
+
+def bootstrap_hook(consumer: InferenceConsumer, qdrant_collection: str) -> None:
+    try:
+        collections = [c.name for c in consumer.state["qdrant"].get_collections().collections]
+        if qdrant_collection not in collections:
+            consumer.state["qdrant"].create_collection(
+                collection_name=qdrant_collection,
                 vectors_config=VectorParams(size=1, distance=Distance.COSINE)
             )
-            # Create index on timestamp for faster cleanup queries
-            qdrant.create_payload_index(
-                collection_name=QDRANT_COLLECTION,
+            consumer.state["qdrant"].create_payload_index(
+                collection_name=qdrant_collection,
                 field_name="timestamp",
                 field_schema="float"
             )
-            # Create indexes for user_id and article_id for faster filtering
-            qdrant.create_payload_index(
-                collection_name=QDRANT_COLLECTION,
+            consumer.state["qdrant"].create_payload_index(
+                collection_name=qdrant_collection,
                 field_name="user_id",
                 field_schema="integer"
             )
-            qdrant.create_payload_index(
-                collection_name=QDRANT_COLLECTION,
+            consumer.state["qdrant"].create_payload_index(
+                collection_name=qdrant_collection,
                 field_name="type",
                 field_schema="keyword"
             )
-            logger.info(f"Collection '{QDRANT_COLLECTION}' created with indexes.")
+            consumer.logger.info(f"Collection '{qdrant_collection}' created with indexes.")
         else:
-            logger.info(f"Collection '{QDRANT_COLLECTION}' already exists.")
+            consumer.logger.info(f"Collection '{qdrant_collection}' already exists.")
     except Exception as e:
-        logger.error(f"Error creating collection: {e}")
+        consumer.logger.error(f"Error creating collection: {e}")
         raise
 
-create_feedback_collection()
+def process_hook(consumer: InferenceConsumer, batch: List[FeedbackAggregate]) -> None:
+    pass
+    # try:
+    #     for feedback in batch:
+    #         try:
+                # user_id = feedback.user_id
+                # article_id = feedback.news_id
+                # feedback_type = feedback.value
+                # feedback_date = feedback.date
 
-# --- Kafka Consumer ---
-consumer = KafkaConsumer(
-    'feedback-aggregate',
-    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-    value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-    auto_offset_reset='earliest',
-    enable_auto_commit=True,
-    group_id='feedback-consumer-group'
-)
-logger.info(f"Kafka consumer started on topic 'feedback-aggregate'.")
+                # try:
+                #     feedback_datetime = datetime.fromisoformat(feedback_date)
+                #     timestamp = feedback_datetime.timestamp()
+                # except Exception:
+                #     timestamp = datetime.now().timestamp()
 
-def cleanup_old_feedbacks():
-    """Delete feedbacks older than FEEDBACK_RETENTION_DAYS"""
+                # point = PointStruct(
+                #     id=feedback_id,
+                #     vector=[0.0],
+                #     payload={
+                #         "user_id": user_id,
+                #         "article_id": article_id,
+                #         "type": feedback_type,
+                #         "date": feedback_date,
+                #         "timestamp": timestamp,
+                #         "text": feedback.get("text", ""),
+                #         "rating": feedback.get("rating")
+                #     }
+                # )
+                #consumer.state["qdrant"].upsert(collection_name=consumer.config["QDRANT_COLLECTION"], points=[point])
+                #consumer.logger.info(f"✅ Feedback {feedback_id} (user: {user_id}, article: {article_id}, type: {feedback_type}) saved.")
+
+    #         except Exception as e:
+    #             consumer.logger.error(f"Error processing message: {e}", exc_info=True)
+    # except Exception as e:
+    #     consumer.logger.error(f"Error processing batch: {e}", exc_info=True)
+
+def create_feedback_consumer(model: MlflowModel, producer: InferenceProducer, logger: logging.Logger, config: InferenceConsumerConfig) -> InferenceConsumer:
+    consumer = InferenceConsumer(logger, config, {
+        "FEEDBACK_RETENTION_DAYS": int(os.getenv("FEEDBACK_RETENTION_DAYS", "30")),
+        "QDRANT_COLLECTION": "feedbacks"
+    }, health_hook=health_hook,
+    process_hook=process_hook,
+    bootstrap_hook=lambda c: bootstrap_hook(c, os.getenv("QDRANT_COLLECTION", "feedbacks"))
+    )
+    consumer.state["qdrant"] = QdrantClient(url=os.getenv("QDRANT_URL", "http://localhost:6333"))
+    consumer.state["producer"] = producer
+    consumer.state["model"] = model
+    bootstrap_hook(consumer, consumer.config["QDRANT_COLLECTION"])
+    return consumer
+
+def cleanup_old_feedbacks(consumer: InferenceConsumer) -> None:
     try:
-        cutoff_timestamp = (datetime.now() - timedelta(days=FEEDBACK_RETENTION_DAYS)).timestamp()
+        cutoff_timestamp = (datetime.now() - timedelta(days=consumer.config['FEEDBACK_RETENTION_DAYS'])).timestamp()
         
         # Scroll through old points
-        old_points, _ = qdrant.scroll(
-            collection_name=QDRANT_COLLECTION,
+        old_points, _ = consumer.state["qdrant"].scroll(
+            collection_name=consumer.config["QDRANT_COLLECTION"],
             scroll_filter=Filter(
                 must=[
                     FieldCondition(
@@ -96,63 +121,13 @@ def cleanup_old_feedbacks():
         
         if old_points:
             old_ids = [p.id for p in old_points]
-            qdrant.delete(
-                collection_name=QDRANT_COLLECTION,
+            consumer.state["qdrant"].delete(
+                collection_name=consumer.config["QDRANT_COLLECTION"],
                 points_selector=old_ids
             )
-            logger.info(f"🗑️  {len(old_ids)} old feedbacks deleted (older than {FEEDBACK_RETENTION_DAYS} days).")
+            consumer.logger.info(f"🗑️  {len(old_ids)} old feedbacks deleted (older than {consumer.config['FEEDBACK_RETENTION_DAYS']} days.)")
         else:
-            logger.info(f"No old feedbacks to delete.")
+            consumer.logger.info("No old feedbacks to delete.")
     except Exception as e:
-        logger.error(f"Error during feedback cleanup: {e}", exc_info=True)
+        consumer.logger.error(f"Error during feedback cleanup: {e}", exc_info=True)
 
-# --- Main loop ---
-message_count = 0
-try:
-    for message in consumer:
-        try:
-            feedback = message.value
-            feedback_id = int(feedback.get("id"))
-            user_id = int(feedback.get("user_id"))
-            article_id = int(feedback.get("article_id"))
-            feedback_type = feedback.get("type", "like")  # like, dislike, view, etc.
-            feedback_date = feedback.get("date", datetime.now().isoformat())
-            
-            # Parse date to timestamp
-            try:
-                feedback_datetime = datetime.fromisoformat(feedback_date)
-                timestamp = feedback_datetime.timestamp()
-            except Exception:
-                timestamp = datetime.now().timestamp()
-
-            # Save feedback to Qdrant
-            point = PointStruct(
-                id=feedback_id,
-                vector=[0.0],  # placeholder vector (not used for feedbacks)
-                payload={
-                    "user_id": user_id,
-                    "article_id": article_id,
-                    "type": feedback_type,
-                    "date": feedback_date,
-                    "timestamp": timestamp,
-                    "text": feedback.get("text", ""),
-                    "rating": feedback.get("rating")
-                }
-            )
-            qdrant.upsert(collection_name=QDRANT_COLLECTION, points=[point])
-            logger.info(f"✅ Feedback {feedback_id} (user: {user_id}, article: {article_id}, type: {feedback_type}) saved.")
-
-            message_count += 1
-            
-            # Cleanup old feedbacks periodically (every 100 messages)
-            if message_count % 100 == 0:
-                cleanup_old_feedbacks()
-                
-        except Exception as e:
-            logger.error(f"Error processing message: {e}", exc_info=True)
-            
-except KeyboardInterrupt:
-    logger.info("Consumer shutdown requested.")
-finally:
-    consumer.close()
-    logger.info("Kafka consumer closed.")
