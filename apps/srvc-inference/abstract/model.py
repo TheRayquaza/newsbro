@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Any, Dict, List
 
 import pandas as pd
-
-# mlflow.set_tracking_uri("http://mlflow.localhost:8080")
 
 
 class BaseRecommendationModel(ABC):
@@ -22,7 +20,7 @@ class BaseRecommendationModel(ABC):
         pass
 
     @abstractmethod
-    def recommend(self, news_index: int, top_n: int = 6, **kwargs) -> pd.DataFrame:
+    def recommend(self, news: List[Dict[str, Any]], **kwargs) -> pd.DataFrame:
         """Get recommendations for a given news"""
         pass
 

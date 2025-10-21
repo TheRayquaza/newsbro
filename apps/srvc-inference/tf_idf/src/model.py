@@ -1,9 +1,10 @@
+from typing import Any, Dict, List
+
 import mlflow
 import mlflow.sklearn
 import pandas as pd
 from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import linear_kernel
 
 from abstract.model import BaseRecommendationModel
 
@@ -40,23 +41,29 @@ class TfidfModel(BaseRecommendationModel):
 
         self.is_trained = True
 
-    def recommend(self, title: str, top_n: int = 5) -> pd.DataFrame:
+    def recommend(self, news: List[Dict[str, Any]], **kwargs) -> pd.DataFrame:
         """Get top-N recommended articles for a given title"""
-        if not self.is_trained:
-            raise ValueError("Model not trained yet. Call fit() first.")
+        # top_n = kwargs.get('top_n', 5)
+        recommendations = pd.DataFrame(
+            columns=["title", "abstract", "similarity_score"]
+        )
 
-        if title not in self.news_df["title"].values:
-            raise ValueError(f"Title '{title}' not found in news dataset.")
+        # for item in news:
+        #     if not self.is_trained:
+        #         raise ValueError("Model not trained yet. Call fit() first.")
 
-        idx = self.news_df[self.news_df["title"] == title].index[0]
+        #     if item["title"] not in self.news_df["title"].values:
+        #         raise ValueError(f"Title '{item.title}' not found in news dataset.")
 
-        sim_scores = linear_kernel(
-            self.tfidf_matrix[idx : idx + 1], self.tfidf_matrix
-        ).flatten()
+        #     idx = self.news_df[self.news_df["title"] == item["title"]].index[0]
 
-        sim_indices = sim_scores.argsort()[::-1][1 : top_n + 1]
+        #     sim_scores = linear_kernel(
+        #         self.tfidf_matrix[idx : idx + 1], self.tfidf_matrix
+        #     ).flatten()
 
-        recommendations = self.news_df.iloc[sim_indices].copy()
-        recommendations["similarity_score"] = sim_scores[sim_indices]
+        #     sim_indices = sim_scores.argsort()[::-1][1 : top_n + 1]
+
+        #     recommendations = self.news_df.iloc[sim_indices].copy()
+        #     recommendations["similarity_score"] = sim_scores[sim_indices]
 
         return recommendations[["title", "abstract", "similarity_score"]]
