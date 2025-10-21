@@ -34,6 +34,7 @@
               types-requests
               types-pyyaml
               types-redis
+              uvicorn
             ]);
         in
           pkgs.mkShell {

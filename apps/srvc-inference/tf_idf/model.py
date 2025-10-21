@@ -1,46 +1,56 @@
-import pandas as pd
+from abstract.model import BaseRecommendationModel
 from sklearn.feature_extraction.text import TfidfVectorizer
-from pathlib import Path
-import logging
+from sklearn.metrics.pairwise import linear_kernel
+from dotenv import load_dotenv
+import pandas as pd
+import mlflow
+import mlflow.sklearn
 
-class TFIDFModel:
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
+load_dotenv()
 
-    def fit(self, path: str, params: dict = {}) -> TfidfVectorizer:
-        """Load CSV data and train TF-IDF vectorizer"""
-        csv_path = Path(path)
-        max_features = params.get("TFIDF_MAX_FEATURES", 12)
+mlflow.autolog()
+mlflow.set_tracking_uri("http://mlflow.localhost:8080")
 
-        if not csv_path.exists():
-            self.logger.warning(f"CSV file not found at {path}. Using minimal corpus.")
-            return None
-        else:
-            self.logger.info(f"Loading training data from {path}")
-            try:
-                df = pd.read_csv(csv_path)
-                
-                if 'abstract' not in df.columns:
-                    self.logger.error("CSV must contain 'abstract' column")
-                    raise ValueError("Missing 'abstract' column in CSV")
+class TfidfModel(BaseRecommendationModel):
+    
+    def __init__(self, name="TF-IDF Model", description="TF-IDF based content similarity"):
+        super().__init__(name=name, description=description)
+        self.vectorizer = None
+        self.tfidf_matrix = None
+        self.news_df = None
+        self.is_trained = False
+
+    def fit(self, news_df: pd.DataFrame, **kwargs):
+        """Train the TF-IDF recommendation model"""
+        mlflow.set_experiment("tfidf_experiment_2")
+        self.news_df = news_df.copy()
         
-                initial_corpus = df['abstract'].head(1000).tolist()
-                self.logger.info(f"Loaded {len(initial_corpus)} documents for TF-IDF training")
-                
-            except Exception as e:
-                self.logger.error(f"Error loading CSV: {e}. Using minimal corpus.")
-                initial_corpus = [
-                    "First sample article to initialize the vectorizer",
-                    "Second sample article with different abstract"
-                ]
+        with mlflow.start_run(run_name="TF-IDF Model Training"):
+            self.vectorizer = TfidfVectorizer(stop_words='english', **kwargs)
+            self.tfidf_matrix = self.vectorizer.fit_transform(self.news_df['content'])
 
-        vectorizer = TfidfVectorizer(
-            max_features=max_features,
-            stop_words='english',
-            min_df=2,
-            max_df=0.8
-        )
-        vectorizer.fit(initial_corpus)
-        self.logger.info(f"TF-IDF vectorizer trained with {max_features} features.")
-        
-        return vectorizer
+            mlflow.log_params(kwargs)
+            mlflow.log_param("num_documents", len(self.news_df))
+
+            mlflow.sklearn.log_model(self.vectorizer, "tfidf_vectorizer")
+
+        self.is_trained = True
+
+    def recommend(self, title: str, top_n: int = 5) -> pd.DataFrame:
+        """Get top-N recommended articles for a given title"""
+        if not self.is_trained:
+            raise ValueError("Model not trained yet. Call fit() first.")
+
+        if title not in self.news_df['title'].values:
+            raise ValueError(f"Title '{title}' not found in news dataset.")
+
+        idx = self.news_df[self.news_df['title'] == title].index[0]
+
+        sim_scores = linear_kernel(self.tfidf_matrix[idx:idx+1], self.tfidf_matrix).flatten()
+
+        sim_indices = sim_scores.argsort()[::-1][1:top_n+1]
+
+        recommendations = self.news_df.iloc[sim_indices].copy()
+        recommendations['similarity_score'] = sim_scores[sim_indices]
+
+        return recommendations[['title', 'abstract', 'similarity_score']]

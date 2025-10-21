@@ -1,11 +1,7 @@
 import pandas as pd
-import logging
 from abc import ABC, abstractmethod
 from typing import Dict
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 #mlflow.set_tracking_uri("http://mlflow.localhost:8080")
 
 class BaseRecommendationModel(ABC):
@@ -28,7 +24,7 @@ class BaseRecommendationModel(ABC):
         """Get recommendations for a given news"""
         pass
     
-    def get_info(self) -> Dict[str, str]:
+    def get_info(self) -> Dict[str, str | bool | None]:
         """Get model information"""
         return {
             "name": self.name,

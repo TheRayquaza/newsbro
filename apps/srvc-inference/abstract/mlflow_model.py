@@ -14,7 +14,7 @@ class MlflowModel:
         """
         print(f"Loading model from URI: {model_uri} with tracking URI: {tracking_uri}")
         mlflow.set_tracking_uri(tracking_uri)
-        
+
         if flavor:
             self.model = self._load_with_flavor(model_uri, flavor)
         else:
