@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class ArticleAggregate(BaseModel):
     id: int
@@ -12,6 +14,7 @@ class ArticleAggregate(BaseModel):
     published_at: datetime
     is_active: bool
 
+
 class FeedbackAggregate(BaseModel):
     user_id: int
     news_id: int
@@ -19,12 +22,14 @@ class FeedbackAggregate(BaseModel):
     is_active: bool
     date: datetime
 
+
 class RSSAggregate(BaseModel):
     id: int
     name: str
     description: str
     link: str
     active: bool
+
 
 class InferenceCommand(BaseModel):
     user_id: int

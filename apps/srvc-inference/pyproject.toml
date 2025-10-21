@@ -1,0 +1,47 @@
+[tool.ruff]
+lint.select = ["E", "F", "I", "B"]
+lint.ignore = ["E501"]
+fix = true
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "tests",
+    "apps/srvc-inference/tf_idf/legacy",
+    "apps/srvc-inference/sbert/legacy"
+]
+
+[tool.black]
+line-length = 88
+exclude = '''
+(
+  /(\.venv|venv|__pycache__|build|dist|tests)/
+)
+'''
+
+[tool.mypy]
+strict = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
+exclude = '(venv|\.venv|build|dist|tests|__pycache__)'
+
+[[tool.mypy.overrides]]
+module = "apps.srvc_inference.sbert.*"
+disallow_untyped_defs = true
+strict_optional = true
+
+[tool.bandit]
+skips = ["B101"]
+exclude_dirs = [
+    "tests",
+    "venv",
+    ".venv",
+]
+
+[tool.radon]
+cc_min = "B"
+exclude = ["venv", ".venv", "tests", "build", "dist"]

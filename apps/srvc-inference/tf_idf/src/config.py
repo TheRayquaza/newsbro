@@ -1,5 +1,7 @@
-import pydantic
 import os
+
+import pydantic
+
 
 class Config(pydantic.BaseModel):
     # General
@@ -7,15 +9,25 @@ class Config(pydantic.BaseModel):
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
     # Kafka
-    kafka_bootstrap_servers: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+    kafka_bootstrap_servers: str = os.getenv(
+        "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
+    )
     ## Producer
     kafka_producer_topic: str = os.getenv("KAFKA_PRODUCER_TOPIC", "inference-topic")
     ## Article Consumer
-    kafka_article_consumer_topic: str = os.getenv("KAFKA_ARTICLE_CONSUMER_TOPIC", "article-aggregate")
-    kafka_article_consumer_group: str = os.getenv("KAFKA_ARTICLE_CONSUMER_GROUP", "article-tfidf-group")
+    kafka_article_consumer_topic: str = os.getenv(
+        "KAFKA_ARTICLE_CONSUMER_TOPIC", "article-aggregate"
+    )
+    kafka_article_consumer_group: str = os.getenv(
+        "KAFKA_ARTICLE_CONSUMER_GROUP", "article-tfidf-group"
+    )
     ## Feedback Consumer
-    kafka_feedback_consumer_topic: str = os.getenv("KAFKA_FEEDBACK_CONSUMER_TOPIC", "feedback-aggregate")
-    kafka_feedback_consumer_group: str = os.getenv("KAFKA_FEEDBACK_CONSUMER_GROUP", "feedback-tfidf-group")
+    kafka_feedback_consumer_topic: str = os.getenv(
+        "KAFKA_FEEDBACK_CONSUMER_TOPIC", "feedback-aggregate"
+    )
+    kafka_feedback_consumer_group: str = os.getenv(
+        "KAFKA_FEEDBACK_CONSUMER_GROUP", "feedback-tfidf-group"
+    )
 
     # Qdrant
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
@@ -27,4 +39,4 @@ class Config(pydantic.BaseModel):
 
     # API
     api_port: int = int(os.getenv("API_PORT", "8000"))
-    api_host: str = os.getenv("API_HOST", "0.0.0.0")
+    api_host: str = os.getenv("API_HOST", "")

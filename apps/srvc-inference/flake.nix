@@ -35,6 +35,9 @@
               types-pyyaml
               types-redis
               uvicorn
+              black
+              bandit
+              radon
             ]);
         in
           pkgs.mkShell {

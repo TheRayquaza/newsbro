@@ -1,29 +1,31 @@
-import pandas as pd
 from abc import ABC, abstractmethod
 from typing import Dict
 
-#mlflow.set_tracking_uri("http://mlflow.localhost:8080")
+import pandas as pd
+
+# mlflow.set_tracking_uri("http://mlflow.localhost:8080")
+
 
 class BaseRecommendationModel(ABC):
     """Abstract base class for recommendation models"""
-    
+
     def __init__(self, name: str, description: str):
         self.name = name
         self.description = description
         self.is_trained = False
         self.mlflow_run_id = None
         self.model_version = None
-    
+
     @abstractmethod
     def fit(self, news_df: pd.DataFrame, **kwargs) -> None:
         """Train the recommendation model"""
         pass
-    
+
     @abstractmethod
     def recommend(self, news_index: int, top_n: int = 6, **kwargs) -> pd.DataFrame:
         """Get recommendations for a given news"""
         pass
-    
+
     def get_info(self) -> Dict[str, str | bool | None]:
         """Get model information"""
         return {
@@ -31,5 +33,5 @@ class BaseRecommendationModel(ABC):
             "description": self.description,
             "is_trained": self.is_trained,
             "mlflow_run_id": self.mlflow_run_id,
-            "model_version": self.model_version
+            "model_version": self.model_version,
         }

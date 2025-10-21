@@ -8,7 +8,9 @@
 cd ..
 nix develop .
 mypy .
-ruff check --fix
+ruff check . --fix
+bandit -r .
+black .
 ```
 
 * run:
