@@ -51,12 +51,14 @@ class MlflowModel:
                             )
                         run_id = versions[0].run_id
 
-                    run = client.get_run(run_id)
+                    run = client.get_run("" if not run_id else run_id)
                     flavors = list(run.data.params.keys())
                     print(f"Available flavors in model: {flavors}")
 
                 elif model_uri.startswith("runs:/"):
                     run_id = model_uri.split("/")[1]
+                    if not run_id:
+                        raise ValueError(f"Invalid runs:/ URI: {model_uri}")
                     run = client.get_run(run_id)
                     flavors = list(run.data.params.keys())
                     print(f"Available flavors in model: {flavors}")
@@ -101,7 +103,6 @@ class MlflowModel:
 
     def predict(self, input_data: Any) -> Any:
         """Make predictions using the loaded model."""
-        # Handle different model types
         if hasattr(self.model, "predict"):
             return self.model.predict(input_data)
         elif callable(self.model):

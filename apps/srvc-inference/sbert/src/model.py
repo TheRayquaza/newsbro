@@ -1,5 +1,6 @@
+from typing import Any, Dict, List
+
 import mlflow
-import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
@@ -53,25 +54,32 @@ class SBertModel(BaseRecommendationModel):
         self.is_trained = True
         print("S-BERT model training completed.")
 
-    def recommend(self, title: str, top_n: int = 6) -> pd.DataFrame:
+    def recommend(self, news: List[Dict[str, Any]], **kwargs) -> pd.DataFrame:
         """Get recommendations for a given article by title"""
         if not self.is_trained:
             raise ValueError("Model not trained yet. Call fit() first.")
 
-        matching_articles = self.news_df[self.news_df["title"] == title]
-        if matching_articles.empty:
-            raise ValueError(f"Title '{title}' not found in news dataset.")
+        recommendations = pd.DataFrame(
+            columns=["title", "abstract", "similarity_score"]
+        )
 
-        idx = matching_articles.index[0]
+        # for item in news:
+        #     title = item["title"]
 
-        query_embedding = self.news_embeddings[idx].reshape(1, -1)
-        sim_scores = cosine_similarity(query_embedding, self.news_embeddings)[0]
+        #     matching_articles = self.news_df[self.news_df["title"] == title]
+        #     if matching_articles.empty:
+        #         raise ValueError(f"Title '{title}' not found in news dataset.")
 
-        sim_indices = np.argsort(sim_scores)[::-1]
-        sim_indices = sim_indices[sim_indices != idx][:top_n]
-        top_scores = sim_scores[sim_indices]
+        #     idx = matching_articles.index[0]
 
-        recommendations = self.news_df.iloc[sim_indices].copy()
-        recommendations["similarity_score"] = top_scores
+        #     query_embedding = self.news_embeddings[idx].reshape(1, -1)
+        #     sim_scores = cosine_similarity(query_embedding, self.news_embeddings)[0]
+
+        #     sim_indices = np.argsort(sim_scores)[::-1]
+        #     sim_indices = sim_indices[sim_indices != idx][:top_n]
+        #     top_scores = sim_scores[sim_indices]
+
+        #     recommendations = self.news_df.iloc[sim_indices].copy()
+        #     recommendations["similarity_score"] = top_scores
 
         return recommendations[["title", "abstract", "similarity_score"]]
