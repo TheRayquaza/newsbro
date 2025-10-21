@@ -1,4 +1,4 @@
-from .BaseRecommendationModel import BaseRecommendationModel
+from abstract.model import BaseRecommendationModel
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv

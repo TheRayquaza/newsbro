@@ -1,4 +1,4 @@
-# TF-IDF
+# SBERT
 
 ## Dev
 
@@ -17,7 +17,7 @@ ruff check --fix
 cd ..
 docker compose up -d
 nix develop .
-python3 -m tf_idf.main
+python3 -m sbert.main
 ```
 
 ## Deployment
@@ -36,7 +36,6 @@ python3 -m tf_idf.main
 | `KAFKA_FEEDBACK_CONSUMER_GROUP` | `feedback-tfidf-group`  | Kafka consumer group for feedback                       |
 | `QDRANT_URL`                    | `http://localhost:6333` | URL for Qdrant vector database                          |
 | `MODEL_URI`                     | *(None)*                | URI or path to the ML model                             |
-| `TOP_N_RECOMMENDATIONS`         | `10`                    | Number of top recommendations to return                 |
 | `MLFLOW_S3_ENDPOINT_URL`        | `http://minio-svc.localhost:8080` | S3 Endpoint                                   |
 | `AWS_ACCESS_KEY_ID`             | `minio`                 | S3 access key                                           |
 | `AWS_SECRET_ACCESS_KEY`         | `minio123`              | S3 secret key                                           |

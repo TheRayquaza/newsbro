@@ -18,6 +18,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+.mypy_cache/
 lib64/
 parts/
 sdist/
@@ -171,7 +172,6 @@ venv.bak/
 /site
 
 # mypy
-.mypy_cache/
 .dmypy.json
 dmypy.json
 
