@@ -1,35 +1,36 @@
-from abstract.producer import InferenceProducer, InferenceProducerConfig
-from abstract.consumer import InferenceConsumerConfig
-from abstract.mlflow_model import MlflowModel
-from tf_idf.feedback_consumer import create_feedback_consumer
-from tf_idf.article_consumer import create_article_consumer
-from tf_idf.config import Config
+import logging
+import os
 
 import uvicorn
-import os
-from fastapi import FastAPI, HTTPException
-import logging
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+
+from abstract.consumer import InferenceConsumerConfig
+from abstract.mlflow_model import MlflowModel
+from abstract.producer import InferenceProducer, InferenceProducerConfig
+from tf_idf.src.article_consumer import create_article_consumer
+from tf_idf.src.config import Config
+from tf_idf.src.feedback_consumer import create_feedback_consumer
 
 if __name__ == "__main__":
     if os.getenv("ENVIRONMENT") != "production":
         print("Loading .env file for development environment")
         load_dotenv()
     config = Config()
-    
+
     print(config)
 
     logging.basicConfig(
         level=(logging.INFO if config.log_level.upper() == "INFO" else logging.DEBUG),
-        format='%(asctime)s [%(levelname)s] %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
     logger = logging.getLogger(__name__)
 
     app = FastAPI(
         title="Article Recommendation API",
         description="TF-IDF based article recommendation API using Qdrant",
-        version="0.0.0"
+        version="0.0.0",
     )
 
     model = MlflowModel(
