@@ -1,202 +1,122 @@
 import os
-import json
-import time
-import logging
-import pandas as pd
-from pathlib import Path
-from kafka import KafkaConsumer
-from sklearn.feature_extraction.text import TfidfVectorizer
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct, Distance, VectorParams
-from threading import Lock, Thread
-from dotenv import load_dotenv
+from typing import List
+import logging
 
-load_dotenv()
+from abstract.mlflow_model import MlflowModel
+from abstract.message import ArticleAggregate
+from abstract.producer import InferenceProducer
+from abstract.consumer import InferenceConsumerConfig, InferenceConsumer
 
-# --- Configuration from ENV ---
-QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
-KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-BATCH_SIZE = int(os.getenv("BATCH_SIZE", "50"))
-BATCH_INTERVAL = int(os.getenv("BATCH_INTERVAL", "2"))
-TFIDF_MAX_FEATURES = int(os.getenv("TFIDF_MAX_FEATURES", "12"))
-CSV_DATA_PATH = os.getenv("CSV_DATA_PATH", "../data/news_cleaned.csv")
-
-# --- Logging ---
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
-logger = logging.getLogger(__name__)
-
-# --- Qdrant Client ---
-client = QdrantClient(url=QDRANT_URL)
-collection_name = "articles"
-
-# --- Initialize TF-IDF from CSV ---
-def load_and_train_vectorizer():
-    """Load CSV data and train TF-IDF vectorizer"""
-    csv_path = Path(CSV_DATA_PATH)
-    
-    if not csv_path.exists():
-        logger.warning(f"CSV file not found at {CSV_DATA_PATH}. Using minimal corpus.")
-        initial_corpus = [
-            "First sample article to initialize the vectorizer",
-            "Second sample article with different content"
-        ]
-    else:
-        logger.info(f"Loading training data from {CSV_DATA_PATH}")
-        try:
-            df = pd.read_csv(csv_path)
-            
-            # Validate required columns
-            if 'abstract' not in df.columns:
-                logger.error("CSV must contain 'abstract' column")
-                raise ValueError("Missing 'abstract' column in CSV")
-    
-            initial_corpus = df['abstract'].head(1000).tolist()  # Use first 1000 for training
-            logger.info(f"Loaded {len(initial_corpus)} documents for TF-IDF training")
-            
-        except Exception as e:
-            logger.error(f"Error loading CSV: {e}. Using minimal corpus.")
-            initial_corpus = [
-                "First sample article to initialize the vectorizer",
-                "Second sample article with different abstract"
-            ]
-    
-    # Train vectorizer
-    vectorizer = TfidfVectorizer(
-        max_features=TFIDF_MAX_FEATURES,
-        stop_words='english',
-        min_df=2,
-        max_df=0.8
-    )
-    vectorizer.fit(initial_corpus)
-    logger.info(f"TF-IDF vectorizer trained with {TFIDF_MAX_FEATURES} features.")
-    
-    return vectorizer
-
-# --- Create Qdrant Collection ---
-def create_collection_if_not_exists():
-    """Create Qdrant collection with proper vector size"""
+def health_hook(consumer: InferenceConsumer) -> bool:
     try:
-        collections = [c.name for c in client.get_collections().collections]
-        if collection_name not in collections:
-            client.create_collection(
-                collection_name=collection_name,
+        consumer.state["qdrant"].get_collections()
+        return True
+    except Exception as e:
+        consumer.logger.error(f"Health check failed: {e}")
+        return False
+
+def bootstrap_hook(consumer: InferenceConsumer, qdrant_collection: str) -> None:
+    try:
+        collections = [c.name for c in consumer.state["qdrant"].get_collections().collections]
+        if qdrant_collection not in collections:
+            consumer.state["qdrant"].create_collection(
+                collection_name=qdrant_collection,
                 vectors_config=VectorParams(
-                    size=TFIDF_MAX_FEATURES,
+                    size=consumer.config["TFIDF_MAX_FEATURES"],
                     distance=Distance.COSINE
                 )
             )
-            logger.info(f"Collection '{collection_name}' created with vector size {TFIDF_MAX_FEATURES}.")
+            consumer.logger.info(f"Collection '{qdrant_collection}' created with vector size {consumer.config['TFIDF_MAX_FEATURES']}.")
         else:
-            # Verify vector size matches
-            collection_info = client.get_collection(collection_name)
+            collection_info = consumer.state["qdrant"].get_collection(qdrant_collection)
             vector_size = collection_info.config.params.vectors.size
-            if vector_size != TFIDF_MAX_FEATURES:
-                logger.error(
+            if vector_size != consumer.config["TFIDF_MAX_FEATURES"]:
+                consumer.logger.error(
                     f"Collection exists but vector size mismatch: "
-                    f"expected {TFIDF_MAX_FEATURES}, got {vector_size}"
+                    f"expected {consumer.config['TFIDF_MAX_FEATURES']}, got {vector_size}"
                 )
                 raise ValueError("Vector size mismatch with existing collection")
-            logger.info(f"Collection '{collection_name}' already exists.")
+            consumer.logger.info(f"Collection '{qdrant_collection}' already exists.")
+        
     except Exception as e:
-        logger.error(f"Error managing collection: {e}")
+        consumer.logger.error(f"Error creating collection: {e}")
         raise
 
-# Initialize
-vectorizer = load_and_train_vectorizer()
-create_collection_if_not_exists()
-
-# --- Kafka Consumer ---
-consumer = KafkaConsumer(
-    'article-aggregate',
-    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-    auto_offset_reset='earliest',
-    enable_auto_commit=True,
-    group_id='tfidf-batch-group',
-    value_deserializer=lambda x: json.loads(x.decode('utf-8'))
-)
-logger.info("Kafka consumer started on topic 'article-aggregate'.")
-
-# --- Batch Processing ---
-batch_lock = Lock()
-batch_buffer = []
-
-def process_batch_data(batch):
-    """Process a batch of articles: upsert or delete"""
-    try:
-        to_upsert = [a for a in batch if a.get("action", "add") in ["add", "update"]]
-        to_delete = [a for a in batch if a.get("action") == "delete"]
-
-        if to_upsert:
-            texts = [a.get("abstract", "") for a in to_upsert]
-            vectors = vectorizer.transform(texts).toarray().tolist()
-            
-            # Validate vector dimensions
-            for v in vectors:
-                if len(v) != TFIDF_MAX_FEATURES:
-                    logger.error(f"Vector dimension mismatch: expected {TFIDF_MAX_FEATURES}, got {len(v)}")
-                    return
-            
-            points = [
-                PointStruct(
-                    id=int(a["id"]),
-                    vector=v,
-                    payload={
-                        "title": a.get("title", ""),
-                        "abstract": a.get("abstract", ""),
-                        "category": a.get("category", ""),
-                        "created_at": a.get("created_at", "")
-                    }
-                )
-                for a, v in zip(to_upsert, vectors)
-            ]
-            client.upsert(collection_name=collection_name, points=points)
-            logger.info(f"[+] Upserted batch of {len(points)} articles")
-
-        if to_delete:
-            ids_to_delete = [int(a["id"]) for a in to_delete]
-            client.delete(collection_name=collection_name, points_selector=ids_to_delete)
-            logger.info(f"[-] Deleted batch of {len(ids_to_delete)} articles")
-
-    except Exception as e:
-        logger.error(f"Error processing batch: {e}", exc_info=True)
-
-def periodic_batch_processor():
-    """Process batch periodically"""
-    global batch_buffer
-    while True:
-        time.sleep(BATCH_INTERVAL)
-        with batch_lock:
-            if not batch_buffer:
-                continue
-            batch = batch_buffer[:]
-            batch_buffer = []
+def process_hook(consumer: InferenceConsumer, batch: List[ArticleAggregate]) -> None:
+    # try:
+    #     to_upsert = []
+    #     to_delete = []
         
-        process_batch_data(batch)
-
-# Start periodic batch processor
-Thread(target=periodic_batch_processor, daemon=True).start()
-logger.info("Periodic batch processor thread started.")
-
-# --- Main loop: read from Kafka ---
-try:
-    for message in consumer:
-        article = message.value
-        
-        with batch_lock:
-            batch_buffer.append(article)
-            # Process immediately if batch is full
-            if len(batch_buffer) >= BATCH_SIZE:
-                batch = batch_buffer[:]
-                batch_buffer = []
-                # Process in separate thread to avoid blocking
-                Thread(target=process_batch_data, args=(batch,), daemon=True).start()
+    #     for article in batch:
+    #         try:
+    #             action = article.get("action", "add")
                 
-except KeyboardInterrupt:
-    logger.info("Consumer shutdown requested.")
-finally:
-    consumer.close()
-    logger.info("Kafka consumer closed.")
+    #             if action in ["add", "update"]:
+    #                 to_upsert.append(article)
+    #             elif action == "delete":
+    #                 to_delete.append(article)
+                    
+    #         except Exception as e:
+    #             consumer.logger.error(f"Error processing message: {e}", exc_info=True)
+        
+    #     if to_upsert:
+    #         texts = [a.get("abstract", "") for a in to_upsert]
+    #         vectors = consumer.state["model"].transform(texts).toarray().tolist()
+
+    #         for v in vectors:
+    #             if len(v) != consumer.config["TFIDF_MAX_FEATURES"]:
+    #                 consumer.logger.error(
+    #                     f"Vector dimension mismatch: expected {consumer.config['TFIDF_MAX_FEATURES']}, got {len(v)}"
+    #                 )
+    #                 return
+            
+    #         points = [
+    #             PointStruct(
+    #                 id=int(a["id"]),
+    #                 vector=v,
+    #                 payload={
+    #                     "title": a.get("title", ""),
+    #                     "abstract": a.get("abstract", ""),
+    #                     "category": a.get("category", ""),
+    #                     "created_at": a.get("created_at", "")
+    #                 }
+    #             )
+    #             for a, v in zip(to_upsert, vectors)
+    #         ]
+    #         consumer.state["qdrant"].upsert(collection_name=consumer.config["QDRANT_COLLECTION"], points=points)
+    #         consumer.logger.info(f"✅ Upserted batch of {len(points)} articles")
+        
+    #     if to_delete:
+    #         ids_to_delete = [int(a["id"]) for a in to_delete]
+    #         consumer.state["qdrant"].delete(
+    #             collection_name=consumer.config["QDRANT_COLLECTION"],
+    #             points_selector=ids_to_delete
+    #         )
+    #         consumer.logger.info(f"🗑️  Deleted batch of {len(ids_to_delete)} articles")
+  
+    # except Exception as e:
+    #     consumer.logger.error(f"Error processing batch: {e}", exc_info=True)
+    pass
+
+def create_article_consumer(model: MlflowModel, producer: InferenceProducer, logger: logging.Logger, config: InferenceConsumerConfig) -> InferenceConsumer:    
+    consumer = InferenceConsumer(
+        logger,
+        config,
+        {
+            "TFIDF_MAX_FEATURES": int(os.getenv("TFIDF_MAX_FEATURES", "12")),
+            "CSV_DATA_PATH": os.getenv("CSV_DATA_PATH", "../data/news_cleaned.csv"),
+            "QDRANT_COLLECTION": "articles"
+        },
+        health_hook=health_hook,
+        process_hook=process_hook,
+        bootstrap_hook=lambda c: bootstrap_hook(c, os.getenv("QDRANT_COLLECTION", "articles"))
+    )
+
+    consumer.state["qdrant"] = QdrantClient(url=os.getenv("QDRANT_URL", "http://localhost:6333"))
+    consumer.state["producer"] = producer
+    consumer.state["model"] = model
+    bootstrap_hook(consumer, consumer.config["QDRANT_COLLECTION"])
+
+    return consumer
