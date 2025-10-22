@@ -1,17 +1,17 @@
 import logging
 import os
-from typing import List
+from typing import List, Dict
+from collections import defaultdict
 
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Distance, VectorParams
+from qdrant_client.http.models import Distance, VectorParams, PointStruct
 
 from abstract.consumer import InferenceConsumer, InferenceConsumerConfig
-from abstract.message import ArticleAggregate
+from abstract.message import ArticleAggregate, FeedbackAggregate
 from abstract.mlflow_model import MlflowModel
 from abstract.producer import InferenceProducer
 
-
-def health_hook(consumer: InferenceConsumer) -> bool:
+def health(consumer: InferenceConsumer) -> bool:
     try:
         consumer.state["qdrant"].get_collections()
         return True
@@ -19,8 +19,8 @@ def health_hook(consumer: InferenceConsumer) -> bool:
         consumer.logger.error(f"Health check failed: {e}")
         return False
 
-
-def bootstrap_hook(consumer: InferenceConsumer, qdrant_collection: str) -> None:
+def bootstrap(consumer: InferenceConsumer, qdrant_collection: str) -> None:
+    TFIDF_MAX_FEATURES = consumer.config["TFIDF_MAX_FEATURES"]
     try:
         collections = [
             c.name for c in consumer.state["qdrant"].get_collections().collections
@@ -29,7 +29,7 @@ def bootstrap_hook(consumer: InferenceConsumer, qdrant_collection: str) -> None:
             consumer.state["qdrant"].create_collection(
                 collection_name=qdrant_collection,
                 vectors_config=VectorParams(
-                    size=consumer.config["TFIDF_MAX_FEATURES"], distance=Distance.COSINE
+                    size=TFIDF_MAX_FEATURES, distance=Distance.COSINE
                 ),
             )
             consumer.logger.info(
@@ -38,7 +38,7 @@ def bootstrap_hook(consumer: InferenceConsumer, qdrant_collection: str) -> None:
         else:
             collection_info = consumer.state["qdrant"].get_collection(qdrant_collection)
             vector_size = collection_info.config.params.vectors.size
-            if vector_size != consumer.config["TFIDF_MAX_FEATURES"]:
+            if vector_size != TFIDF_MAX_FEATURES:
                 consumer.logger.error(
                     f"Collection exists but vector size mismatch: "
                     f"expected {consumer.config['TFIDF_MAX_FEATURES']}, got {vector_size}"
@@ -50,90 +50,88 @@ def bootstrap_hook(consumer: InferenceConsumer, qdrant_collection: str) -> None:
         consumer.logger.error(f"Error creating collection: {e}")
         raise
 
+def process(consumer: InferenceConsumer, batch: List[ArticleAggregate]) -> None:
+    TFIDF_MAX_FEATURES = consumer.config["TFIDF_MAX_FEATURES"]
+    QDRANT_COLLECTION = consumer.config["QDRANT_COLLECTION"]
+    qdrant: QdrantClient = consumer.state["qdrant"]
+    model: MlflowModel = consumer.state["model"]
 
-def process_hook(consumer: InferenceConsumer, batch: List[ArticleAggregate]) -> None:
-    # try:
-    #     to_upsert = []
-    #     to_delete = []
+    try:
+        to_upsert: List[ArticleAggregate] = []
+        to_delete: List[ArticleAggregate] = []
 
-    #     for article in batch:
-    #         try:
-    #             action = article.get("action", "add")
+        for article in batch:
+            try:
+                if article.is_active:
+                    to_upsert.append(article)
+                else:
+                    to_delete.append(article)
 
-    #             if action in ["add", "update"]:
-    #                 to_upsert.append(article)
-    #             elif action == "delete":
-    #                 to_delete.append(article)
+            except Exception as e:
+                consumer.logger.error(f"Error processing message: {e}", exc_info=True)
 
-    #         except Exception as e:
-    #             consumer.logger.error(f"Error processing message: {e}", exc_info=True)
+        if to_upsert:
+            texts = [a.abstract for a in to_upsert]
+            vectors = model.transform(texts).toarray().tolist()
 
-    #     if to_upsert:
-    #         texts = [a.get("abstract", "") for a in to_upsert]
-    #         vectors = consumer.state["model"].transform(texts).toarray().tolist()
+            for v in vectors:
+                if len(v) != TFIDF_MAX_FEATURES:
+                    consumer.logger.error(
+                        f"Vector dimension mismatch: expected {consumer.config['TFIDF_MAX_FEATURES']}, got {len(v)}"
+                    )
+                    return
 
-    #         for v in vectors:
-    #             if len(v) != consumer.config["TFIDF_MAX_FEATURES"]:
-    #                 consumer.logger.error(
-    #                     f"Vector dimension mismatch: expected {consumer.config['TFIDF_MAX_FEATURES']}, got {len(v)}"
-    #                 )
-    #                 return
+            points = [
+                PointStruct(
+                    id=int(a.id),
+                    vector=v,
+                    payload=a.dict(),
+                )
+                for a, v in zip(to_upsert, vectors)
+            ]
+            qdrant.upsert(collection_name=QDRANT_COLLECTION, points=points)
+            consumer.logger.info(f"✅ Upserted batch of {len(points)} articles")
+            
+            recommendations = recommend(consumer.state["model"], to_upsert)
+            producer: InferenceProducer = consumer.state["producer"]
+            
+            producer.produce()
 
-    #         points = [
-    #             PointStruct(
-    #                 id=int(a["id"]),
-    #                 vector=v,
-    #                 payload={
-    #                     "title": a.get("title", ""),
-    #                     "abstract": a.get("abstract", ""),
-    #                     "category": a.get("category", ""),
-    #                     "created_at": a.get("created_at", "")
-    #                 }
-    #             )
-    #             for a, v in zip(to_upsert, vectors)
-    #         ]
-    #         consumer.state["qdrant"].upsert(collection_name=consumer.config["QDRANT_COLLECTION"], points=points)
-    #         consumer.logger.info(f"✅ Upserted batch of {len(points)} articles")
+        if to_delete:
+            ids_to_delete = [int(a["id"]) for a in to_delete]
+            qdrant.delete(
+                collection_name=QDRANT_COLLECTION,
+                points_selector=ids_to_delete
+            )
+            consumer.logger.info(f"🗑️  Deleted batch of {len(ids_to_delete)} articles")
 
-    #     if to_delete:
-    #         ids_to_delete = [int(a["id"]) for a in to_delete]
-    #         consumer.state["qdrant"].delete(
-    #             collection_name=consumer.config["QDRANT_COLLECTION"],
-    #             points_selector=ids_to_delete
-    #         )
-    #         consumer.logger.info(f"🗑️  Deleted batch of {len(ids_to_delete)} articles")
-
-    # except Exception as e:
-    #     consumer.logger.error(f"Error processing batch: {e}", exc_info=True)
-    pass
-
+    except Exception as e:
+        consumer.logger.error(f"Error processing batch: {e}", exc_info=True)
 
 def create_article_consumer(
     model: MlflowModel,
     producer: InferenceProducer,
     logger: logging.Logger,
-    config: InferenceConsumerConfig,
+    consumer_config: InferenceConsumerConfig,
 ) -> InferenceConsumer:
+    config = {
+        "TFIDF_MAX_FEATURES": int(os.getenv("TFIDF_MAX_FEATURES", "12")),
+        "QDRANT_COLLECTION": os.getenv("QDRANT_COLLECTION", "articles"),
+        "QDRANT_URL": os.getenv("QDRANT_URL", "http://localhost:6333"),
+    }
     consumer = InferenceConsumer(
         logger,
+        consumer_config,
         config,
-        {
-            "TFIDF_MAX_FEATURES": int(os.getenv("TFIDF_MAX_FEATURES", "12")),
-            "CSV_DATA_PATH": os.getenv("CSV_DATA_PATH", "../data/news_cleaned.csv"),
-            "QDRANT_COLLECTION": "articles",
-        },
-        health_hook=health_hook,
-        process_hook=process_hook,
-        bootstrap_hook=lambda c: bootstrap_hook(
-            c, os.getenv("QDRANT_COLLECTION", "articles")
-        ),
+        health_hook=health,
+        process_hook=process
     )
 
     consumer.state["qdrant"] = QdrantClient(
-        url=os.getenv("QDRANT_URL", "http://localhost:6333")
+        url=config["QDRANT_URL"]
     )
     consumer.state["producer"] = producer
     consumer.state["model"] = model
-    bootstrap_hook(consumer, consumer.config["QDRANT_COLLECTION"])
+    bootstrap(consumer, config["QDRANT_COLLECTION"])
 
     return consumer

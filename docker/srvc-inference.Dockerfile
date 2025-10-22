@@ -4,11 +4,11 @@ ARG model
 
 WORKDIR /app
 
-COPY apps/srvc-inference/${model}/requirements.txt .
+COPY ${model}/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY apps/srvc-inference/abstract ./abstract
-COPY apps/srvc-inference/${model} ./model
+COPY abstract ./abstract
+COPY ${model} ./model
 
 ENV MODEL_NAME=${model}
 

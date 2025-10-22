@@ -1,5 +1,4 @@
 services:
-  # Redpanda Kafka-compatible Broker
   redpanda:
     container_name: redpanda
     image: docker.redpanda.com/redpandadata/redpanda:v23.1.7
@@ -17,13 +16,39 @@ services:
       - "9644:9644"
     volumes:
       - redpanda_data:/var/lib/redpanda/data
-    networks:
-      - recommendation-network
     healthcheck:
       test: ["CMD", "rpk", "topic", "list", "--brokers", "redpanda:29092"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+
+  console:
+    container_name: console
+    image: docker.redpanda.com/redpandadata/console:v2.2.3
+    entrypoint: /bin/sh
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda:29092"]
+          schemaRegistry:
+            enabled: true
+            urls: ["http://redpanda:8081"]
+        redpanda:
+          adminApi:
+            enabled: true
+            urls: ["http://redpanda:9644"]
+        connect:
+          enabled: true
+          clusters:
+            - name: local-connect-cluster
+              url: http://connect:8083
+    ports:
+      - 9002:8080
+    depends_on:
+      - redpanda
 
   # Qdrant Vector Database
   qdrant:
@@ -34,8 +59,6 @@ services:
       - "6334:6334"
     volumes:
       - qdrant_storage:/qdrant/storage
-    networks:
-      - recommendation-network
     healthcheck:
       test:
         - CMD-SHELL
@@ -44,36 +67,7 @@ services:
       timeout: 5s
       retries: 3
 
-  # Article Consumer Service
-  article-consumer:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: article-consumer
-    depends_on:
-      redpanda:
-        condition: service_healthy
-      qdrant:
-        condition: service_healthy
-    volumes:
-      - ../../data:/app/data:ro
-    environment:
-      - QDRANT_URL=http://qdrant:6333
-      - KAFKA_BOOTSTRAP_SERVERS=redpanda:29092
-      - BATCH_SIZE=50
-      - BATCH_INTERVAL=2
-      - TFIDF_MAX_FEATURES=512
-      - CSV_DATA_PATH=/app/data/news_cleaned.csv
-    restart: unless-stopped
-    env_file: ".env"
-    networks:
-      - recommendation-network
-
 volumes:
   qdrant_storage:
     driver: local
   redpanda_data:
-
-networks:
-  recommendation-network:
-    driver: bridge

@@ -80,6 +80,9 @@ class MlflowModel:
                 except Exception as flavor_err:
                     print(f"{flavor} loading failed: {flavor_err}")
                     continue
+        raise ValueError(
+            f"Could not load model from {model_uri} with any known flavor."
+        )
 
     def _load_with_flavor(self, model_uri: str, flavor: str) -> Any:
         """Load model using a specific flavor."""

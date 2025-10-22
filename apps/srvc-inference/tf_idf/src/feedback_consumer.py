@@ -18,7 +18,7 @@ from abstract.mlflow_model import MlflowModel
 from abstract.producer import InferenceProducer
 
 
-def health_hook(consumer: InferenceConsumer) -> bool:
+def health(consumer: InferenceConsumer) -> bool:
     try:
         consumer.state["qdrant"].get_collections()
         return True
@@ -27,7 +27,7 @@ def health_hook(consumer: InferenceConsumer) -> bool:
         return False
 
 
-def bootstrap_hook(consumer: InferenceConsumer, qdrant_collection: str) -> None:
+def bootstrap(consumer: InferenceConsumer, qdrant_collection: str) -> None:
     try:
         collections = [
             c.name for c in consumer.state["qdrant"].get_collections().collections
@@ -62,7 +62,7 @@ def bootstrap_hook(consumer: InferenceConsumer, qdrant_collection: str) -> None:
         raise
 
 
-def process_hook(consumer: InferenceConsumer, batch: List[FeedbackAggregate]) -> None:
+def process(consumer: InferenceConsumer, batch: List[FeedbackAggregate]) -> None:
     pass
     # try:
     #     for feedback in batch:
@@ -113,9 +113,9 @@ def create_feedback_consumer(
             "FEEDBACK_RETENTION_DAYS": int(os.getenv("FEEDBACK_RETENTION_DAYS", "30")),
             "QDRANT_COLLECTION": "feedbacks",
         },
-        health_hook=health_hook,
-        process_hook=process_hook,
-        bootstrap_hook=lambda c: bootstrap_hook(
+        health_hook=health,
+        process_hook=process,
+        bootstrap_hook=lambda c: bootstrap(
             c, os.getenv("QDRANT_COLLECTION", "feedbacks")
         ),
     )
@@ -124,19 +124,20 @@ def create_feedback_consumer(
     )
     consumer.state["producer"] = producer
     consumer.state["model"] = model
-    bootstrap_hook(consumer, consumer.config["QDRANT_COLLECTION"])
+    bootstrap(consumer, consumer.config["QDRANT_COLLECTION"])
     return consumer
 
 
 def cleanup_old_feedbacks(consumer: InferenceConsumer) -> None:
+    qdrant: QdrantClient = consumer.state["qdrant"]
+    qdrant_collection = consumer.config["QDRANT_COLLECTION"]
     try:
         cutoff_timestamp = (
             datetime.now() - timedelta(days=consumer.config["FEEDBACK_RETENTION_DAYS"])
         ).timestamp()
 
-        # Scroll through old points
-        old_points, _ = consumer.state["qdrant"].scroll(
-            collection_name=consumer.config["QDRANT_COLLECTION"],
+        old_points, _ = qdrant.scroll(
+            collection_name=qdrant_collection,
             scroll_filter=Filter(
                 must=[FieldCondition(key="timestamp", range=Range(lt=cutoff_timestamp))]
             ),
@@ -147,8 +148,8 @@ def cleanup_old_feedbacks(consumer: InferenceConsumer) -> None:
 
         if old_points:
             old_ids = [p.id for p in old_points]
-            consumer.state["qdrant"].delete(
-                collection_name=consumer.config["QDRANT_COLLECTION"],
+            qdrant.delete(
+                collection_name=qdrant_collection,
                 points_selector=old_ids,
             )
             consumer.logger.info(
