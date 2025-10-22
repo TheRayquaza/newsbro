@@ -1,0 +1,20 @@
+name: srvc-inference (TF-IDF)
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "apps/srvc-inference/tf_idf/**"
+    tags:
+      - "srvc-inference-tf_idf-v*.*.*"
+
+jobs:
+  call-template:
+    uses: ./.github/workflows/templates/python-svc-workflow.yaml
+    with:
+      service_name: srvc-inference
+      dockerfile: ./docker/srvc-inference.Dockerfile
+      context_root: apps/srvc-inference
+      model_name: tf_idf
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}

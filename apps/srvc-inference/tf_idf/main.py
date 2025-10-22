@@ -1,6 +1,5 @@
 import logging
 import os
-
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -15,7 +14,13 @@ from tf_idf.src.feedback_consumer import create_feedback_consumer
 if __name__ == "__main__":
     if os.getenv("ENVIRONMENT") != "production":
         print("Loading .env file for development environment")
-        load_dotenv()
+        if os.path.exists(".env"):
+            load_dotenv(".env")
+        elif os.getenv("ENV_FILE_PATH") and os.path.exists(
+            os.getenv("ENV_FILE_PATH")
+        ):
+            print("Loading env file from ENV_FILE_PATH")
+            load_dotenv(os.getenv("ENV_FILE_PATH"))
     config = Config()
 
     print(config)
