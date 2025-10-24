@@ -1,6 +1,7 @@
 import logging
 import os
 import uvicorn
+import sys
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
@@ -8,21 +9,22 @@ from abstract.consumer import InferenceConsumerConfig
 from abstract.mlflow_model import MlflowModel
 from abstract.producer import InferenceProducer, InferenceProducerConfig
 from tf_idf.src.article_consumer import create_article_consumer
-from tf_idf.src.config import Config
 from tf_idf.src.feedback_consumer import create_feedback_consumer
 
 if __name__ == "__main__":
     if os.getenv("ENVIRONMENT") != "production":
         print("Loading .env file for development environment")
-        if os.path.exists(".env"):
-            load_dotenv(".env")
-        elif os.getenv("ENV_FILE_PATH") and os.path.exists(
-            os.getenv("ENV_FILE_PATH")
-        ):
-            print("Loading env file from ENV_FILE_PATH")
-            load_dotenv(os.getenv("ENV_FILE_PATH"))
-    config = Config()
+        env_file = sys.argv[1] if len(sys.argv) > 1 else ".env"
+        print(env_file)
+        if os.path.exists(env_file):
+            load_dotenv(env_file)
+            print(os.getenv("MODEL_URI"))
+        elif len(sys.argv) > 1:
+            raise FileNotFoundError(f"Environment file {env_file} not found")
 
+    from tf_idf.src.config import Config # because Config evaluation is done on runtime
+
+    config = Config()
     print(config)
 
     logging.basicConfig(
@@ -33,7 +35,6 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
 
     app = FastAPI(
-        title="Article Recommendation API",
         description="TF-IDF based article recommendation API using Qdrant",
         version="0.0.0",
     )

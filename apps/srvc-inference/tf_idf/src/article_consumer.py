@@ -1,15 +1,17 @@
 import logging
 import os
-from typing import List, Dict
-from collections import defaultdict
+from typing import List
+import datetime
 
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct
 
 from abstract.consumer import InferenceConsumer, InferenceConsumerConfig
-from abstract.message import ArticleAggregate, FeedbackAggregate
+from abstract.message import ArticleAggregate, FeedbackAggregate, InferenceCommand
 from abstract.mlflow_model import MlflowModel
 from abstract.producer import InferenceProducer
+
+from tf_idf.src.recommend import recommend
 
 def health(consumer: InferenceConsumer) -> bool:
     try:
@@ -62,7 +64,7 @@ def process(consumer: InferenceConsumer, batch: List[ArticleAggregate]) -> None:
 
         for article in batch:
             try:
-                if article.is_active:
+                if article["is_active"]:
                     to_upsert.append(article)
                 else:
                     to_delete.append(article)
@@ -71,7 +73,7 @@ def process(consumer: InferenceConsumer, batch: List[ArticleAggregate]) -> None:
                 consumer.logger.error(f"Error processing message: {e}", exc_info=True)
 
         if to_upsert:
-            texts = [a.abstract for a in to_upsert]
+            texts = [a["abstract"] for a in to_upsert]
             vectors = model.transform(texts).toarray().tolist()
 
             for v in vectors:
@@ -83,19 +85,28 @@ def process(consumer: InferenceConsumer, batch: List[ArticleAggregate]) -> None:
 
             points = [
                 PointStruct(
-                    id=int(a.id),
+                    id=int(a["id"]),
                     vector=v,
-                    payload=a.dict(),
+                    payload=a,
                 )
                 for a, v in zip(to_upsert, vectors)
             ]
             qdrant.upsert(collection_name=QDRANT_COLLECTION, points=points)
             consumer.logger.info(f"✅ Upserted batch of {len(points)} articles")
             
-            recommendations = recommend(consumer.state["model"], to_upsert)
+            recommendations = recommend(consumer, to_upsert)
+            recommendation_commands: List[InferenceCommand] = []
+            for article, user_scores in recommendations:
+                for user in user_scores.keys():
+                    recommendation_commands.append(InferenceCommand(
+                        user,
+                        consumer.config["MODEL_NAME"],
+                        article=article,
+                        date=datetime.utcnow()
+                    ))
             producer: InferenceProducer = consumer.state["producer"]
-            
-            producer.produce()
+            consumer.logger.info(f"Generating {len(recommendation_commands)} recommendations")
+            producer.produce(recommendation_commands)
 
         if to_delete:
             ids_to_delete = [int(a["id"]) for a in to_delete]
@@ -124,7 +135,7 @@ def create_article_consumer(
         consumer_config,
         config,
         health_hook=health,
-        process_hook=process
+        process_hook=lambda batch: process(consumer, batch)
     )
 
     consumer.state["qdrant"] = QdrantClient(
