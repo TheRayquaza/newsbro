@@ -49,7 +49,7 @@ class InferenceConsumer:
         self.process_hook = process_hook if process_hook else (lambda batch: None)
 
     def health(self) -> bool:
-        if not self.health_hook():
+        if not self.health_hook(): # TODO
             return False
         topics = self.consumer.topics()
         if not topics:

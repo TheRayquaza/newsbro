@@ -16,7 +16,7 @@ class Config(pydantic.BaseModel):
     kafka_producer_topic: str = os.getenv("KAFKA_PRODUCER_TOPIC", "inference-topic")
     ## Article Consumer
     kafka_article_consumer_topic: str = os.getenv(
-        "KAFKA_ARTICLE_CONSUMER_TOPIC", "article-aggregate"
+        "KAFKA_ARTICLE_CONSUMER_TOPIC", "articles-aggregate"
     )
     kafka_article_consumer_group: str = os.getenv(
         "KAFKA_ARTICLE_CONSUMER_GROUP", "article-tfidf-group"

@@ -93,7 +93,7 @@ services:
     image: ghcr.io/therayquaza/newsbro/repo-account:repo-account-v1.2.7
     environment:
       DATABASE_HOST: postgres:5432
-      PORT: 8080
+      PORT: 8081
       KAFKA_BROKER: redpanda:29092
       DATABASE_USERNAME: "username"
       DATABASE_PASSWORD: "password"
@@ -114,7 +114,7 @@ services:
       retries: 5
     restart: always
     ports:
-      - "8080:8080"
+      - "8081:8081"
     depends_on:
       - postgres
       - redpanda
@@ -127,7 +127,7 @@ services:
       - repo-article/.env
     environment:
       DATABASE_HOST: postgres:5432
-      PORT: 8081
+      PORT: 8082
       KAFKA_BROKERS: redpanda:29092
       DATABASE_USERNAME: "username"
       DATABASE_PASSWORD: "password"
@@ -143,7 +143,7 @@ services:
       retries: 5
     restart: always
     ports:
-      - "8081:8081"
+      - "8082:8082"
     depends_on:
       - postgres
       - redpanda
@@ -153,6 +153,7 @@ services:
 volumes:
   redpanda:
   postgres_data:
+  qdrant_storage:
 
 networks:
   data-net:

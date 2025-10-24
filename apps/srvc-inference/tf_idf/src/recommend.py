@@ -9,7 +9,7 @@ def recommend(
     consumer: InferenceConsumer,
     articles: List[ArticleAggregate],
     limit: int = 10
-) -> List[tuple[ArticleAggregate, Dict[str, float]]]:
+) -> List[tuple[ArticleAggregate, Dict[int, float]]]:
     """
     Generate recommendation scores for given articles based on each user's last 10 liked articles.
 
@@ -30,8 +30,8 @@ def recommend(
     user_liked_articles = defaultdict(list)
     for point in all_points:
         payload: FeedbackAggregate = point.payload
-        if payload.value == 1:
-            user_liked_articles[payload.user_id].append(payload)
+        if payload["value"] == 1:
+            user_liked_articles[payload["user_id"]].append(payload)
     
     user_mean_vectors = {}
     for user_id, liked_articles in user_liked_articles.items():

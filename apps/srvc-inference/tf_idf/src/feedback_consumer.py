@@ -114,10 +114,7 @@ def create_feedback_consumer(
             "QDRANT_COLLECTION": "feedbacks",
         },
         health_hook=health,
-        process_hook=process,
-        bootstrap_hook=lambda c: bootstrap(
-            c, os.getenv("QDRANT_COLLECTION", "feedbacks")
-        ),
+        process_hook=lambda batch: process(consumer, batch)
     )
     consumer.state["qdrant"] = QdrantClient(
         url=os.getenv("QDRANT_URL", "http://localhost:6333")
