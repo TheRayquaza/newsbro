@@ -19,7 +19,7 @@ from abstract.producer import InferenceProducer
 
 
 class TFIDFArticleConsumerConfig(pydantic.BaseModel):
-    tf_idf_max_features: int = int(os.getenv("TFIDF_MAX_FEATURES", "12"))
+    article_vector_features: int = int(os.getenv("ARTICLE_VECTOR_FEATURES", "100"))
     articles_collection: str = os.getenv("ARTICLES_COLLECTION", "articles")
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
     similarity_threshold: float = float(os.getenv("SIMILARITY_THRESHOLD", "0.7"))
@@ -104,13 +104,13 @@ class TFIDFArticleConsumer(InferenceConsumer):
                 self.qdrant.create_collection(
                     collection_name=collection_name,
                     vectors_config=VectorParams(
-                        size=self.config.tf_idf_max_features,
+                        size=self.config.article_vector_features,
                         distance=Distance.COSINE,
                     ),
                 )
                 self.logger.info(
                     f"Collection '{collection_name}' created with vector size "
-                    f"{self.config.tf_idf_max_features}."
+                    f"{self.config.article_vector_features}."
                 )
         except Exception as e:
             self.logger.error(f"Error creating collection '{collection_name}': {e}")
@@ -132,8 +132,8 @@ class TFIDFArticleConsumer(InferenceConsumer):
             self.logger.error(f"Error processing batch: {e}", exc_info=True)
 
     def _upsert_articles(self, articles: List[ArticleAggregate]) -> None:
-        texts = [article.abstract for article in articles]
-        vectors = self.model.transform(texts).toarray().tolist()
+        texts = [article.title + " " + article.abstract for article in articles]
+        vectors = self.model.transform(texts).tolist()
 
         points = [
             PointStruct(id=article.id, vector=vector, payload=article.dict())
@@ -262,6 +262,11 @@ class TFIDFArticleConsumer(InferenceConsumer):
                 try:
                     similarity = self._compute_cosine_similarity(
                         article_vector, user_vector
+                    )
+
+                    self.logger.info(
+                        f"Computed similarity for User {user_id} - Article {article.id}: "
+                        f"{similarity:.4f}"
                     )
 
                     if similarity >= self.config.similarity_threshold:

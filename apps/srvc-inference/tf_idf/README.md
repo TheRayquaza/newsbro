@@ -19,7 +19,13 @@ black .
 cd ..
 docker compose up -d
 nix develop .
-python3 -m tf_idf.main
+python3 -m tf_idf.main tf_idf/.env # ~/Downloads/model.pkl (this is optional)
+```
+
+* train:
+
+```
+python3 -m tf_idf.src.model.train articles.csv
 ```
 
 ## Deployment

@@ -2,11 +2,18 @@ from typing import Any, Optional
 
 import mlflow
 import mlflow.pyfunc
+import pickle
+import mlflow.utils.file_utils as file_utils
+import os
 
 
 class MlflowModel:
     def __init__(
-        self, model_uri: str, tracking_uri: str, flavor: Optional[str] = None
+        self,
+        model_uri: str,
+        tracking_uri: str,
+        flavor: Optional[str] = None,
+        from_pickle: bool = False,
     ) -> None:
         """
         Load MLflow model with automatic flavor detection.
@@ -19,10 +26,24 @@ class MlflowModel:
         print(f"Loading model from URI: {model_uri} with tracking URI: {tracking_uri}")
         mlflow.set_tracking_uri(tracking_uri)
 
+        if from_pickle:
+            self.model = self._load_with_pickle(model_uri)
+            return
         if flavor:
             self.model = self._load_with_flavor(model_uri, flavor)
         else:
             self.model = self._auto_load_model(model_uri)
+
+    def _load_with_pickle(self, model_file: str) -> Any:
+        """
+        Load model using pickle as a fallback.
+        """
+        if not os.path.exists(model_file):
+            raise FileNotFoundError(f"Pickle model file not found at {model_file}")
+
+        with open(model_file, "rb") as f:
+            model = pickle.load(f)
+        return model
 
     def _auto_load_model(self, model_uri: str) -> Any:
         """

@@ -1,18 +1,13 @@
 import json
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import List, Optional
 
 import numpy as np
 import pydantic
 from pydantic import parse_obj_as
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import (
-    FieldCondition,
-    Filter,
-    Range,
-)
 from redis.exceptions import RedisError
 from redis.sentinel import Sentinel
 
@@ -194,41 +189,3 @@ class TFIDFFeedbackConsumer(InferenceConsumer):
         except Exception as e:
             self.logger.error(f"Error retrieving user profile for {user_id}: {e}")
             return None
-
-    def cleanup_old_feedbacks(self) -> None:
-        try:
-            cutoff_timestamp = (
-                datetime.now(timezone.utc)
-                - timedelta(days=self.config.feedback_retention_days)
-            ).timestamp()
-
-            old_points, _ = self.qdrant.scroll(
-                collection_name=self.config.feedbacks_collection,
-                scroll_filter=Filter(
-                    must=[
-                        FieldCondition(
-                            key="timestamp",
-                            range=Range(lt=cutoff_timestamp),
-                        )
-                    ]
-                ),
-                limit=1000,
-                with_payload=False,
-                with_vectors=False,
-            )
-
-            if old_points:
-                old_ids = [point.id for point in old_points]
-                self.qdrant.delete(
-                    collection_name=self.config.feedbacks_collection,
-                    points_selector=old_ids,
-                )
-                self.logger.info(
-                    f"🗑️  Deleted {len(old_ids)} old feedbacks "
-                    f"(older than {self.config.feedback_retention_days} days)"
-                )
-            else:
-                self.logger.info("No old feedbacks to delete.")
-
-        except Exception as e:
-            self.logger.error(f"Error during feedback cleanup: {e}", exc_info=True)

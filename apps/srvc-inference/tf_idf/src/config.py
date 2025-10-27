@@ -14,7 +14,7 @@ class Config(pydantic.BaseModel):
     )
     kafka_batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "50"))
     ## Producer
-    kafka_producer_topic: str = os.getenv("KAFKA_PRODUCER_TOPIC", "inference-topic")
+    kafka_producer_topic: str = os.getenv("KAFKA_PRODUCER_TOPIC", "inference-command")
     ## Article Consumer
     kafka_article_consumer_topic: str = os.getenv(
         "KAFKA_ARTICLE_CONSUMER_TOPIC", "articles-aggregate"
