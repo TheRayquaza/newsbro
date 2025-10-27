@@ -16,7 +16,6 @@ if __name__ == "__main__":
         env_file = sys.argv[1] if len(sys.argv) > 1 else ".env"
         if os.path.exists(env_file):
             load_dotenv(env_file)
-            print(os.getenv("TFIDF_MAX_FEATURES"))
         elif len(sys.argv) > 1:
             raise FileNotFoundError(f"Environment file {env_file} not found")
 
@@ -44,10 +43,17 @@ if __name__ == "__main__":
         version="0.0.0",
     )
 
-    model = MlflowModel(
-        model_uri=config.model_uri,
-        tracking_uri=config.tracking_uri,
-    )
+    if os.getenv("ENVIRONMENT") == "production":
+        model = MlflowModel(
+            model_uri=config.model_uri,
+            tracking_uri=config.tracking_uri,
+        )
+    else:
+        model = MlflowModel(
+            model_uri=sys.argv[2] if len(sys.argv) > 2 else config.model_uri,
+            tracking_uri=config.tracking_uri,
+            from_pickle=True,
+        )
 
     producer_config = InferenceProducerConfig(
         kafka_bootstrap_servers=config.kafka_bootstrap_servers,

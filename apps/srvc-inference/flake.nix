@@ -39,6 +39,7 @@
               bandit
               radon
               redis
+              langdetect
             ]);
         in
           pkgs.mkShell {
