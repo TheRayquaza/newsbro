@@ -1,16 +1,12 @@
-name: srvc-inference (SBERT)
+name: srvc-inference (TF-IDF)
+
 on:
   push:
     branches: ["**"]
     paths:
-      - 'apps/srvc-inference/sbert/**'
-    tags-ignore:
-      - '**'
-  push:
+      - "apps/srvc-inference/tf_idf/**"
     tags:
-      - 'srvc-inference-sbert-v*.*.*'
-    paths:
-      - 'apps/srvc-inference/sbert/**'
+      - "srvc-inference-tf_idf-v*.*.*"
 
 permissions:
   write-all
