@@ -1,20 +1,16 @@
 name: port-front
+
 on:
   push:
     branches: ["**"]
     paths:
       - 'apps/port-front/**'
-    tags-ignore:
-      - '**'
-  push:
     tags:
       - 'port-front-v*.*.*'
-    paths:
-      - 'apps/port-front/**'
 
 jobs:
   ci:
-    uses: ./.github/workflows/templates/react-svc-workflow.yml
+    uses: ./.github/workflows/react-svc-workflow.yml
     with:
       app_name: port-front
       app_path: apps/port-front

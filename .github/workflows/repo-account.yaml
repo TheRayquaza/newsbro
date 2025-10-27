@@ -1,20 +1,16 @@
 name: repo-account
+
 on:
   push:
     branches: ["**"]
     paths:
       - 'apps/repo-account/**'
-    tags-ignore:
-      - '**'
-  push:
     tags:
       - 'repo-account-v*.*.*'
-    paths:
-      - 'apps/repo-account/**'
 
 jobs:
   ci:
-    uses: ./.github/workflows/templates/go-svc-workflow.yaml
+    uses: ./.github/workflows/go-svc-workflow.yaml
     with:
       app_name: repo-account
       app_path: apps/repo-account

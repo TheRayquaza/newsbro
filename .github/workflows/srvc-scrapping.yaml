@@ -3,18 +3,13 @@ on:
   push:
     branches: ["**"]
     paths:
-      - 'apps/srvc-scrapping/**'
-    tags-ignore:
-      - '**'
-  push:
+      - "apps/srvc-scrapping/**"
     tags:
-      - 'srvc-scrapping-v*.*.*'
-    paths:
-      - 'apps/srvc-scrapping/**'
+      - "srvc-scrapping-v*.*.*"
 
 jobs:
   ci:
-    uses: ./.github/workflows/templates/go-svc-workflow.yaml
+    uses: ./.github/workflows/go-svc-workflow.yaml
     with:
       app_name: srvc-scrapping
       app_path: apps/srvc-scrapping
