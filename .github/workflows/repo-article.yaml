@@ -1,16 +1,12 @@
 name: repo-article
+
 on:
   push:
     branches: ["**"]
     paths:
       - 'apps/repo-article/**'
-    tags-ignore:
-      - '**'
-  push:
     tags:
       - 'repo-article-v*.*.*'
-    paths:
-      - 'apps/repo-article/**'
 
 jobs:
   ci:

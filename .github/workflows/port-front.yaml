@@ -1,16 +1,12 @@
 name: port-front
+
 on:
   push:
     branches: ["**"]
     paths:
       - 'apps/port-front/**'
-    tags-ignore:
-      - '**'
-  push:
     tags:
       - 'port-front-v*.*.*'
-    paths:
-      - 'apps/port-front/**'
 
 jobs:
   ci:
