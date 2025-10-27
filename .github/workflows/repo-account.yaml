@@ -1,12 +1,16 @@
 name: repo-account
-
 on:
   push:
     branches: ["**"]
     paths:
       - 'apps/repo-account/**'
+    tags-ignore:
+      - '**'
+  push:
     tags:
       - 'repo-account-v*.*.*'
+    paths:
+      - 'apps/repo-account/**'
 
 jobs:
   ci:

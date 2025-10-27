@@ -1,12 +1,16 @@
 name: srvc-scrapping
-
 on:
   push:
     branches: ["**"]
     paths:
       - 'apps/srvc-scrapping/**'
+    tags-ignore:
+      - '**'
+  push:
     tags:
       - 'srvc-scrapping-v*.*.*'
+    paths:
+      - 'apps/srvc-scrapping/**'
 
 jobs:
   ci:
