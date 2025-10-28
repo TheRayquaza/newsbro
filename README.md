@@ -18,6 +18,8 @@ Feel free to open issues if you see anything relevant that could be added.
 - [Project Structure](#project-structure)
 - [Architecture](#architecture)
     - [User Feed](#handling-user-feeds)
+- Models
+    - [TF-IDF / SVD](docs/model/tf_idf.md#tf-idf)
 - [Development](#dev)
     - [CI/CD](#cicd)
     - [Commits](#commits)
