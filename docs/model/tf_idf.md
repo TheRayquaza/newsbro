@@ -26,4 +26,4 @@ better approach
 
 ## Summary
 
-![TF-IDF](./docs/model/tf-idf.png)
+![TF-IDF](./tf_idf.png)
