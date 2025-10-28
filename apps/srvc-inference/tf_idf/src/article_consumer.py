@@ -74,7 +74,7 @@ class TFIDFArticleConsumer(InferenceConsumer):
                 db=self.config.redis_db,
             )
 
-            self.logger.info("✅ Redis Sentinel connection established")
+            self.logger.info("Redis Sentinel connection established")
         except Exception as e:
             self.logger.error(f"Failed to initialize Redis Sentinel: {e}")
             raise
@@ -144,12 +144,9 @@ class TFIDFArticleConsumer(InferenceConsumer):
             collection_name=self.config.articles_collection,
             points=points,
         )
-        self.logger.info(f"✅ Upserted batch of {len(points)} articles")
+        self.logger.info(f"Upserted batch of {len(points)} articles")
 
-        recommendations = self.recommend(articles, vectors)
-        if recommendations:
-            self.logger.info(f"Generating {len(recommendations)} recommendations")
-            self.producer.produce(recommendations)
+        self.producer.produce(self.recommend(articles, vectors))
 
     def _delete_articles(self, articles: List[ArticleAggregate]) -> None:
         """Delete articles from Qdrant."""
@@ -158,7 +155,7 @@ class TFIDFArticleConsumer(InferenceConsumer):
             collection_name=self.config.articles_collection,
             points_selector=ids_to_delete,
         )
-        self.logger.info(f"🗑️  Deleted batch of {len(ids_to_delete)} articles")
+        self.logger.warning(f"Deleted batch of {len(ids_to_delete)} articles")
 
     def recommend(
         self, new_articles: List[ArticleAggregate], article_vectors: List[List[float]]
@@ -181,15 +178,9 @@ class TFIDFArticleConsumer(InferenceConsumer):
 
             self.logger.info(f"Loaded {len(user_profiles)} user profiles from Redis")
 
-            recommendations = self._generate_recommendations(
+            return self._generate_recommendations(
                 new_articles, article_vectors, user_profiles
             )
-
-            self.logger.info(
-                f"Generated {len(recommendations)} recommendations for "
-                f"{len(new_articles)} articles across {len(user_profiles)} users"
-            )
-            return recommendations
 
         except Exception as e:
             self.logger.error(f"Error in recommend: {e}", exc_info=True)
@@ -214,10 +205,8 @@ class TFIDFArticleConsumer(InferenceConsumer):
 
                 for key in keys:
                     try:
-                        # Extract user_id from key (format: "user_profile:123")
                         user_id = int(key.decode("utf-8").split(":")[1])
 
-                        # Get profile data
                         value = self.redis_client.get(key)
                         if value:
                             profile_data = json.loads(value)
@@ -230,7 +219,6 @@ class TFIDFArticleConsumer(InferenceConsumer):
                         )
                         continue
 
-                # Break when cursor returns to 0 (full scan complete)
                 if cursor == 0:
                     break
 
@@ -249,60 +237,60 @@ class TFIDFArticleConsumer(InferenceConsumer):
     ) -> List[InferenceCommand]:
         """
         Generate recommendations by computing similarity between article vectors
-        and user profile vectors.
+        and user profile vectors using vectorized operations.
         """
-        recommendations = []
+        if not new_articles or not article_vectors or not user_profiles:
+            return []
 
-        for article, article_vector_list in zip(
-            new_articles, article_vectors, strict=False
-        ):
-            article_vector = np.array(article_vector_list)
+        article_matrix = np.array(article_vectors, dtype=np.float32)
 
-            for user_id, user_vector in user_profiles.items():
-                try:
-                    similarity = self._compute_cosine_similarity(
-                        article_vector, user_vector
-                    )
+        article_norms = np.linalg.norm(article_matrix, axis=1, keepdims=True)
+        article_norms[article_norms == 0] = 1  # Avoid division by zero
+        article_matrix_normalized = article_matrix / article_norms
 
-                    self.logger.info(
-                        f"Computed similarity for User {user_id} - Article {article.id}: "
-                        f"{similarity:.4f}"
-                    )
+        user_ids = list(user_profiles.keys())
+        user_matrix = np.vstack([user_profiles[uid] for uid in user_ids])
 
-                    if similarity >= self.config.similarity_threshold:
-                        recommendation = InferenceCommand(
-                            model=self.config.model_name,
-                            user_id=int(user_id),
-                            article=article,
-                            score=float(similarity),
-                            date=datetime.now(timezone.utc),
-                        )
-                        recommendations.append(recommendation)
+        user_norms = np.linalg.norm(user_matrix, axis=1, keepdims=True)
+        user_norms[user_norms == 0] = 1
+        user_matrix_normalized = user_matrix / user_norms
 
-                        self.logger.info(
-                            f"✅ Recommendation: User {user_id} - Article {article.id} "
-                            f"(similarity: {similarity:.4f})"
-                        )
+        similarity_matrix = article_matrix_normalized @ user_matrix_normalized.T
 
-                except Exception as e:
-                    self.logger.error(
-                        f"Error computing similarity for user {user_id}, "
-                        f"article {article.id}: {e}"
-                    )
-                    continue
+        threshold = self.config.similarity_threshold
+
+        above_threshold = similarity_matrix >= threshold
+        article_indices, user_indices = np.where(above_threshold)
+
+        current_time = datetime.now(timezone.utc)
+
+        self.logger.info(
+            f"Processing {len(article_indices)} recommendations "
+            f"from {len(new_articles)} articles and {len(user_ids)} users"
+        )
+
+        recommendations = [
+            InferenceCommand(
+                model=self.config.model_name,
+                user_id=int(user_ids[user_idx]),
+                article=new_articles[art_idx],
+                score=float(similarity_matrix[art_idx, user_idx]),
+                date=current_time,
+            )
+            for art_idx, user_idx in zip(article_indices, user_indices, strict=False)
+        ]
+
+        if len(recommendations) != 0:
+            self.logger.info(
+                f"Generated {len(recommendations)} recommendations "
+                f"(avg similarity: {sum(r.score for r in recommendations) / len(recommendations):.4f})"
+            )
+        else:
+            self.logger.info(
+                f"No recommendations generated above threshold {threshold:.4f}"
+            )
 
         return recommendations
-
-    @staticmethod
-    def _compute_cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
-        """Compute cosine similarity between two vectors."""
-        norm1 = np.linalg.norm(vec1)
-        norm2 = np.linalg.norm(vec2)
-
-        if norm1 == 0 or norm2 == 0:
-            return 0.0
-
-        return float(np.dot(vec1, vec2) / (norm1 * norm2))
 
     def get_user_profile(self, user_id: int) -> Optional[dict]:
         """Retrieve a specific user profile from Redis."""
