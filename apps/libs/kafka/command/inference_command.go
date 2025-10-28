@@ -10,5 +10,5 @@ type InferenceCommand struct {
 	Model   string    `json:"model"`
 	Score   float64   `json:"score"`
 	Date    time.Time `json:"date"`
-	Article *aggregate.ArticleAggregate
+	Article *aggregate.ArticleAggregate `json:"article"`
 }
