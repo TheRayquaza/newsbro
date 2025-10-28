@@ -33,12 +33,13 @@ func main() {
 	}
 
 	// Initialize services
-	feedService := services.NewFeedService(rdb, cfg.DefaultModel)
+	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.FeedbackExpiration)
 
-	// Setup Kafka consumer
+	// Setup context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Setup Kafka inference consumer
 	inferenceConsumer, err := consumer.NewInferenceConsumer(
 		cfg.KafkaBrokers,
 		cfg.KafkaInferenceCommandTopic,
@@ -46,10 +47,24 @@ func main() {
 		feedService,
 	)
 	if err != nil {
-		log.Printf("Warning: Failed to initialize Kafka consumer: %v", err)
+		log.Printf("Warning: Failed to initialize Kafka inference consumer: %v", err)
 	} else {
 		go inferenceConsumer.Start(ctx)
 		log.Println("Kafka inference consumer initialized successfully")
+	}
+
+	// Setup Kafka feedback consumer
+	feedbackConsumer, err := consumer.NewFeedbackConsumer(
+		cfg.KafkaBrokers,
+		cfg.KafkaFeedbackTopic,
+		cfg.KafkaFeedbackGroupID,
+		feedService,
+	)
+	if err != nil {
+		log.Printf("Warning: Failed to initialize Kafka feedback consumer: %v", err)
+	} else {
+		go feedbackConsumer.Start(ctx)
+		log.Println("Kafka feedback consumer initialized successfully")
 	}
 
 	// Setup routes
@@ -62,11 +77,21 @@ func main() {
 		<-sigterm
 		log.Println("Shutting down gracefully...")
 		cancel()
+
+		// Close inference consumer
 		if inferenceConsumer != nil {
 			if err := inferenceConsumer.Close(); err != nil {
 				log.Printf("Error closing inference consumer: %v", err)
 			}
 		}
+
+		// Close feedback consumer
+		if feedbackConsumer != nil {
+			if err := feedbackConsumer.Close(); err != nil {
+				log.Printf("Error closing feedback consumer: %v", err)
+			}
+		}
+
 		os.Exit(0)
 	}()
 

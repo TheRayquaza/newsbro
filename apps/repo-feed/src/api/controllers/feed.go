@@ -34,7 +34,7 @@ func NewFeedController(feedService *services.FeedService) *FeedController {
 // @Failure 500 {object} dto.ErrorResponse
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /feed [get]
-func (uc *FeedController) GetFeed(c *gin.Context) {
+func (uc *FeedController) GetUserFeed(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
@@ -55,20 +55,20 @@ func (uc *FeedController) GetFeed(c *gin.Context) {
 
 	model := c.Query("model")
 
-	feed, err := uc.feedService.GetFeed(usr.UserID, model)
+	feed, err := uc.feedService.GetUserFeed(usr.UserID, model)
 	if err != nil {
-		if err.Error() == "feed not found" {
+		switch err.(type) {
+		case *dto.NotFoundError:
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{
 				Code:    http.StatusNotFound,
-				Message: "Feed not found",
+				Message: err.Error(),
 			})
-			return
+		default:
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
+			})
 		}
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Code:    http.StatusInternalServerError,
-			Message: "Failed to retrieve feed",
-		})
-		return
 	}
 
 	c.JSON(http.StatusOK, converters.FeedModelToFeedResponse(feed))

@@ -5,20 +5,19 @@ import (
 	"encoding/json"
 	"log"
 
-	"repo_feed/src/api/dto"
 	"repo_feed/src/domain/services"
 
 	"github.com/IBM/sarama"
-	"github.com/TheRayquaza/newsbro/apps/libs/kafka/command"
+	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
 )
 
-type InferenceConsumer struct {
+type FeedbackConsumer struct {
 	consumerGroup sarama.ConsumerGroup
 	feedService   *services.FeedService
 	topic         string
 }
 
-func NewInferenceConsumer(brokers []string, topic string, groupID string, feedService *services.FeedService) (*InferenceConsumer, error) {
+func NewFeedbackConsumer(brokers []string, topic string, groupID string, feedService *services.FeedService) (*FeedbackConsumer, error) {
 	config := sarama.NewConfig()
 	config.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRoundRobin()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
@@ -28,16 +27,16 @@ func NewInferenceConsumer(brokers []string, topic string, groupID string, feedSe
 		return nil, err
 	}
 
-	return &InferenceConsumer{
+	return &FeedbackConsumer{
 		consumerGroup: consumerGroup,
 		feedService:   feedService,
 		topic:         topic,
 	}, nil
 }
 
-func (ac *InferenceConsumer) Start(ctx context.Context) {
-	log.Println("Starting Kafka consumer for new recommendation...")
-	handler := &consumerGroupHandler{feedService: ac.feedService}
+func (ac *FeedbackConsumer) Start(ctx context.Context) {
+	log.Println("Starting Kafka consumer for new feedbacks...")
+	handler := &consumerFeedbackGroupHandler{feedService: ac.feedService}
 
 	for {
 		select {
@@ -55,23 +54,23 @@ func (ac *InferenceConsumer) Start(ctx context.Context) {
 	}
 }
 
-func (ac *InferenceConsumer) Close() error {
+func (ac *FeedbackConsumer) Close() error {
 	return ac.consumerGroup.Close()
 }
 
-type consumerGroupHandler struct {
+type consumerFeedbackGroupHandler struct {
 	feedService *services.FeedService
 }
 
-func (h *consumerGroupHandler) Setup(sarama.ConsumerGroupSession) error {
+func (h *consumerFeedbackGroupHandler) Setup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-func (h *consumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error {
+func (h *consumerFeedbackGroupHandler) Cleanup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (h *consumerFeedbackGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.Printf("Message received: topic=%s, partition=%d, offset=%d", msg.Topic, msg.Partition, msg.Offset)
 		h.processMessage(msg.Value)
@@ -80,33 +79,16 @@ func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 	return nil
 }
 
-func (h *consumerGroupHandler) processMessage(data []byte) {
-	var cmd command.InferenceCommand
+func (h *consumerFeedbackGroupHandler) processMessage(data []byte) {
+	var cmd aggregate.FeedbackAggregate
 	if err := json.Unmarshal(data, &cmd); err != nil {
 		log.Printf("Error unmarshaling message: %v", err)
 		return
 	}
 
-	log.Printf("Processing new inference command for user ID: %d", cmd.UserID)
+	log.Printf("Processing new feedback for user %d on article %d", cmd.UserID, cmd.NewsID)
 
-	article := dto.Article{
-		Title:       cmd.Article.Title,
-		Abstract:    cmd.Article.Abstract,
-		Category:    cmd.Article.Category,
-		Subcategory: cmd.Article.Subcategory,
-		Link:        cmd.Article.Link,
-		RSSLink:     cmd.Article.RSSLink,
-		PublishedAt: cmd.Article.PublishedAt,
-	}
-
-	req := &dto.UpdateFeedRequest{
-		UserID:  cmd.UserID,
-		Article: &article,
-		Model:   cmd.Model,
-		Score:   cmd.Score,
-	}
-
-	err := h.feedService.UpdateFeed(req, true)
+	err := h.feedService.AddNewFeedback(cmd.UserID, cmd.NewsID)
 	if err != nil {
 		log.Printf("Error updating feed: %v", err)
 		return

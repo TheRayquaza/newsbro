@@ -53,7 +53,7 @@ func SetupRouter(cfg *config.Config, feedService *services.FeedService) *gin.Eng
 			// User routes
 			feeds := protected.Group("/feed")
 			{
-				feeds.GET("", feedController.GetFeed)
+				feeds.GET("", feedController.GetUserFeed)
 			}
 		}
 	}
