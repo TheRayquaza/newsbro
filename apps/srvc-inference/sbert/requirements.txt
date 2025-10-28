@@ -1,22 +1,18 @@
 # Core messaging & vector DB
-kafka-python==2.0.2
-qdrant-client==1.15.1
+kafka-python
+qdrant-client
 
 # ML stack (updated for Python 3.13)
-scikit-learn==1.5.2
-pandas==2.2.3
-numpy==2.1.2
-pyarrow==17.0.0
+scikit-learn
+pandas
+pyarrow
 
 # Environment & APIs
-python-dotenv==1.0.1
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-pydantic==2.9.2
+python-dotenv
+fastapi
+uvicorn[standard]
+pydantic
 
 # Experiment tracking / AWS
-mlflow==2.17.1
-boto3==1.35.36
-
-# Typing & stubs
-pandas-stubs==2.2.3.241009
+mlflow
+boto3
