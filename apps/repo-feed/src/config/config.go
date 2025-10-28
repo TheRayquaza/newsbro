@@ -2,11 +2,13 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -14,18 +16,26 @@ type Config struct {
 	JWTSecret        string
 	FrontendOrigin   string
 	LoginRedirectURL string
+
 	// Redis
 	RedisSentinels  []string
 	RedisMasterName string
 	RedisPassword   string
 	RedisDB         int
+
 	// Kafka
 	KafkaBrokers               []string
 	KafkaInferenceCommandTopic string
+	KafkaFeedbackTopic         string
 	KafkaGroupID               string
-	// Other
-	DefaultModel string
-	Environment  string
+	KafkaFeedbackGroupID       string
+
+	// Feedback settings
+	DefaultModel       string
+	FeedbackExpiration time.Duration
+
+	// Environment
+	Environment string
 }
 
 func Load() *Config {
@@ -53,20 +63,37 @@ func Load() *Config {
 		return db
 	}()
 
+	feedbackExpiration := func() time.Duration {
+		expStr := getEnv("FEEDBACK_EXPIRATION_SECONDS", "604800") // Default to 7 days
+		seconds, err := strconv.Atoi(expStr)
+		if err != nil {
+			fmt.Printf("Invalid FEEDBACK_EXPIRATION_SECONDS value '%s', defaulting to 604800 seconds\n", expStr)
+			seconds = 604800
+		}
+		return time.Duration(seconds) * time.Second
+	}()
+
 	return &Config{
-		Port:                       getEnv("PORT", "8080"),
-		JWTSecret:                  getEnv("JWT_SECRET", "your-secret-key"),
-		FrontendOrigin:             getEnv("FRONTEND_ORIGIN", "http://localhost:3000"),
-		LoginRedirectURL:           getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000/auth/callback"),
-		RedisSentinels:             redisSentinels,
-		RedisMasterName:            getEnv("REDIS_MASTER_NAME", "mymaster"),
-		RedisPassword:              getEnv("REDIS_PASSWORD", ""),
-		RedisDB:                    redisDb,
+		Port:             getEnv("PORT", "8080"),
+		JWTSecret:        getEnv("JWT_SECRET", "your-secret-key"),
+		FrontendOrigin:   getEnv("FRONTEND_ORIGIN", "http://localhost:3000"),
+		LoginRedirectURL: getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000/auth/callback"),
+
+		RedisSentinels:  redisSentinels,
+		RedisMasterName: getEnv("REDIS_MASTER_NAME", "mymaster"),
+		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
+		RedisDB:         redisDb,
+
 		KafkaBrokers:               kafkaBrokers,
 		KafkaInferenceCommandTopic: getEnv("KAFKA_INFERENCE_COMMAND_TOPIC", "inference-commands"),
+		KafkaFeedbackTopic:         getEnv("KAFKA_FEEDBACK_TOPIC", "user-feedback"),
 		KafkaGroupID:               getEnv("KAFKA_GROUP_ID", "repo-feed-group"),
-		DefaultModel:               getEnv("DEFAULT_MODEL", "tfidf"),
-		Environment:                getEnv("ENVIRONMENT", "prod"),
+		KafkaFeedbackGroupID:       getEnv("KAFKA_FEEDBACK_GROUP_ID", "repo-feed-feedback-group"),
+
+		DefaultModel:       getEnv("DEFAULT_MODEL", "tfidf"),
+		FeedbackExpiration: feedbackExpiration,
+
+		Environment: getEnv("ENVIRONMENT", "prod"),
 	}
 }
 
