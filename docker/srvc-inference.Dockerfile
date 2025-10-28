@@ -1,31 +1,17 @@
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim
 
 ARG model
-WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    cmake \
-    libssl-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
 COPY ${model}/requirements.txt .
-
-RUN pip install --upgrade pip setuptools wheel \
- && pip install --no-cache-dir --only-binary=:all: --target=/install -r requirements.txt
-
-FROM python:3.12-slim
-
-ARG model
-WORKDIR /app
-
-COPY --from=builder /install /usr/local/lib/python3.12/site-packages
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY abstract ./abstract
 COPY ${model} ./model
 
 ENV MODEL_NAME=${model}
+
 EXPOSE 8000
 
 CMD ["uvicorn", "${MODEL_NAME}.main:app", "--host", "0.0.0.0", "--port", "8000"]
