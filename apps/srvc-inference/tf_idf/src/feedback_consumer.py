@@ -18,7 +18,7 @@ from abstract.producer import InferenceProducer
 
 
 class TFIDFFeedbackConsumerConfig(pydantic.BaseModel):
-    articles_collection: str = os.getenv("ARTICLES_COLLECTION", "articles")
+    articles_collection: str = os.getenv("QDRANT_ARTICLES_COLLECTION", "articles")
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
     feedback_retention_days: int = int(os.getenv("FEEDBACK_RETENTION_DAYS", "30"))
     redis_sentinels: str = os.getenv(
@@ -74,7 +74,7 @@ class TFIDFFeedbackConsumer(InferenceConsumer):
                 db=self.config.redis_db,
             )
 
-            self.logger.info("✅ Redis Sentinel connection established")
+            self.logger.info("Redis Sentinel connection established")
         except Exception as e:
             self.logger.error(f"Failed to initialize Redis Sentinel: {e}")
             raise
@@ -95,71 +95,65 @@ class TFIDFFeedbackConsumer(InferenceConsumer):
         """Process a batch of feedback records and store them in Qdrant."""
         try:
             for feedback in batch:
-                try:
-                    if feedback.value == 1:
-                        try:
-                            redis_key = f"user_profile:{feedback.user_id}"
+                if feedback.value == 1:
+                    try:
+                        redis_key = f"user_profile:{feedback.user_id}"
 
-                            existing_profile = self.redis_client.get(redis_key)
+                        existing_profile = self.redis_client.get(redis_key)
 
-                            if existing_profile:
-                                profile_data = json.loads(existing_profile)
-                                article_ids = profile_data.get("article_ids", [])
-                                article_ids.insert(0, feedback.news_id)
-                                article_ids = article_ids[: self.config.top_k_articles]
-                            else:
-                                article_ids = [feedback.news_id]
+                        if existing_profile:
+                            profile_data = json.loads(existing_profile)
+                            article_ids = profile_data.get("article_ids", [])
+                            article_ids.insert(0, feedback.news_id)
+                            article_ids = article_ids[: self.config.top_k_articles]
+                        else:
+                            article_ids = [feedback.news_id]
 
-                            self.logger.info(
-                                f"Updating profile for user {feedback.user_id} with {len(article_ids)} articles: {article_ids}"
-                            )
-
-                            article_vectors = self._fetch_article_vectors(article_ids)
-                            if article_vectors is None or len(article_vectors) == 0:
-                                self.logger.warning(
-                                    f"No article vectors found for user {feedback.user_id}"
-                                )
-                                return
-
-                            mean_vector = np.mean(article_vectors, axis=0)
-
-                            redis_value = {
-                                "vector": mean_vector.tolist(),
-                                "article_ids": article_ids,
-                                "updated_at": datetime.now(timezone.utc).isoformat(),
-                                "num_articles": len(article_ids),
-                            }
-                            self.redis_client.set(
-                                redis_key,
-                                json.dumps(redis_value),
-                                ex=self.config.feedback_retention_days
-                                * 86400,  # TTL in seconds
-                            )
-                            self.logger.info(
-                                f"✅ Updated mean vector for user {feedback.user_id} "
-                                f"based on {len(article_ids)} articles"
-                            )
-                        except RedisError as e:
-                            self.logger.error(
-                                f"Redis error updating user {feedback.user_id} profile: {e}"
-                            )
-                        except Exception as e:
-                            self.logger.error(
-                                f"Error updating mean vector for user {feedback.user_id}: {e}",
-                                exc_info=True,
-                            )
-                    else:
                         self.logger.info(
-                            f"Skipping negative feedback "
-                            f"(user: {feedback.user_id}, article: {feedback.news_id}, value: {feedback.value})"
+                            f"Updating profile for user {feedback.user_id} with {len(article_ids)} articles: {article_ids}"
                         )
-                except Exception as e:
-                    self.logger.error(
-                        f"Error processing feedback {getattr(feedback, 'id', 'unknown')}: {e}",
-                        exc_info=True,
+
+                        article_vectors = self._fetch_article_vectors(article_ids)
+                        if article_vectors is None or len(article_vectors) == 0:
+                            self.logger.warning(
+                                f"No article vectors found for user {feedback.user_id}"
+                            )
+                            return
+
+                        mean_vector = np.mean(article_vectors, axis=0)
+
+                        redis_value = {
+                            "vector": mean_vector.tolist(),
+                            "article_ids": article_ids,
+                            "updated_at": datetime.now(timezone.utc).isoformat(),
+                            "num_articles": len(article_ids),
+                        }
+                        self.redis_client.set(
+                            redis_key,
+                            json.dumps(redis_value),
+                            ex=self.config.feedback_retention_days
+                            * 86400,  # TTL in seconds
+                        )
+                        self.logger.info(
+                            f"Updated mean vector for user {feedback.user_id} "
+                            f"based on {len(article_ids)} articles"
+                        )
+                    except RedisError as e:
+                        self.logger.error(
+                            f"Redis error updating user {feedback.user_id} profile: {e}"
+                        )
+                    except Exception as e:
+                        self.logger.error(
+                            f"Error updating mean vector for user {feedback.user_id}: {e}",
+                            exc_info=True,
+                        )
+                else:
+                    self.logger.info(
+                        f"Skipping negative feedback "
+                        f"(user: {feedback.user_id}, article: {feedback.news_id}, value: {feedback.value})"
                     )
 
-            self.logger.info(f"✅ Processed batch of {len(batch)} feedbacks")
+            self.logger.info(f"Processed batch of {len(batch)} feedbacks")
 
         except Exception as e:
             self.logger.error(f"Error processing batch: {e}", exc_info=True)

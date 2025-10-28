@@ -1,10 +1,9 @@
+import os
+import pickle
 from typing import Any, Optional
 
 import mlflow
 import mlflow.pyfunc
-import pickle
-import mlflow.utils.file_utils as file_utils
-import os
 
 
 class MlflowModel:
