@@ -6,6 +6,7 @@ qdrant-client==1.15.1
 scikit-learn==1.5.2
 pandas==2.2.3
 numpy==2.1.2
+pyarrow==17.0.0
 
 # Environment & APIs
 python-dotenv==1.0.1
