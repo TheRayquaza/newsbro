@@ -9,9 +9,7 @@ on:
       - "srvc-inference-tf_idf-v*.*.*"
 
 permissions:
-  contents: read
-  packages: write
-  id-token: write
+  write-all
 
 jobs:
   call-template:
