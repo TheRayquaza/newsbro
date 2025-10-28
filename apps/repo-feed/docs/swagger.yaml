@@ -1,0 +1,82 @@
+definitions:
+  repo_feed_src_api_dto.ArticleResponse:
+    properties:
+      abstract:
+        type: string
+      category:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      link:
+        type: string
+      published_at:
+        type: string
+      rss_link:
+        type: string
+      subcategory:
+        type: string
+      title:
+        type: string
+    type: object
+  repo_feed_src_api_dto.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  repo_feed_src_api_dto.FeedResponse:
+    properties:
+      articles:
+        items:
+          $ref: '#/definitions/repo_feed_src_api_dto.ArticleResponse'
+        type: array
+      model_name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /feed:
+    get:
+      description: Get the feed of the authenticated user
+      parameters:
+      - description: Model name (optional, uses default if not specified)
+        in: query
+        name: model
+        type: string
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/repo_feed_src_api_dto.FeedResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/repo_feed_src_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/repo_feed_src_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/repo_feed_src_api_dto.ErrorResponse'
+      summary: Get user feed
+      tags:
+      - Feed
+swagger: "2.0"
