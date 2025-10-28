@@ -8,6 +8,9 @@ on:
     tags:
       - "srvc-inference-tf_idf-v*.*.*"
 
+permissions:
+  write-all
+
 jobs:
   call-template:
     uses: ./.github/workflows/python-svc-workflow.yaml
