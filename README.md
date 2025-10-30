@@ -19,10 +19,15 @@ Feel free to open issues if you see anything relevant that could be added.
 - [Architecture](#architecture)
     - [User Feed](#handling-user-feeds)
 - [Development](#dev)
-    - [Backends](#working-with-backends)
-    - [Frontend](#working-with-frontend)
     - [CI/CD](#cicd)
     - [Commits](#commits)
+- [Services](./apps/README.md)
+    - [port-front](./apps/port-front/README.md)
+    - [repo-account](./apps/repo-account/README.md)
+    - [repo-article](./apps/repo-article/README.md)
+    - [repo-feed](./apps/repo-feed/README.md)
+    - [srvc-inference](./apps/srvc-inference/README.md)
+    - [srvc-scrapping](./apps/srvc-scrapping/README.md)
 - [Deployment](#deployment)
     - [Deployment Specifications](#deployment-specifications)
 
@@ -43,6 +48,7 @@ All internal data will be securely erased once the project concludes.
 ├── apps
 │   ├── repo-account
 │   ├── repo-article
+│   ├── repo-feed
 │   ├── port-front
 │   ├── srvc-scrapping
 │   ├── srvc-search
@@ -75,50 +81,18 @@ The project is built with a microservices architecture including the following c
 - `srvc-scrapping`: Scrapping for articles, ingest to kafka
 - `srvc-search`: Search service
 - `srvc-inference`: Inference service to provide update user feeds
-- `srvc-recommendation`: Service providing the user feed
+- `repo-feed`: Service providing the user feed
 - `port-front`: main frontend
 
-![Architecture Diagram](docs/archi/archi_v1.1.png)
+![Architecture Diagram](docs/archi/archi_v1.2.png)
 
 ### Handling user feeds
 
-![User Feed](docs/misc/user_feed.png)
+![User Feed](docs/misc/user_feed_2.png)
 
 ## Dev
 
 We provide a generic docker compose to run a minimal stack at `apps/docker-compose.yml`
-
-### Working with backends
-
-- For go app:
-
-```bash
-cd apps/$SRVC
-docker compose up -d
-go run src/cmd/main.go
-docker compose down
-```
-
-- For python app:
-
-```bash
-cd apps/$SRVC
-docker compose up -d
-# TODO
-docker compose down
-```
-
-### Working with frontend
-
-- We use a vite proxy to handle requests to our backends
-- Backends should be up
-- `apps/docker-compose.yml` should be up
-
-```bash
-cd apps/port-front
-npm ci
-npm run dev
-```
 
 ### CI/CD
 

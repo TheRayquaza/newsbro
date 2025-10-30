@@ -80,10 +80,7 @@ jobs:
   build-docker:
     if: startsWith(github.ref, format('refs/tags/{0}-', inputs.service_name))
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
+    permissions: write-all
     steps:
       - uses: actions/checkout@v4
 
