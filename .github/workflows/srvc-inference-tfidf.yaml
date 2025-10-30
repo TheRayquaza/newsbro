@@ -1,12 +1,16 @@
 name: srvc-inference (TF-IDF)
-
 on:
   push:
     branches: ["**"]
     paths:
-      - "apps/srvc-inference/tf_idf/**"
+      - 'apps/srvc-inference/tf_idf/**'
+    tags-ignore:
+      - '**'
+  push:
     tags:
-      - "srvc-inference-tf_idf-v*.*.*"
+      - 'srvc-inference-tfidf-v*.*.*'
+    paths:
+      - 'apps/srvc-inference/tf_idf/**'
 
 permissions:
   write-all
