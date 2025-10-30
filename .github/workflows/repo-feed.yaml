@@ -9,7 +9,7 @@ on:
       - 'repo-feed-v*.*.*'
 
 jobs:
-  ci:
+  repo-feed:
     uses: ./.github/workflows/go-svc-workflow.yaml
     with:
       app_name: repo-feed
