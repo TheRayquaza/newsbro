@@ -80,7 +80,6 @@ if __name__ == "__main__":
     c2_config = TFIDFArticleConsumerConfig()
     logger.info(c2_config)
     c2 = TFIDFArticleConsumer(model, producer, logger, c2_consumer_config, c2_config)
-    # c1.bootstrap() no more bootstrap
     c2.bootstrap()
     c1.run()
     c2.run()

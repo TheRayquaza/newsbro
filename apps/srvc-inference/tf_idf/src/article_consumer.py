@@ -137,7 +137,7 @@ class TFIDFArticleConsumer(InferenceConsumer):
 
         points = [
             PointStruct(id=article.id, vector=vector, payload=article.dict())
-            for article, vector in zip(articles, vectors, strict=False)
+            for article, vector in zip(articles, vectors, strict=True)
         ]
 
         self.qdrant.upsert(
@@ -277,7 +277,7 @@ class TFIDFArticleConsumer(InferenceConsumer):
                 score=float(similarity_matrix[art_idx, user_idx]),
                 date=current_time,
             )
-            for art_idx, user_idx in zip(article_indices, user_indices, strict=False)
+            for art_idx, user_idx in zip(article_indices, user_indices, strict=True)
         ]
 
         if len(recommendations) != 0:
