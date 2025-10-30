@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
+	"time"
 
 	"repo_feed/src/api/dto"
 	"repo_feed/src/converters"
@@ -13,12 +15,14 @@ import (
 )
 
 type FeedController struct {
-	feedService *services.FeedService
+	feedService  *services.FeedService
+	defaultModel string
 }
 
-func NewFeedController(feedService *services.FeedService) *FeedController {
+func NewFeedController(feedService *services.FeedService, defaultModel string) *FeedController {
 	return &FeedController{
-		feedService: feedService,
+		feedService:  feedService,
+		defaultModel: defaultModel,
 	}
 }
 
@@ -30,7 +34,6 @@ func NewFeedController(feedService *services.FeedService) *FeedController {
 // @Param model query string false "Model name (optional, uses default if not specified)"
 // @Success 200 {object} dto.FeedResponse
 // @Failure 401 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
 // @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /feed [get]
@@ -54,22 +57,49 @@ func (uc *FeedController) GetUserFeed(c *gin.Context) {
 	}
 
 	model := c.Query("model")
+	if model == "" {
+		model = uc.defaultModel
+	}
 
-	feed, err := uc.feedService.GetUserFeed(usr.UserID, model)
+	limit := c.Query("limit")
+	if limit == "" {
+		limit = "20"
+	}
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil || limitInt <= 0 {
+		limitInt = 20
+	}
+	limitInt64 := int64(limitInt)
+
+	articles, err := uc.feedService.GetUserFeed(usr.UserID, model, limitInt64)
 	if err != nil {
 		switch err.(type) {
 		case *dto.NotFoundError:
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Code:    http.StatusNotFound,
-				Message: err.Error(),
+			c.JSON(http.StatusOK, dto.FeedResponse{
+				UserID:    usr.UserID,
+				ModelName: model,
+				Articles:  []dto.Article{},
+				UpdatedAt: time.Now(),
 			})
+			return
 		default:
 			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 				Code:    http.StatusInternalServerError,
 				Message: err.Error(),
 			})
+			return
 		}
 	}
 
-	c.JSON(http.StatusOK, converters.FeedModelToFeedResponse(feed))
+	articleDTOs := make([]dto.Article, len(articles))
+	for i, article := range articles {
+		articleDTOs[i] = converters.ArticleModelToArticle(&article)
+	}
+
+	c.JSON(http.StatusOK, dto.FeedResponse{
+		UserID:    usr.UserID,
+		ModelName: model,
+		Articles:  articleDTOs,
+		UpdatedAt: time.Now(),
+	})
 }

@@ -68,18 +68,28 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 
 ## Variables
 
-| Name                           | Default Value / Example               |
-| ------------------------------ | ------------------------------------- |
-| **PORT**                       | `8080`                                |
-| **JWT_SECRET**                 | `your-secret-key`                     |
-| **FRONTEND_ORIGIN**            | `http://localhost:3000`               |
-| **LOGIN_REDIRECT_URL**         | `http://localhost:3000/auth/callback` |
-| **REDIS_SENTINELS**            | `localhost:26379`                     |
-| **REDIS_MASTER_NAME**          | `mymaster`                            |
-| **REDIS_PASSWORD**             | *(empty)*                             |
-| **REDIS_DB**                   | `0`                                   |
-| **KAFKA_BROKERS**              | `localhost:9092`                      |
-| **KAFKA_INFERENCE_COMMAND_TOPIC** | `inference-commands`               |
-| **KAFKA_GROUP_ID**             | `repo-feed-group`                     |
-| **DEFAULT_MODEL**              | `tfidf`                               |
-| **ENVIRONMENT**                | `prod`                                |
+| Name                          | Description                                              | Default Value                            |
+|-------------------------------|----------------------------------------------------------|------------------------------------------|
+| `PORT`                        | HTTP server port.                                        | `8080`                                   |
+| `JWT_SECRET`                  | Secret key for signing JWTs.                             | `your-secret-key`                        |
+| `FRONTEND_ORIGIN`             | The origin URL of the frontend application.              | `http://localhost:3000`                  |
+| `LOGIN_REDIRECT_URL`          | URL for post-login redirection.                          | `http://localhost:3000/auth/callback`    |
+| `REDIS_SENTINELS`             | Comma-separated list of Redis Sentinel addresses.        | `localhost:26379`                        |
+| `REDIS_MASTER_NAME`           | Name of the Redis master instance.                       | `mymaster`                               |
+| `REDIS_PASSWORD`              | Password for Redis.                                      | *(empty)*                                |
+| `REDIS_DB`                    | Redis database index.                                    | `0`                                      |
+| `KAFKA_BROKERS`               | Comma-separated list of Kafka broker addresses.          | `localhost:9092`                         |
+| `KAFKA_INFERENCE_COMMAND_TOPIC` | Kafka topic for sending inference commands.            | `inference-commands`                     |
+| `KAFKA_FEEDBACK_TOPIC`        | Kafka topic for receiving user feedback.                 | `user-feedback`                          |
+| `KAFKA_GROUP_ID`              | Consumer group ID for inference commands.                | `repo-feed-group`                        |
+| `KAFKA_FEEDBACK_GROUP_ID`     | Consumer group ID for user feedback.                     | `repo-feed-feedback-group`               |
+| `DEFAULT_MODEL`               | Default recommendation model to use.                     | `tfidf`                                  |
+| `FEEDBACK_EXPIRATION_SECONDS` | Duration (in seconds) to keep user feedback.             | `604800 (7 days)`                        |
+| `FEED_RESCORING_ENABLED`      | Enable/disable the feed rescoring background job.        | `false`                                  |
+| `FEED_RESCORING_INTERVAL`     | Frequency of the feed rescoring job.                     | `10m`                                    |
+| `FEED_RESCORING_BATCH_SIZE`   | Number of feeds to process per batch.                    | `1000`                                   |
+| `FEED_RESCORING_WORKERS`      | Number of concurrent workers for rescoring.              | `10`                                     |
+| `FEED_RESCORING_THRESHOLD`    | Score below which articles are removed from ZSETs.       | `0.1`                                    |
+| `FEED_RESCORING_DECAY_ENABLED` | Enable/disable score decay during rescoring.            | `true`                                   |
+| `FEED_RESCORING_DECAY_HALFLIFE` | Half-life duration for score decay (e.g., 24h).        | `60h (2.5 days)`                         |
+| `ENVIRONMENT`                 | Application environment (e.g., prod, dev).               | `prod`                                   |

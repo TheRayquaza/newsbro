@@ -68,10 +68,90 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/feed/rescoring/reset": {
+            "post": {
+                "description": "Resets the rescoring job’s cursor to start rescoring all feeds from the beginning.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Feed Rescoring"
+                ],
+                "summary": "Reset rescoring cursor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer \u003cAdd access token here\u003e",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/feed/rescoring/status": {
+            "get": {
+                "description": "Returns progress information about the feed rescoring job.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Feed Rescoring"
+                ],
+                "summary": "Get rescoring job status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer \u003cAdd access token here\u003e",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "repo_feed_src_api_dto.ArticleResponse": {
+        "repo_feed_src_api_dto.Article": {
             "type": "object",
             "properties": {
                 "abstract": {
@@ -83,9 +163,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_active": {
-                    "type": "boolean"
-                },
                 "link": {
                     "type": "string"
                 },
@@ -94,6 +171,9 @@ const docTemplate = `{
                 },
                 "rss_link": {
                     "type": "string"
+                },
+                "score": {
+                    "type": "number"
                 },
                 "subcategory": {
                     "type": "string"
@@ -120,7 +200,7 @@ const docTemplate = `{
                 "articles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/repo_feed_src_api_dto.ArticleResponse"
+                        "$ref": "#/definitions/repo_feed_src_api_dto.Article"
                     }
                 },
                 "model_name": {

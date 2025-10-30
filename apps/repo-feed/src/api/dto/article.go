@@ -13,5 +13,5 @@ type Article struct {
 	Link        string    `json:"link"`
 	RSSLink     string    `json:"rss_link"`
 	PublishedAt time.Time `json:"published_at"`
-	IsActive    bool      `json:"is_active"`
+	Score       float64   `json:"score"`
 }

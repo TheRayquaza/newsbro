@@ -12,9 +12,10 @@ import (
 	docs "repo_feed/docs"
 
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
-func SetupRouter(cfg *config.Config, feedService *services.FeedService) *gin.Engine {
+func SetupRouter(cfg *config.Config, feedService *services.FeedService, rescoringService *services.FeedRescoringService) *gin.Engine {
 	router := gin.Default()
 
 	// Middleware
@@ -27,17 +28,28 @@ func SetupRouter(cfg *config.Config, feedService *services.FeedService) *gin.Eng
 	router.Use(middleware.Secure())
 
 	// Controllers
-	feedController := controllers.NewFeedController(feedService)
+	feedController := controllers.NewFeedController(feedService, cfg.DefaultModel)
+	//rescoringController := controllers.NewRescoringController(rescoringService)
 
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
-		// TODO
+		ctx := c.Request.Context()
+		if err := feedService.RDB.Ping(ctx).Err(); err != nil {
+			log.Println("Health check failed:", err)
+			c.JSON(500, gin.H{"status": "unhealthy"})
+			return
+		}
 		c.JSON(200, gin.H{"status": "healthy"})
 	})
 
 	// Readiness check
 	router.GET("/ready", func(c *gin.Context) {
-		// TODO
+		ctx := c.Request.Context()
+		if err := feedService.RDB.Ping(ctx).Err(); err != nil {
+			log.Println("Readiness check failed:", err)
+			c.JSON(500, gin.H{"status": "unready"})
+			return
+		}
 		c.JSON(200, gin.H{"status": "ready"})
 	})
 
@@ -54,9 +66,18 @@ func SetupRouter(cfg *config.Config, feedService *services.FeedService) *gin.Eng
 			feeds := protected.Group("/feed")
 			{
 				feeds.GET("", feedController.GetUserFeed)
+				/*
+					rescoring := feeds.Group("/rescoring")
+					rescoring.Use(authMiddleware.AdminMiddleware())
+					{
+						rescoring.GET("/status", rescoringController.GetRescoringStatus)
+						rescoring.POST("/reset", rescoringController.ResetRescoringCursor)
+					}
+				*/
 			}
 		}
 	}
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	return router
