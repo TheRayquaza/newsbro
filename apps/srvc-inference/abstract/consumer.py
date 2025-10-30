@@ -61,28 +61,25 @@ class InferenceConsumer(abc.ABC):
         pass
 
     def _should_process_batch(self) -> bool:
-        """Check if batch should be processed based on size or time."""
-        with self.batch_lock:
-            if len(self.batch) >= self.consumer_config.batch_size:
-                return True
+        """Check if batch should be processed based on size or time. MUST BE CALLED with batch_lock held."""
+        if len(self.batch) >= self.consumer_config.batch_size:
+            return True
 
-            if len(self.batch) > 0:
-                time_elapsed = time.time() - self.last_process_time
-                if time_elapsed >= self.consumer_config.batch_interval:
-                    return True
+        if len(self.batch) > 0:
+            time_elapsed = time.time() - self.last_process_time
+            if time_elapsed >= self.consumer_config.batch_interval:
+                return True
 
         return False
 
     def _process_batch(self) -> None:
-        """Process current batch and reset."""
-        with self.batch_lock:
-            if not self.batch:
-                return
-
-            batch_to_process = self.batch.copy()
-            self.batch = []
-            self.last_process_time = time.time()
-
+        """Process current batch and reset. MUST BE CALLED with batch_lock held."""
+        if not self.batch:
+            return
+        batch_to_process = self.batch.copy()
+        self.batch = []
+        self.last_process_time = time.time()
+        
         try:
             self.logger.info(f"Processing batch of {len(batch_to_process)} messages")
             Thread(target=self.process, args=(batch_to_process,), daemon=True).start()
@@ -95,7 +92,7 @@ class InferenceConsumer(abc.ABC):
             f"Starting consumer with batch_size={self.consumer_config.batch_size}, "
             f"batch_interval={self.consumer_config.batch_interval}s"
         )
-
+        
         try:
             while not self.shutdown_event.is_set():
                 try:
@@ -103,27 +100,28 @@ class InferenceConsumer(abc.ABC):
                         article = message.value
                         if self.dict_to_msg:
                             article = self.dict_to_msg(article)
-
+                        
                         with self.batch_lock:
                             self.batch.append(article)
-
-                        if len(self.batch) >= self.consumer_config.batch_size:
-                            self._process_batch()
-                            break
-
-                    if self._should_process_batch():
-                        self._process_batch()
-
+                            if len(self.batch) >= self.consumer_config.batch_size:
+                                self._process_batch()
+                        
+                        # Check time-based processing outside the message loop
+                        with self.batch_lock:
+                            if self._should_process_batch():
+                                self._process_batch()
+                                
                 except StopIteration:
-                    if self._should_process_batch():
-                        self._process_batch()
-
-        except Exception as e:
-            self.logger.error(f"Error in consumer loop: {e}", exc_info=True)
+                    with self.batch_lock:
+                        if self._should_process_batch():
+                            self._process_batch()
+                except Exception as e:
+                    self.logger.error(f"Error in consumer loop: {e}", exc_info=True)
         finally:
-            if self.batch:
-                self.logger.info("Processing remaining batch on shutdown")
-                self._process_batch()
+            with self.batch_lock:
+                if self.batch:
+                    self.logger.info("Processing remaining batch on shutdown")
+                    self._process_batch()
 
     def run(self) -> Thread:
         """Start the consumer thread."""

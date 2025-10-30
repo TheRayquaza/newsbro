@@ -118,7 +118,7 @@ class TFIDFFeedbackConsumer(InferenceConsumer):
                             self.logger.warning(
                                 f"No article vectors found for user {feedback.user_id}"
                             )
-                            return
+                            continue
 
                         mean_vector = np.mean(article_vectors, axis=0)
 
