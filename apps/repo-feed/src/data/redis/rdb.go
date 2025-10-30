@@ -54,14 +54,3 @@ func Initialize(config RedisConfig) (*redis.Client, error) {
 
 	return client, nil
 }
-
-func HealthCheck(client *redis.Client) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	if err := client.Ping(ctx).Err(); err != nil {
-		return fmt.Errorf("redis health check failed: %w", err)
-	}
-
-	return nil
-}

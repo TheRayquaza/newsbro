@@ -1,5 +1,5 @@
 definitions:
-  repo_feed_src_api_dto.ArticleResponse:
+  repo_feed_src_api_dto.Article:
     properties:
       abstract:
         type: string
@@ -7,14 +7,14 @@ definitions:
         type: string
       id:
         type: integer
-      is_active:
-        type: boolean
       link:
         type: string
       published_at:
         type: string
       rss_link:
         type: string
+      score:
+        type: number
       subcategory:
         type: string
       title:
@@ -31,7 +31,7 @@ definitions:
     properties:
       articles:
         items:
-          $ref: '#/definitions/repo_feed_src_api_dto.ArticleResponse'
+          $ref: '#/definitions/repo_feed_src_api_dto.Article'
         type: array
       model_name:
         type: string
@@ -79,4 +79,58 @@ paths:
       summary: Get user feed
       tags:
       - Feed
+  /feed/rescoring/reset:
+    post:
+      description: Resets the rescoring job’s cursor to start rescoring all feeds
+        from the beginning.
+      parameters:
+      - description: Bearer <Add access token here>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset rescoring cursor
+      tags:
+      - Feed Rescoring
+  /feed/rescoring/status:
+    get:
+      description: Returns progress information about the feed rescoring job.
+      parameters:
+      - description: Bearer <Add access token here>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get rescoring job status
+      tags:
+      - Feed Rescoring
 swagger: "2.0"

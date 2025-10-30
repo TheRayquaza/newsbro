@@ -12,7 +12,7 @@ func FeedModelToFeedResponse(feed *models.FeedModel) dto.FeedResponse {
 		Articles: func() []dto.Article {
 			articles := make([]dto.Article, len(feed.Articles))
 			for i, article := range feed.Articles {
-				articles[i] = ArticleModelToArticleResponse(&article)
+				articles[i] = ArticleModelToArticle(&article)
 			}
 			return articles
 		}(),

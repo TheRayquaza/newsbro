@@ -5,7 +5,7 @@ import (
 	"repo_feed/src/data/models"
 )
 
-func ArticleModelToArticleResponse(article *models.ArticleModel) dto.Article {
+func ArticleModelToArticle(article *models.ArticleModel) dto.Article {
 	return dto.Article{
 		ID:          article.ID,
 		Category:    article.Category,
@@ -15,11 +15,11 @@ func ArticleModelToArticleResponse(article *models.ArticleModel) dto.Article {
 		Link:        article.Link,
 		RSSLink:     article.RSSLink,
 		PublishedAt: article.PublishedAt,
-		IsActive:    article.IsActive,
+		Score:       article.DecayScore,
 	}
 }
 
-func ArticleToArticleModel(article *dto.Article) models.ArticleModel {
+func ArticleToArticleModel(article *dto.Article, score float64) models.ArticleModel {
 	return models.ArticleModel{
 		ID:          article.ID,
 		Category:    article.Category,
@@ -29,6 +29,7 @@ func ArticleToArticleModel(article *dto.Article) models.ArticleModel {
 		Link:        article.Link,
 		RSSLink:     article.RSSLink,
 		PublishedAt: article.PublishedAt,
-		IsActive:    true, // Default to active when creating from DTO
+		Score:       score,
+		DecayScore:  score,
 	}
 }

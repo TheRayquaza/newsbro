@@ -21,7 +21,7 @@ func main() {
 		log.Println("Running in development mode")
 	}
 
-	// Initialize redis pool
+	// Initialize Redis pool
 	rdb, err := redis.Initialize(redis.RedisConfig{
 		Sentinels:  cfg.RedisSentinels,
 		MasterName: cfg.RedisMasterName,
@@ -32,8 +32,23 @@ func main() {
 		log.Fatal("Failed to initialize Redis:", err)
 	}
 
-	// Initialize services
-	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.FeedbackExpiration)
+	// Initialize feed service
+	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.FeedbackExpiration, cfg.FeedRescoring.DecayHalfLife)
+
+	// Initialize and start rescoring job
+	rescoringConfig := services.RescoringConfig{
+		Interval:          cfg.FeedRescoring.Interval,
+		BatchSize:         cfg.FeedRescoring.BatchSize,
+		ConcurrentWorkers: cfg.FeedRescoring.ConcurrentWorkers,
+		ScoreThreshold:    cfg.FeedRescoring.ScoreThreshold,
+		DecayEnabled:      cfg.FeedRescoring.DecayEnabled,
+		DecayHalfLife:     cfg.FeedRescoring.DecayHalfLife,
+		Enabled:           cfg.FeedRescoring.Enabled,
+	}
+
+	rescoringService := services.NewFeedRescoringService(feedService, rescoringConfig)
+	rescoringService.Start()
+	log.Println("Feed rescoring service started")
 
 	// Setup context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
@@ -68,15 +83,20 @@ func main() {
 	}
 
 	// Setup routes
-	router := routes.SetupRouter(cfg, feedService)
+	router := routes.SetupRouter(cfg, feedService, rescoringService)
+	//router.SetTrustedProxies([]string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"}) kube internal
 
-	// Handle graceful shutdown
+	// Graceful shutdown handler
 	go func() {
 		sigterm := make(chan os.Signal, 1)
 		signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
 		<-sigterm
+
 		log.Println("Shutting down gracefully...")
 		cancel()
+
+		// Stop rescoring service
+		rescoringService.Stop()
 
 		// Close inference consumer
 		if inferenceConsumer != nil {

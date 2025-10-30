@@ -34,6 +34,17 @@ type Config struct {
 	DefaultModel       string
 	FeedbackExpiration time.Duration
 
+	// Feed Rescoring
+	FeedRescoring struct {
+		Enabled           bool
+		Interval          time.Duration
+		BatchSize         int
+		ConcurrentWorkers int
+		ScoreThreshold    float64
+		DecayEnabled      bool
+		DecayHalfLife     time.Duration
+	}
+
 	// Environment
 	Environment string
 }
@@ -43,36 +54,44 @@ func Load() *Config {
 		log.Println("No .env file found")
 	}
 
-	redisSentinels := func() []string {
-		sentinelsStr := getEnv("REDIS_SENTINELS", "localhost:26379")
-		return splitAndTrim(sentinelsStr, ",")
-	}()
+	// --- Redis ---
+	redisSentinels := splitAndTrim(getEnv("REDIS_SENTINELS", "localhost:26379"), ",")
+	redisDB := parseIntEnv("REDIS_DB", 0)
 
-	kafkaBrokers := func() []string {
-		brokersStr := getEnv("KAFKA_BROKERS", "localhost:9092")
-		return splitAndTrim(brokersStr, ",")
-	}()
+	// --- Kafka ---
+	kafkaBrokers := splitAndTrim(getEnv("KAFKA_BROKERS", "localhost:9092"), ",")
 
-	redisDb := func() int {
-		dbStr := getEnv("REDIS_DB", "0")
-		db, err := strconv.Atoi(dbStr)
-		if err != nil {
-			fmt.Printf("Invalid REDIS_DB value '%s', defaulting to 0\n", dbStr)
-			return 0
-		}
-		return db
-	}()
-
+	// --- Feedback expiration ---
 	feedbackExpiration := func() time.Duration {
-		expStr := getEnv("FEEDBACK_EXPIRATION_SECONDS", "604800") // Default to 7 days
+		expStr := getEnv("FEEDBACK_EXPIRATION_SECONDS", "604800") // Default 7 days
 		seconds, err := strconv.Atoi(expStr)
 		if err != nil {
-			fmt.Printf("Invalid FEEDBACK_EXPIRATION_SECONDS value '%s', defaulting to 604800 seconds\n", expStr)
+			fmt.Printf("Invalid FEEDBACK_EXPIRATION_SECONDS='%s', using 604800\n", expStr)
 			seconds = 604800
 		}
 		return time.Duration(seconds) * time.Second
 	}()
 
+	// --- Feed Rescoring ---
+	feedRescoring := struct {
+		Enabled           bool
+		Interval          time.Duration
+		BatchSize         int
+		ConcurrentWorkers int
+		ScoreThreshold    float64
+		DecayEnabled      bool
+		DecayHalfLife     time.Duration
+	}{
+		Enabled:           parseBoolEnv("FEED_RESCORING_ENABLED", false),
+		Interval:          parseDurationEnv("FEED_RESCORING_INTERVAL", "10m"),
+		BatchSize:         parseIntEnv("FEED_RESCORING_BATCH_SIZE", 1000),
+		ConcurrentWorkers: parseIntEnv("FEED_RESCORING_WORKERS", 10),
+		ScoreThreshold:    parseFloatEnv("FEED_RESCORING_THRESHOLD", 0.1),
+		DecayEnabled:      parseBoolEnv("FEED_RESCORING_DECAY_ENABLED", true),
+		DecayHalfLife:     parseDurationEnv("FEED_RESCORING_DECAY_HALFLIFE", "120h"), // default 5 days
+	}
+
+	// --- Return Config ---
 	return &Config{
 		Port:             getEnv("PORT", "8080"),
 		JWTSecret:        getEnv("JWT_SECRET", "your-secret-key"),
@@ -82,7 +101,7 @@ func Load() *Config {
 		RedisSentinels:  redisSentinels,
 		RedisMasterName: getEnv("REDIS_MASTER_NAME", "mymaster"),
 		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
-		RedisDB:         redisDb,
+		RedisDB:         redisDB,
 
 		KafkaBrokers:               kafkaBrokers,
 		KafkaInferenceCommandTopic: getEnv("KAFKA_INFERENCE_COMMAND_TOPIC", "inference-commands"),
@@ -92,6 +111,8 @@ func Load() *Config {
 
 		DefaultModel:       getEnv("DEFAULT_MODEL", "tfidf"),
 		FeedbackExpiration: feedbackExpiration,
+
+		FeedRescoring: feedRescoring,
 
 		Environment: getEnv("ENVIRONMENT", "prod"),
 	}
@@ -110,4 +131,39 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func parseBoolEnv(key string, defaultValue bool) bool {
+	val := strings.ToLower(getEnv(key, fmt.Sprintf("%t", defaultValue)))
+	return val == "true" || val == "1" || val == "yes"
+}
+
+func parseIntEnv(key string, defaultValue int) int {
+	valStr := getEnv(key, fmt.Sprintf("%d", defaultValue))
+	val, err := strconv.Atoi(valStr)
+	if err != nil {
+		log.Printf("Invalid %s='%s', using default %d\n", key, valStr, defaultValue)
+		return defaultValue
+	}
+	return val
+}
+
+func parseFloatEnv(key string, defaultValue float64) float64 {
+	valStr := getEnv(key, fmt.Sprintf("%f", defaultValue))
+	val, err := strconv.ParseFloat(valStr, 64)
+	if err != nil {
+		log.Printf("Invalid %s='%s', using default %f\n", key, valStr, defaultValue)
+		return defaultValue
+	}
+	return val
+}
+
+func parseDurationEnv(key, defaultValue string) time.Duration {
+	valStr := getEnv(key, defaultValue)
+	dur, err := time.ParseDuration(valStr)
+	if err != nil {
+		log.Printf("Invalid %s='%s', using default %s\n", key, valStr, defaultValue)
+		dur, _ = time.ParseDuration(defaultValue)
+	}
+	return dur
 }

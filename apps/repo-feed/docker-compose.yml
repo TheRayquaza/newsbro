@@ -77,12 +77,14 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ./data/master:/data
+      - redis-master-data:/data
     command:
       [
         "redis-server",
         "--appendonly",
         "yes",
+        "--stop-writes-on-bgsave-error",
+        "no",
         "--repl-diskless-load",
         "on-empty-db",
         "--replica-announce-ip",
@@ -105,7 +107,7 @@ services:
     ports:
       - "6380:6379"
     volumes:
-      - ./data/slave1:/data
+      - redis-slave-data:/data
     command:
       [
         "redis-server",
@@ -158,6 +160,8 @@ services:
 
 volumes:
   redpanda:
+  redis-master-data:
+  redis-slave-data:
 
 networks:
   data-net:

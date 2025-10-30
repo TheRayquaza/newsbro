@@ -37,7 +37,7 @@ func NewInferenceConsumer(brokers []string, topic string, groupID string, feedSe
 
 func (ac *InferenceConsumer) Start(ctx context.Context) {
 	log.Println("Starting Kafka consumer for new recommendation...")
-	handler := &consumerGroupHandler{feedService: ac.feedService}
+	handler := &consumerInferenceGroupHandler{feedService: ac.feedService}
 
 	for {
 		select {
@@ -59,19 +59,19 @@ func (ac *InferenceConsumer) Close() error {
 	return ac.consumerGroup.Close()
 }
 
-type consumerGroupHandler struct {
+type consumerInferenceGroupHandler struct {
 	feedService *services.FeedService
 }
 
-func (h *consumerGroupHandler) Setup(sarama.ConsumerGroupSession) error {
+func (h *consumerInferenceGroupHandler) Setup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-func (h *consumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error {
+func (h *consumerInferenceGroupHandler) Cleanup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (h *consumerInferenceGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.Printf("Message received: topic=%s, partition=%d, offset=%d", msg.Topic, msg.Partition, msg.Offset)
 		h.processMessage(msg.Value)
@@ -80,7 +80,7 @@ func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 	return nil
 }
 
-func (h *consumerGroupHandler) processMessage(data []byte) {
+func (h *consumerInferenceGroupHandler) processMessage(data []byte) {
 	var cmd command.InferenceCommand
 	if err := json.Unmarshal(data, &cmd); err != nil {
 		log.Printf("Error unmarshaling message: %v", err)
@@ -90,6 +90,7 @@ func (h *consumerGroupHandler) processMessage(data []byte) {
 	log.Printf("Processing new inference command for user ID: %d", cmd.UserID)
 
 	article := dto.Article{
+		ID:          cmd.Article.ID,
 		Title:       cmd.Article.Title,
 		Abstract:    cmd.Article.Abstract,
 		Category:    cmd.Article.Category,
@@ -106,7 +107,7 @@ func (h *consumerGroupHandler) processMessage(data []byte) {
 		Score:   cmd.Score,
 	}
 
-	err := h.feedService.UpdateFeed(req, true)
+	err := h.feedService.UpdateFeedZSET(req)
 	if err != nil {
 		log.Printf("Error updating feed: %v", err)
 		return
