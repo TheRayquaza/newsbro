@@ -1,31 +1,36 @@
 import logging
 import os
-import uvicorn
 import sys
+
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
 from abstract.consumer import InferenceConsumerConfig
 from abstract.mlflow_model import MlflowModel
 from abstract.producer import InferenceProducer, InferenceProducerConfig
-from tf_idf.src.article_consumer import create_article_consumer
-from tf_idf.src.feedback_consumer import create_feedback_consumer
 
 if __name__ == "__main__":
     if os.getenv("ENVIRONMENT") != "production":
         print("Loading .env file for development environment")
         env_file = sys.argv[1] if len(sys.argv) > 1 else ".env"
-        print(env_file)
         if os.path.exists(env_file):
             load_dotenv(env_file)
-            print(os.getenv("MODEL_URI"))
+            print(os.getenv("TFIDF_MAX_FEATURES"))
         elif len(sys.argv) > 1:
             raise FileNotFoundError(f"Environment file {env_file} not found")
 
-    from tf_idf.src.config import Config # because Config evaluation is done on runtime
+    from tf_idf.src.article_consumer import (
+        TFIDFArticleConsumer,
+        TFIDFArticleConsumerConfig,
+    )
+    from tf_idf.src.config import Config  # because Config evaluation is done on runtime
+    from tf_idf.src.feedback_consumer import (
+        TFIDFFeedbackConsumer,
+        TFIDFFeedbackConsumerConfig,
+    )
 
     config = Config()
-    print(config)
 
     logging.basicConfig(
         level=(logging.INFO if config.log_level.upper() == "INFO" else logging.DEBUG),
@@ -50,20 +55,27 @@ if __name__ == "__main__":
     )
     producer = InferenceProducer(logger, producer_config)
 
-    c1_config = InferenceConsumerConfig(
+    c1_consumer_config = InferenceConsumerConfig(
         kafka_bootstrap_servers=config.kafka_bootstrap_servers,
         kafka_consumer_topic=config.kafka_feedback_consumer_topic,
         kafka_consumer_group=config.kafka_feedback_consumer_group,
+        batch_size=config.kafka_batch_size,
     )
-    c1 = create_feedback_consumer(model, producer, logger, c1_config)
+    c1_config = TFIDFFeedbackConsumerConfig()
+    logger.info(c1_config)
+    c1 = TFIDFFeedbackConsumer(model, producer, logger, c1_consumer_config, c1_config)
 
-    c2_config = InferenceConsumerConfig(
+    c2_consumer_config = InferenceConsumerConfig(
         kafka_bootstrap_servers=config.kafka_bootstrap_servers,
         kafka_consumer_topic=config.kafka_article_consumer_topic,
         kafka_consumer_group=config.kafka_article_consumer_group,
+        batch_size=config.kafka_batch_size,
     )
-    c2 = create_article_consumer(model, producer, logger, c2_config)
-
+    c2_config = TFIDFArticleConsumerConfig()
+    logger.info(c2_config)
+    c2 = TFIDFArticleConsumer(model, producer, logger, c2_consumer_config, c2_config)
+    # c1.bootstrap() no more bootstrap
+    c2.bootstrap()
     c1.run()
     c2.run()
 

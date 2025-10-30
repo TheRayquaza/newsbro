@@ -1,6 +1,8 @@
 version: "3.8"
 
 services:
+
+  # KAFKA SERVICE
   redpanda:
     container_name: redpanda
     image: docker.redpanda.com/redpandadata/redpanda:v23.1.7
@@ -12,6 +14,7 @@ services:
       - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
       - --pandaproxy-addr 0.0.0.0:8082
       - --advertise-pandaproxy-addr localhost:8082
+      - --memory 512M
     ports:
       - 9092:9092
       - 9644:9644
@@ -20,22 +23,15 @@ services:
       - redpanda:/var/lib/redpanda/data
     networks:
       - data-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
-  qdrant:
-    image: qdrant/qdrant:v1.7.0
-    container_name: qdrant
-    ports:
-      - "6333:6333"
-      - "6334:6334"
-    volumes:
-      - qdrant_storage:/qdrant/storage
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1
-      interval: 5s
-      timeout: 5s
-      retries: 3
 
   console:
     container_name: console
@@ -65,13 +61,51 @@ services:
       - redpanda
     networks:
       - data-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
 
+  # QDRANT SERVICE
+  qdrant:
+    image: qdrant/qdrant:v1.8.0
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - data-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  # POSTGRES SERVICE
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: postgres
     environment:
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
+      POSTGRES_INITDB_ARGS: "-c shared_buffers=128MB -c max_connections=50"
     ports:
       - "5432:5432"
     volumes:
@@ -80,7 +114,12 @@ services:
       - data-net
     command: >
       bash -c "
-        docker-entrypoint.sh postgres &
+        docker-entrypoint.sh postgres 
+        -c shared_buffers=128MB 
+        -c max_connections=50 
+        -c work_mem=4MB 
+        -c maintenance_work_mem=64MB 
+        -c effective_cache_size=256MB &
         pid=$!;
         sleep 5;
         psql -U username -d postgres -c 'CREATE DATABASE account;';
@@ -88,9 +127,106 @@ services:
         psql -U username -d postgres -c 'CREATE DATABASE analytics;';
         wait $pid;
       "
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
+  # REDIS SERVICES
+  redis-master:
+    image: redis:alpine
+    container_name: redis-master
+    hostname: redis-master
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/master:/data
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--repl-diskless-load",
+        "on-empty-db",
+        "--replica-announce-ip",
+        "${HOST_IP}",
+        "--replica-announce-port",
+        "6379",
+        "--protected-mode",
+        "no"
+      ]
+    networks:
+      redis-net:
+        ipv4_address: 172.21.0.3
+
+  redis-slave:
+    image: redis:alpine
+    container_name: redis-slave
+    hostname: redis-slave
+    depends_on:
+      - redis-master
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./data/slave1:/data
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--replicaof",
+        "redis-master",
+        "6379",
+        "--repl-diskless-load",
+        "on-empty-db",
+        "--replica-announce-ip",
+        "${HOST_IP}",
+        "--replica-announce-port",
+        "6380",
+        "--protected-mode",
+        "no"
+      ]
+    networks:
+      redis-net:
+        ipv4_address: 172.21.0.4
+
+  redis-sentinel:
+    image: redis:alpine
+    container_name: redis-sentinel
+    hostname: redis-sentinel
+    depends_on:
+      - redis-master
+    ports:
+      - "26379:26379"
+    command: >
+      sh -c 'echo "bind 0.0.0.0" > /etc/sentinel.conf &&
+        echo "sentinel monitor mymaster redis-master 6379 2" >> /etc/sentinel.conf &&
+        echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf &&
+        echo "sentinel down-after-milliseconds mymaster 10000" >> /etc/sentinel.conf &&
+        echo "sentinel failover-timeout mymaster 10000" >> /etc/sentinel.conf &&
+        echo "sentinel parallel-syncs mymaster 1" >> /etc/sentinel.conf &&
+        redis-sentinel /etc/sentinel.conf'
+    networks:
+      redis-data-net: {}
+      redis-net:
+        ipv4_address: 172.21.0.6
+
+  redisinsight:
+    image: redislabs/redisinsight:2.70
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    networks:
+      - redis-data-net
+
+  # APP SERVICES
   repo-account:
     image: ghcr.io/therayquaza/newsbro/repo-account:repo-account-v1.2.7
+    container_name: repo-account
     environment:
       DATABASE_HOST: postgres:5432
       PORT: 8081
@@ -111,7 +247,7 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 3
     restart: always
     ports:
       - "8081:8081"
@@ -120,9 +256,18 @@ services:
       - redpanda
     networks:
       - data-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 
   repo-article:
     image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.4.2
+    container_name: repo-article
     env_file:
       - repo-article/.env
     environment:
@@ -140,7 +285,7 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:8081/health || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 3
     restart: always
     ports:
       - "8082:8082"
@@ -149,11 +294,27 @@ services:
       - redpanda
     networks:
       - data-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 
 volumes:
   redpanda:
   postgres_data:
   qdrant_storage:
 
+
 networks:
   data-net:
+    driver: bridge
+  redis-data-net:
+  redis-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16

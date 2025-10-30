@@ -33,6 +33,7 @@ class RSSAggregate(BaseModel):
 
 class InferenceCommand(BaseModel):
     user_id: int
-    model_name: str
+    model: str
     article: ArticleAggregate
+    score: float
     date: datetime
