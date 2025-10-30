@@ -118,7 +118,7 @@ func (s *FeedService) UpdateFeedZSET(req *dto.UpdateFeedRequest) error {
 	articleContentKey := fmt.Sprintf("article:%d", req.Article.ID)
 
 	if s.hasFeedback(ctx, req.UserID, req.Article.ID) {
-		log.Printf("Skipping article %d due to feedback from user %d", req.Article.ID, req.UserID)
+		log.Printf("Skipping article ID %d for user ID %d due to negative feedback", req.Article.ID, req.UserID)
 		return nil
 	}
 
@@ -147,21 +147,24 @@ func (s *FeedService) UpdateFeedZSET(req *dto.UpdateFeedRequest) error {
 	return nil
 }
 
+/*
 func (s *FeedService) RemoveArticleZSET(userID, articleID uint, model string) error {
 	ctx := context.Background()
 	if model == "" {
 		model = s.defaultModel
 	}
 	key := fmt.Sprintf("feed:%d:%s", userID, model)
-	articleIDStr := fmt.Sprintf("%d", articleID)
 
-	if err := s.RDB.ZRem(ctx, key, articleIDStr).Err(); err != nil {
+	member := encodeZSetMember(articleID, 0, time.Time{})
+
+	if err := s.RDB.ZRem(ctx, key).Err(); err != nil {
 		return fmt.Errorf("failed to remove article ID %d from ZSET %s: %w", articleID, key, err)
 	}
 
 	log.Printf("Successfully removed article ID %d from feed %s", articleID, key)
 	return nil
 }
+*/
 
 func (s *FeedService) AddNewFeedback(userID uint, articleID uint) error {
 	ctx := context.Background()
