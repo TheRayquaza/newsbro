@@ -38,6 +38,7 @@
               black
               bandit
               radon
+              redis
             ]);
         in
           pkgs.mkShell {

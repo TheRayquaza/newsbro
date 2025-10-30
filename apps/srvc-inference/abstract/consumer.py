@@ -1,8 +1,9 @@
+import abc
 import json
 import logging
 import os
 from threading import Thread
-from typing import Any, Dict
+from typing import Any, List
 
 import pydantic
 from kafka import KafkaConsumer
@@ -22,19 +23,17 @@ class InferenceConsumerConfig(pydantic.BaseModel):
     batch_interval: int = int(os.getenv("BATCH_INTERVAL", "2"))
 
 
-class InferenceConsumer:
+class InferenceConsumer(abc.ABC):
     def __init__(
         self,
         logger: logging.Logger,
         consumer_config: InferenceConsumerConfig,
-        config: dict,
-        health_hook=None,
-        process_hook=None,
+        dict_to_msg=None,
         *args,
         **kwargs,
     ):
-        self.config = config
         self.logger = logger
+        self.dict_to_msg = dict_to_msg
         self.consumer = KafkaConsumer(
             consumer_config.kafka_consumer_topic,
             bootstrap_servers=consumer_config.kafka_bootstrap_servers,
@@ -43,27 +42,28 @@ class InferenceConsumer:
             group_id=consumer_config.kafka_consumer_group,
             value_deserializer=lambda x: json.loads(x.decode("utf-8")),
         )
-        self.state: Dict[str, Any] = {}
         self.consumer_config = consumer_config
-        self.health_hook = health_hook if health_hook else (lambda: True)
-        self.process_hook = process_hook if process_hook else (lambda batch: None)
 
     def health(self) -> bool:
-        if not self.health_hook(): # TODO
-            return False
         topics = self.consumer.topics()
         if not topics:
             return False
         return True
+
+    @abc.abstractmethod
+    def process(self, batch: List[Any]):
+        pass
 
     def run_impl(self) -> None:
         batch = []
         try:
             for message in self.consumer:
                 article = message.value
+                if self.dict_to_msg:
+                    article = self.dict_to_msg(article)
                 batch.append(article)
                 if len(batch) >= self.consumer_config.batch_size:
-                    Thread(target=self.process_hook, args=(batch,), daemon=True).start()
+                    Thread(target=self.process, args=(batch,), daemon=True).start()
                     batch = []
         except Exception as e:
             self.logger.error(f"Error in consumer loop: {e}", exc_info=True)

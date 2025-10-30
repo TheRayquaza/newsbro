@@ -12,6 +12,7 @@ class Config(pydantic.BaseModel):
     kafka_bootstrap_servers: str = os.getenv(
         "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
     )
+    kafka_batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "50"))
     ## Producer
     kafka_producer_topic: str = os.getenv("KAFKA_PRODUCER_TOPIC", "inference-topic")
     ## Article Consumer
@@ -34,8 +35,8 @@ class Config(pydantic.BaseModel):
 
     # Model
     model_uri: str = os.getenv("MODEL_URI", "")
+    model_name: str = os.getenv("MODEL_NAME", "tfidf")
     tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
-    top_n_recommendations: int = int(os.getenv("TOP_N_RECOMMENDATIONS", "10"))
 
     # API
     api_port: int = int(os.getenv("API_PORT", "8000"))
