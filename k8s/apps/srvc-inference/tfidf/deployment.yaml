@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: srvc-inference-tfidf
+  namespace: apps
+  labels:
+    app: srvc-inference-tfidf
+    type: backends
+    model: tfidf
+spec:
+  # replicas: 1 # managed by hpa
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: srvc-inference-tfidf
+  template:
+    metadata:
+      labels:
+        app: srvc-inference-tfidf
+        monitoring: "enabled"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090" 
+    spec:
+      imagePullSecrets:
+        - name: pull-secret
+      containers:
+        - name: srvc-inference-tfidf
+          image: ghcr.io/therayquaza/newsbro/srvc-inference-tfidf:srvc-inference-tfidf-v1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9090
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: srvc-inference-tfidf-config
+            - configMapRef:
+                name: postgres-config
+            - configMapRef:
+                name: kafka-config
+            - configMapRef:
+                name: redis-config
+            - configMapRef:
+                name: qdrant-config
+            - configMapRef:
+                name: oidc-config
+            - secretRef:
+                name: srvc-inference-tfidf-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "125m"
+            limits:
+              memory: "1Gi"
+              cpu: "250m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10

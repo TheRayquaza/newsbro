@@ -1,4 +1,4 @@
-import pickle # nosec B403
+import pickle  # nosec B403
 import sys
 
 from sklearn.metrics.pairwise import cosine_similarity
@@ -7,7 +7,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 def load_model(model_path: str):
     """Load a saved TF-IDF + SVD pipeline model from a pickle file."""
     with open(model_path, "rb") as f:
-        model = pickle.load(f)  # nosec B301 - safe here, model file is locally generated and trusted
+        model = pickle.load(
+            f
+        )  # nosec B301 - safe here, model file is locally generated and trusted
     print(f"✅ Model loaded from {model_path}")
     return model
 

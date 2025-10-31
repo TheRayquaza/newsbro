@@ -9,22 +9,22 @@ class Config(pydantic.BaseModel):
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
     # Kafka
-    kafka_bootstrap_servers: str = os.getenv(
-        "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
-    )
+    kafka_bootstrap_servers: str = os.getenv("KAFKA_BROKERS", "localhost:9092")
     kafka_batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "50"))
     ## Producer
-    kafka_producer_topic: str = os.getenv("KAFKA_PRODUCER_TOPIC", "inference-command")
+    kafka_producer_topic: str = os.getenv(
+        "KAFKA_INFERENCE_COMMAND_TOPIC", "inference-command"
+    )
     ## Article Consumer
     kafka_article_consumer_topic: str = os.getenv(
-        "KAFKA_ARTICLE_CONSUMER_TOPIC", "articles-aggregate"
+        "KAFKA_ARTICLE_AGGREGATE_TOPIC", "articles-aggregate"
     )
     kafka_article_consumer_group: str = os.getenv(
         "KAFKA_ARTICLE_CONSUMER_GROUP", "article-tfidf-group"
     )
     ## Feedback Consumer
     kafka_feedback_consumer_topic: str = os.getenv(
-        "KAFKA_FEEDBACK_CONSUMER_TOPIC", "feedback-aggregate"
+        "KAFKA_FEEDBACK_AGGREGATE_TOPIC", "feedback-aggregate"
     )
     kafka_feedback_consumer_group: str = os.getenv(
         "KAFKA_FEEDBACK_CONSUMER_GROUP", "feedback-tfidf-group"

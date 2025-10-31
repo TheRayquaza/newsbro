@@ -1,5 +1,5 @@
 import os
-import pickle # nosec B403
+import pickle  # nosec B403
 from typing import Any, Optional
 
 import mlflow
@@ -41,7 +41,9 @@ class MlflowModel:
             raise FileNotFoundError(f"Pickle model file not found at {model_file}")
 
         with open(model_file, "rb") as f:
-            model = pickle.load(f) # nosec B301 - safe here, model file is locally generated and trusted
+            model = pickle.load(
+                f
+            )  # nosec B301 - safe here, model file is locally generated and trusted
         return model
 
     def _auto_load_model(self, model_uri: str) -> Any:

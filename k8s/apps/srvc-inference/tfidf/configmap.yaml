@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: srvc-inference-tfidf-config
+  namespace: apps
+data:
+  # Application
+  LOG_LEVEL: INFO
+  API_HOST: "0.0.0.0"
+  API_PORT: "8080"
+  ENVIRONMENT: production
+  # Model
+  MODEL_NAME: tfidf
+  MODEL_URI: s3://mlflow/11/models/m-d8a417b8607340ccaee01853145f9231/artifacts
+  MODEL_SIMILARITY_THRESHOLD: "0.5"
+  ARTICLE_VECTOR_FEATURES: "100" # check the model URI
+  TOP_K_ARTICLES: "10"
+  MLFLOW_S3_ENDPOINT_URL: http://minio.minio.svc.cluster.local:9000
+  MLFLOW_TRACKING_URI: http://mlflow.mlflow.svc.cluster.local:5000
+  # Misc
+  FEEDBACK_RETENTION_DAYS: "30"
+  # Kafka
+  KAFKA_BATCH_SIZE: "64"
+  KAFKA_BATCH_INTERVAL: "10" # in seconds
+  KAFKA_ARTICLE_CONSUMER_GROUP: srvc-inference-tfidf-article-group
+  KAFKA_FEEDBACK_CONSUMER_GROUP: srvc-inference-tfidf-feedback-group
+  # Redis
+  REDIS_SCAN_BATCH_SIZE: "100"
+  REDIS_USER_PROFILE_KEY: user_profile
+  # Qdrant
+  QDRANT_ARTICLES_COLLECTION: articles # you may want to change this if model dim changes
+
