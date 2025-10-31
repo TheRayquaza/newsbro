@@ -36,7 +36,7 @@ configMapGenerator:
       - DATABASE_HOST=postgres-cluster-rw.postgres.svc.cluster.local:5432
       - DATABASE_RO_HOST=postgres-cluster-ro.postgres.svc.cluster.local:5432
 
-  - name: qdrang-config
+  - name: qdrant-config
     literals:
       - QDRANT_URL=http://qdrant-cluster.qdrant.svc.cluster.local:6333
       # - QDRANT_ARTICLES_COLLECTION=articles

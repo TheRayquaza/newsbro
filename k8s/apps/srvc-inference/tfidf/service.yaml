@@ -7,10 +7,10 @@ metadata:
   labels:
     app: srvc-inference-tfidf
 spec:
-    type: ClusterIP
-    selector:
-      app: srvc-inference-tfidf
-    ports:
-      - protocol: TCP
-        port: 80
-        targetPort: 8080
+  type: ClusterIP
+  selector:
+    app: srvc-inference-tfidf
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
