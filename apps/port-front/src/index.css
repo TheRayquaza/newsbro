@@ -2,24 +2,126 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Light theme (default) */
+:root {
+  color-scheme: light;
+  --text-primary: #213547;
+  --text-secondary: #888;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9f9f9;
+  --link-color: #646cff;
+  --link-hover: #747bff;
+  --button-bg: #f9f9f9;
+  --button-border-hover: #646cff;
+  --logo-glow-primary: #646cffaa;
+  --logo-glow-react: #61dafbaa;
+  --success: #10b981; /* emerald-500 */
+  --success-hover: #059669; /* emerald-600 */
+  --error: #ef4444; /* red-500 */
+  --error-hover: #dc2626; /* red-600 */
+
+  /* Navbar/Footer theme colors */
+  --nav-bg: rgba(248, 250, 252, 0.95);
+  --nav-border: rgba(59, 130, 246, 0.15);
+  --nav-shadow: rgba(59, 130, 246, 0.03);
+  --nav-text: #334155;
+  --nav-text-muted: #64748b;
+  --nav-hover-bg: rgba(226, 232, 240, 0.5);
+  --nav-active-bg: rgba(59, 130, 246, 0.08);
+  --nav-active-text: #2563eb;
+  --nav-dropdown-bg: #ffffff;
+  --nav-dropdown-border: rgba(59, 130, 246, 0.2);
+  --nav-profile-bg: rgba(241, 245, 249, 0.5);
+  --nav-profile-border: rgba(59, 130, 246, 0.15);
+  --nav-gradient-from: #3b82f6;
+  --nav-gradient-to: #06b6d4;
+
+  /* Search/Form theme colors */
+  --search-container-bg: rgba(241, 245, 249, 0.6);
+  --search-input-bg: rgba(248, 250, 252, 0.5);
+  --search-input-border: rgba(59, 130, 246, 0.3);
+  --search-input-text: #334155;
+  --search-input-placeholder: #94a3b8;
+  --search-input-focus-ring: rgba(59, 130, 246, 0.5);
+  --search-button-inactive-bg: rgba(241, 245, 249, 0.5);
+  --search-button-inactive-text: #475569;
+  --search-button-inactive-border: rgba(59, 130, 246, 0.2);
+  --search-button-active-bg: rgba(59, 130, 246, 0.2);
+  --search-button-active-text: #2563eb;
+  --search-button-active-border: rgba(59, 130, 246, 0.3);
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --text-primary: rgba(255, 255, 255, 0.87);
+    --text-secondary: #888;
+    --bg-primary: #242424;
+    --bg-secondary: #1a1a1a;
+    --link-color: #646cff;
+    --link-hover: #535bf2;
+    --button-bg: #1a1a1a;
+    --button-border-hover: #646cff;
+    --logo-glow-primary: #646cffaa;
+    --logo-glow-react: #61dafbaa;
+    --success: #34d399; /* emerald-400 */
+    --success-hover: #10b981; /* emerald-500 */
+    --error: #f87171; /* red-400 */
+    --error-hover: #ef4444; /* red-500 */
+
+    /* Navbar/Footer theme colors */
+    --nav-bg: rgba(15, 23, 42, 0.95);
+    --nav-border: rgba(59, 130, 246, 0.2);
+    --nav-shadow: rgba(59, 130, 246, 0.05);
+    --nav-text: #e2e8f0;
+    --nav-text-muted: #64748b;
+    --nav-hover-bg: rgba(30, 41, 59, 0.5);
+    --nav-active-bg: rgba(59, 130, 246, 0.1);
+    --nav-active-text: #60a5fa;
+    --nav-dropdown-bg: #0f172a;
+    --nav-dropdown-border: rgba(59, 130, 246, 0.2);
+    --nav-profile-bg: rgba(30, 41, 59, 0.5);
+    --nav-profile-border: rgba(59, 130, 246, 0.2);
+    --nav-gradient-from: #60a5fa;
+    --nav-gradient-to: #22d3ee;
+
+    /* Search/Form theme colors */
+    --search-container-bg: rgba(15, 23, 42, 0.6);
+    --search-input-bg: rgba(30, 41, 59, 0.5);
+    --search-input-border: rgba(59, 130, 246, 0.3);
+    --search-input-text: #e2e8f0;
+    --search-input-placeholder: #64748b;
+    --search-input-focus-ring: rgba(59, 130, 246, 0.5);
+    --search-button-inactive-bg: rgba(30, 41, 59, 0.5);
+    --search-button-inactive-text: #cbd5e1;
+    --search-button-inactive-border: rgba(59, 130, 246, 0.2);
+    --search-button-active-bg: rgba(59, 130, 246, 0.2);
+    --search-button-active-text: #60a5fa;
+    --search-button-active-border: rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Apply theme variables */
+:root {
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--link-color);
   text-decoration: inherit;
 }
+
 a:hover {
-  color: #535bf2;
+  color: var(--link-hover);
 }
 
 body {
@@ -42,29 +144,19 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--button-bg);
   cursor: pointer;
   transition: border-color 0.25s;
+  color: var(--text-primary);
 }
+
 button:hover {
-  border-color: #646cff;
+  border-color: var(--button-border-hover);
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }
 
 @import "tailwindcss";

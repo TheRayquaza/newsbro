@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/v1/users': {
-        target: 'http://localhost:8081',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: true,
         cookieDomainRewrite: 'localhost',
@@ -29,7 +29,7 @@ export default defineConfig({
         },
       },
       '/api/v1/auth': {
-        target: 'http://localhost:8081',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: true,
         cookieDomainRewrite: 'localhost',

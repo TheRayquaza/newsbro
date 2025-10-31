@@ -30,7 +30,11 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
   ];
 
   return (
-    <nav className="z-50 bg-slate-900/95 backdrop-blur-xl border-b border-blue-500/20 shadow-lg shadow-blue-500/5">
+    <nav style={{
+      backgroundColor: 'var(--nav-bg)',
+      borderBottom: '1px solid var(--nav-border)',
+      boxShadow: '0 10px 15px -3px var(--nav-shadow)',
+    }} className="z-50 backdrop-blur-xl">
       <div className="px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex justify-between items-center h-16 max-w-7xl mx-auto">
           <div
@@ -38,14 +42,19 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
             onClick={() => navigate("/")}
           >
             <div className="relative">
-              <FileText className="w-8 h-8 text-blue-400 group-hover:text-cyan-400 transition-colors" />
+              <FileText style={{ color: 'var(--nav-active-text)' }} className="w-8 h-8 group-hover:opacity-80 transition-opacity" />
               <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+              <span style={{
+                background: `linear-gradient(to right, var(--nav-gradient-from), var(--nav-gradient-to))`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }} className="text-2xl font-bold">
                 NewsBro
               </span>
-              <span className="text-[10px] text-slate-500 -mt-1">Stay Informed</span>
+              <span style={{ color: 'var(--nav-text-muted)' }} className="text-[10px] -mt-1">Stay Informed</span>
             </div>
           </div>
 
@@ -58,11 +67,17 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`relative flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                    active
-                      ? "text-blue-400 bg-blue-500/10"
-                      : "text-slate-300 hover:text-blue-400 hover:bg-slate-800/50"
-                  } ${item.highlight ? "group" : ""}`}
+                  style={{
+                    color: active ? 'var(--nav-active-text)' : 'var(--nav-text)',
+                    backgroundColor: active ? 'var(--nav-active-bg)' : 'transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) e.currentTarget.style.backgroundColor = 'var(--nav-hover-bg)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  className={`relative flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${item.highlight ? "group" : ""}`}
                 >
                   <Icon className={`w-4 h-4 ${item.highlight && !active ? "group-hover:animate-pulse" : ""}`} />
                   {item.label}
@@ -70,7 +85,9 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
                     <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
                   )}
                   {active && (
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"></div>
+                    <div style={{
+                      background: `linear-gradient(to right, var(--nav-gradient-from), var(--nav-gradient-to))`,
+                    }} className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"></div>
                   )}
                 </button>
               );
@@ -82,24 +99,33 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
             <div className="relative">
               <button
                 onClick={() => setProfileDropdown(!profileDropdown)}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg bg-slate-800/50 border border-blue-500/20 hover:border-blue-500/40 transition-all group"
+                style={{
+                  backgroundColor: 'var(--nav-profile-bg)',
+                  borderColor: 'var(--nav-profile-border)',
+                }}
+                className="flex items-center gap-3 px-4 py-2 rounded-lg border hover:opacity-90 transition-all group"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
+                <div style={{
+                  background: `linear-gradient(to bottom right, var(--nav-gradient-from), var(--nav-gradient-to))`,
+                }} className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm">
                   {user?.username?.[0]?.toUpperCase() || "U"}
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium text-slate-200">{user?.username}</span>
-                  <span className="text-xs text-slate-500">{user?.email}</span>
+                  <span style={{ color: 'var(--nav-text)' }} className="text-sm font-medium">{user?.username}</span>
+                  <span style={{ color: 'var(--nav-text-muted)' }} className="text-xs">{user?.email}</span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${profileDropdown ? "rotate-180" : ""}`} />
+                <ChevronDown style={{ color: 'var(--nav-text-muted)' }} className={`w-4 h-4 transition-transform ${profileDropdown ? "rotate-180" : ""}`} />
               </button>
 
               {/* Dropdown */}
               {profileDropdown && (
-                <div className="absolute right-0 mt-2 w-56 bg-slate-900 border border-blue-500/20 rounded-xl shadow-xl shadow-black/50 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                  <div className="p-4 border-b border-blue-500/20">
-                    <p className="text-sm font-medium text-slate-200">{user?.username}</p>
-                    <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                <div style={{
+                  backgroundColor: 'var(--nav-dropdown-bg)',
+                  borderColor: 'var(--nav-dropdown-border)',
+                }} className="absolute right-0 mt-2 w-56 border rounded-xl shadow-xl shadow-black/50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                  <div style={{ borderColor: 'var(--nav-dropdown-border)' }} className="p-4 border-b">
+                    <p style={{ color: 'var(--nav-text)' }} className="text-sm font-medium">{user?.username}</p>
+                    <p style={{ color: 'var(--nav-text-muted)' }} className="text-xs truncate">{user?.email}</p>
                   </div>
                   <div className="py-2">
                     <button
@@ -107,7 +133,16 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
                         setProfileDropdown(false);
                         navigate("/settings");
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 transition"
+                      style={{ color: 'var(--nav-text)' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--nav-hover-bg)';
+                        e.currentTarget.style.color = 'var(--nav-active-text)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = 'var(--nav-text)';
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 transition"
                     >
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
@@ -131,7 +166,16 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden p-2 rounded-lg text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 transition"
+            style={{ color: 'var(--nav-text)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--nav-hover-bg)';
+              e.currentTarget.style.color = 'var(--nav-active-text)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--nav-text)';
+            }}
+            className="lg:hidden p-2 rounded-lg transition"
           >
             {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -140,16 +184,24 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="lg:hidden bg-slate-900/98 backdrop-blur-xl border-t border-blue-500/20 animate-in slide-in-from-top">
+        <div style={{
+          backgroundColor: 'var(--nav-bg)',
+          borderTop: '1px solid var(--nav-border)',
+        }} className="lg:hidden backdrop-blur-xl animate-in slide-in-from-top">
           <div className="px-4 py-4 space-y-2">
             {/* User Info */}
-            <div className="flex items-center gap-3 p-4 mb-4 bg-slate-800/50 rounded-xl border border-blue-500/20">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">
+            <div style={{
+              backgroundColor: 'var(--nav-profile-bg)',
+              borderColor: 'var(--nav-profile-border)',
+            }} className="flex items-center gap-3 p-4 mb-4 rounded-xl border">
+              <div style={{
+                background: `linear-gradient(to bottom right, var(--nav-gradient-from), var(--nav-gradient-to))`,
+              }} className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold">
                 {user?.username?.[0]?.toUpperCase() || "U"}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-slate-200">{user?.username}</span>
-                <span className="text-xs text-slate-500 truncate">{user?.email}</span>
+                <span style={{ color: 'var(--nav-text)' }} className="text-sm font-medium">{user?.username}</span>
+                <span style={{ color: 'var(--nav-text-muted)' }} className="text-xs truncate">{user?.email}</span>
               </div>
             </div>
 
@@ -164,11 +216,12 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
                     setMenuOpen(false);
                     navigate(item.path);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                    active
-                      ? "text-blue-400 bg-blue-500/10 border border-blue-500/30"
-                      : "text-slate-300 hover:text-blue-400 hover:bg-slate-800/50"
-                  }`}
+                  style={{
+                    color: active ? 'var(--nav-active-text)' : 'var(--nav-text)',
+                    backgroundColor: active ? 'var(--nav-active-bg)' : 'transparent',
+                    borderColor: active ? 'var(--nav-profile-border)' : 'transparent',
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${active ? 'border' : ''}`}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{item.label}</span>
@@ -185,7 +238,16 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
                 setMenuOpen(false);
                 navigate("/settings");
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 transition font-medium"
+              style={{ color: 'var(--nav-text)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--nav-hover-bg)';
+                e.currentTarget.style.color = 'var(--nav-active-text)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--nav-text)';
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium"
             >
               <Settings className="w-5 h-5" />
               <span>Settings</span>
@@ -197,7 +259,8 @@ export const Navbar = ({ menuOpen, setMenuOpen, handleLogout, user }) => {
                 setMenuOpen(false);
                 handleLogout();
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition font-medium border-t border-blue-500/20 mt-4 pt-4"
+              style={{ borderColor: 'var(--nav-border)' }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition font-medium border-t mt-4 pt-4"
             >
               <LogOut className="w-5 h-5" />
               <span>Logout</span>
