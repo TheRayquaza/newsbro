@@ -8,8 +8,11 @@ on:
     tags:
       - 'repo-article-v*.*.*'
 
+permissions:
+  write-all
+
 jobs:
-  ci:
+  repo-article:
     uses: ./.github/workflows/go-svc-workflow.yaml
     with:
       app_name: repo-article

@@ -7,8 +7,11 @@ on:
     tags:
       - "srvc-scrapping-v*.*.*"
 
+permissions:
+  write-all
+
 jobs:
-  ci:
+  srvc-scrapping:
     uses: ./.github/workflows/go-svc-workflow.yaml
     with:
       app_name: srvc-scrapping

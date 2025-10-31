@@ -8,6 +8,9 @@ on:
     tags:
       - 'repo-feed-v*.*.*'
 
+permissions:
+  write-all
+
 jobs:
   repo-feed:
     uses: ./.github/workflows/go-svc-workflow.yaml

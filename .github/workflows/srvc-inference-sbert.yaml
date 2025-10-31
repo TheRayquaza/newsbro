@@ -12,7 +12,7 @@ permissions:
   write-all
 
 jobs:
-  call-template:
+  srvc-inference-sbert:
     uses: ./.github/workflows/python-svc-workflow.yaml
     with:
       service_name: srvc-inference-sbert
