@@ -7,8 +7,8 @@ data:
   # Application
   GIN_MODE: release
   PORT: "8080"
-  ENVIRONMENT: "prod"
+  ENVIRONMENT: prod
   # Postgres
-  DATABASE_NAME: "srvc-scrapping"
+  DATABASE_NAME: srvc-scrapping
   # Kafka
-  KAFKA_GROUP_ID: "srvc-scrapping-group"
+  KAFKA_GROUP_ID: srvc-scrapping-group
