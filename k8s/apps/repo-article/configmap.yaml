@@ -4,14 +4,11 @@ metadata:
   name: repo-article-config
   namespace: apps
 data:
-  DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
-  DATABASE_NAME: "repo-article"
+  # Application
   GIN_MODE: release
-  LOGIN_REDIRECT_URL: "https://app.newsbro.cc/login"
   PORT: "8080"
-  KAFKA_BROKERS: "kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
-  KAFKA_ARTICLE_COMMAND_TOPIC: "new-articles-command"
-  KAFKA_ARTICLE_AGGREGATE_TOPIC: "article-aggregate"
-  KAFKA_FEEDBACK_AGGREGATE_TOPIC: "feedback-aggregate"
-  KAFKA_RSS_AGGREGATE_TOPIC: "rss-aggregate"
+  ENVIRONMENT: "prod"
+  # Postgres
+  DATABASE_NAME: "repo-article"
+  # Kafka
   KAFKA_GROUP_ID: "repo-article-group"

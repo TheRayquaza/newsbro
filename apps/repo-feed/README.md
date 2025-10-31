@@ -80,7 +80,7 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 | `REDIS_DB`                    | Redis database index.                                    | `0`                                      |
 | `KAFKA_BROKERS`               | Comma-separated list of Kafka broker addresses.          | `localhost:9092`                         |
 | `KAFKA_INFERENCE_COMMAND_TOPIC` | Kafka topic for sending inference commands.            | `inference-commands`                     |
-| `KAFKA_FEEDBACK_TOPIC`        | Kafka topic for receiving user feedback.                 | `user-feedback`                          |
+| `KAFKA_FEEDBACK_AGGREGATE_TOPIC`| Kafka topic for receiving user feedback.               | `feedback-aggregate`                     |
 | `KAFKA_GROUP_ID`              | Consumer group ID for inference commands.                | `repo-feed-group`                        |
 | `KAFKA_FEEDBACK_GROUP_ID`     | Consumer group ID for user feedback.                     | `repo-feed-feedback-group`               |
 | `DEFAULT_MODEL`               | Default recommendation model to use.                     | `tfidf`                                  |

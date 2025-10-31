@@ -39,10 +39,14 @@ spec:
           envFrom:
             - configMapRef:
                 name: repo-account-config
-            - secretRef:
-                name: oidc-secrets
+            - configMapRef:
+                name: postgres-config
+            - configMapRef:
+                name: oidc-config
             - secretRef:
                 name: repo-account-secrets
+            - secretRef:
+                name: oidc-secrets
           resources:
             requests:
               memory: "256Mi"

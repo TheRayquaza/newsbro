@@ -4,11 +4,11 @@ metadata:
   name: srvc-scrapping-config
   namespace: apps
 data:
-  DATABASE_HOST: "postgres-cluster-rw.postgres.svc.cluster.local:5432"
-  DATABASE_NAME: "srvc-scrapping"
+  # Application
   GIN_MODE: release
   PORT: "8080"
-  KAFKA_BROKERS: "kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
-  KAFKA_ARTICLE_COMMAND_TOPIC: "new-articles-command"
-  KAFKA_RSS_AGGREGATE_TOPIC: "rss-aggregate"
+  ENVIRONMENT: "prod"
+  # Postgres
+  DATABASE_NAME: "srvc-scrapping"
+  # Kafka
   KAFKA_GROUP_ID: "srvc-scrapping-group"

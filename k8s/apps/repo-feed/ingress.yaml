@@ -1,0 +1,64 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit-repo-feed
+  namespace: apps
+spec:
+  rateLimit:
+    average: 100
+    period: 1m
+    burst: 50
+
+---
+# feed.localhost
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: repo-feed-localhost
+  namespace: apps
+  labels:
+    app: repo-feed
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`feed.localhost`) && PathPrefix(`/api/v1/feed`)
+      kind: Rule
+      services:
+        - name: repo-feed
+          port: 80
+      middlewares:
+        - name: rate-limit-repo-feed
+    - match: Host(`feed.localhost`) && PathPrefix(`/swagger`)
+      kind: Rule
+      services:
+        - name: repo-feed
+          port: 80
+      middlewares:
+        - name: rate-limit-repo-feed
+
+---
+# feed.newsbro.cc
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: repo-feed
+  namespace: apps
+  labels:
+    app: repo-feed
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`feed.newsbro.cc`) && PathPrefix(`/api/v1/feed`)
+      kind: Rule
+      services:
+        - name: repo-feed
+          port: 80
+      middlewares:
+        - name: rate-limit-repo-feed
+  tls:
+    secretName: newsbro-wildcard-tls

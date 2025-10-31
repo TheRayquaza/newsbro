@@ -6,8 +6,35 @@ resources:
   - namespace.yaml
   - repo-account
   - repo-article
+  - repo-feed
   - port-front
   - srvc-scrapping
   - pull-secrets.yaml
   - certificate.yaml
   - oidc-secrets.yaml
+
+configMapGenerator:
+  - name: redis-config
+    literals:
+      - REDIS_SENTINELS=redis-cluster-sentinel.redis.svc.cluster.local:26379
+      - REDIS_MASTER_NAME=mymaster
+      - REDIS_DB=0
+
+  - name: kafka-config
+    literals:
+      - KAFKA_BROKERS=kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
+      - KAFKA_ARTICLE_COMMAND_TOPIC=new-articles-command
+      - KAFKA_ARTICLE_AGGREGATE_TOPIC=article-aggregate
+      - KAFKA_FEEDBACK_AGGREGATE_TOPIC=feedback-aggregate
+      - KAFKA_RSS_AGGREGATE_TOPIC=rss-aggregate
+  
+  - name: postgres-config
+    literals:
+      - DATABASE_HOST=postgres-cluster-rw.postgres.svc.cluster.local:5432
+      - DATABASE_RO_HOST=postgres-cluster-ro.postgres.svc.cluster.local:5432
+
+  - name: oidc-config
+    literals:
+      - LOGIN_REDIRECT_URL=https://app.newsbro.cc/login
+      - OIDC_REDIRECT_FRONTEND_URL=https://app.newsbro.cc
+      - OIDC_REDIRECT_URL=https://account.newsbro.cc/complete/epita

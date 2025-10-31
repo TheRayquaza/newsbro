@@ -27,6 +27,10 @@ spec:
               envFrom:
                 - configMapRef:
                     name: srvc-scrapping-config
+                - configMapRef:
+                    name: kafka-config
+                - configMapRef:
+                    name: postgres-config
                 - secretRef:
                     name: srvc-scrapping-secrets
               resources:
