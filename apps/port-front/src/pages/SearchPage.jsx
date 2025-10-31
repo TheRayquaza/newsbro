@@ -136,7 +136,13 @@ export default function DeepSearchPage() {
                 </div>
 
                 {/* Search Bar */}
-                <div className="mb-6 bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-6">
+                <div
+                    style={{
+                        backgroundColor: "var(--search-container-bg)",
+                        borderColor: "var(--nav-border)",
+                    }}
+                    className="mb-6 backdrop-blur-xl rounded-2xl border p-6"
+                >
                     <div className="flex flex-col lg:flex-row gap-4">
                         <div className="flex-1 relative">
                             <input
@@ -145,16 +151,39 @@ export default function DeepSearchPage() {
                                 onChange={(e) => setSearchText(e.target.value)}
                                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                                 placeholder="Search articles by title, abstract, or keywords..."
-                                className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-blue-500/30 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                style={{
+                                    backgroundColor: "var(--search-input-bg)",
+                                    borderColor: "var(--search-input-border)",
+                                    color: "var(--search-input-text)",
+                                }}
+                                className="w-full pl-12 pr-4 py-3 border rounded-lg placeholder:text-[var(--search-input-placeholder)] focus:outline-none focus:ring-2 focus:ring-[var(--search-input-focus-ring)]"
                             />
                         </div>
 
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${showFilters
-                                    ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-                                    : "bg-slate-800/50 text-slate-300 border border-blue-500/20 hover:border-blue-500/40"
-                                }`}
+                            style={{
+                                backgroundColor: showFilters
+                                    ? "var(--search-button-active-bg)"
+                                    : "var(--search-button-inactive-bg)",
+                                color: showFilters
+                                    ? "var(--search-button-active-text)"
+                                    : "var(--search-button-inactive-text)",
+                                borderColor: showFilters
+                                    ? "var(--search-button-active-border)"
+                                    : "var(--search-button-inactive-border)",
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!showFilters) {
+                                    e.currentTarget.style.borderColor = "var(--search-button-active-border)";
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!showFilters) {
+                                    e.currentTarget.style.borderColor = "var(--search-button-inactive-border)";
+                                }
+                            }}
+                            className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all border"
                         >
                             <Filter className="w-5 h-5" />
                             Filters
@@ -163,7 +192,19 @@ export default function DeepSearchPage() {
                         <button
                             onClick={() => handleSearch(0)}
                             disabled={loading}
-                            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50"
+                            style={{
+                                background: `linear-gradient(to right, var(--nav-gradient-from), var(--nav-gradient-to))`,
+                                boxShadow: "0 10px 15px -3px rgba(59, 130, 246, 0.25)",
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!loading) {
+                                    e.currentTarget.style.filter = "brightness(1.1)";
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.filter = "brightness(1)";
+                            }}
+                            className="flex items-center gap-2 px-8 py-3 text-white font-semibold rounded-lg transition-all disabled:opacity-50"
                         >
                             {loading ? (
                                 <>
@@ -180,13 +221,26 @@ export default function DeepSearchPage() {
                     </div>
 
                     {showFilters && (
-                        <div className="mt-6 pt-6 border-t border-blue-500/20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div
+                            style={{ borderColor: "var(--nav-border)" }}
+                            className="mt-6 pt-6 border-t grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3"
+                        >
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Category</label>
+                                <label
+                                    style={{ color: "var(--search-input-text)" }}
+                                    className="block text-sm font-medium mb-2"
+                                >
+                                    Category
+                                </label>
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full px-4 py-2 bg-slate-800/50 border border-blue-500/30 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    style={{
+                                        backgroundColor: "var(--search-input-bg)",
+                                        borderColor: "var(--search-input-border)",
+                                        color: "var(--search-input-text)",
+                                    }}
+                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--search-input-focus-ring)]"
                                 >
                                     <option value="">All Categories</option>
                                     {categories.map((cat) => (
@@ -199,11 +253,21 @@ export default function DeepSearchPage() {
 
                             {selectedCategory && (
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">Subcategory</label>
+                                    <label
+                                        style={{ color: "var(--search-input-text)" }}
+                                        className="block text-sm font-medium mb-2"
+                                    >
+                                        Subcategory
+                                    </label>
                                     <select
                                         value={selectedSubcategory}
                                         onChange={(e) => setSelectedSubcategory(e.target.value)}
-                                        className="w-full px-4 py-2 bg-slate-800/50 border border-blue-500/30 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                        style={{
+                                            backgroundColor: "var(--search-input-bg)",
+                                            borderColor: "var(--search-input-border)",
+                                            color: "var(--search-input-text)",
+                                        }}
+                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--search-input-focus-ring)]"
                                     >
                                         <option value="">All Subcategories</option>
                                         {subcategories.map((sub) => (
@@ -216,7 +280,10 @@ export default function DeepSearchPage() {
                             )}
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-1">
+                                <label
+                                    style={{ color: "var(--search-input-text)" }}
+                                    className="block text-sm font-medium mb-2 flex items-center gap-1"
+                                >
                                     <Calendar className="w-4 h-4" />
                                     Begin Date
                                 </label>
@@ -224,12 +291,20 @@ export default function DeepSearchPage() {
                                     type="date"
                                     value={beginDate}
                                     onChange={(e) => setBeginDate(e.target.value)}
-                                    className="w-full px-4 py-2 bg-slate-800/50 border border-blue-500/30 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    style={{
+                                        backgroundColor: "var(--search-input-bg)",
+                                        borderColor: "var(--search-input-border)",
+                                        color: "var(--search-input-text)",
+                                    }}
+                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--search-input-focus-ring)]"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-1">
+                                <label
+                                    style={{ color: "var(--search-input-text)" }}
+                                    className="block text-sm font-medium mb-2 flex items-center gap-1"
+                                >
                                     <Calendar className="w-4 h-4" />
                                     End Date
                                 </label>
@@ -237,7 +312,12 @@ export default function DeepSearchPage() {
                                     type="date"
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
-                                    className="w-full px-4 py-2 bg-slate-800/50 border border-blue-500/30 rounded-lg text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    style={{
+                                        backgroundColor: "var(--search-input-bg)",
+                                        borderColor: "var(--search-input-border)",
+                                        color: "var(--search-input-text)",
+                                    }}
+                                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--search-input-focus-ring)]"
                                 />
                             </div>
                         </div>

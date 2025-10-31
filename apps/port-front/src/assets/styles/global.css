@@ -1,3 +1,50 @@
+/* Theme Variables */
+:root {
+  /* Light theme */
+  --bg-gradient-start: #f0f4f8;
+  --bg-gradient-mid: #e2e8f0;
+  --bg-gradient-end: #cbd5e1;
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #2563eb;
+  --accent-glow: rgba(59, 130, 246, 0.3);
+  --input-bg: rgba(248, 250, 252, 0.8);
+  --input-border: rgba(59, 130, 246, 0.25);
+  --input-border-focus: rgba(59, 130, 246, 0.6);
+  --input-placeholder: #94a3b8;
+  --shadow-card: rgba(0, 0, 0, 0.1);
+  --shadow-btn: rgba(59, 130, 246, 0.4);
+  --border-card: rgba(59, 130, 246, 0.2);
+  --divider-line: rgba(59, 130, 246, 0.2);
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-gradient-start: #0a0f1c;
+    --bg-gradient-mid: #0c121f;
+    --bg-gradient-end: #000000;
+    --card-bg: rgba(10, 14, 26, 0.6);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --accent-primary: #4facfe;
+    --accent-secondary: #00f2fe;
+    --accent-glow: rgba(79, 172, 254, 0.5);
+    --input-bg: rgba(10, 14, 26, 0.6);
+    --input-border: rgba(79, 172, 254, 0.25);
+    --input-border-focus: rgba(79, 172, 254, 0.6);
+    --input-placeholder: rgba(255, 255, 255, 0.4);
+    --shadow-card: rgba(0, 0, 0, 0.7);
+    --shadow-btn: rgba(79, 172, 254, 0.4);
+    --border-card: rgba(79, 172, 254, 0.15);
+    --divider-line: rgba(79, 172, 254, 0.2);
+  }
+}
+
 html,
 body,
 #root {
@@ -8,11 +55,16 @@ body,
 }
 
 .main-div {
-  background: linear-gradient(-45deg, #0a0f1c 0%, #0c121f 50%, #000000 100%);
+  background: linear-gradient(
+    -45deg,
+    var(--bg-gradient-start) 0%,
+    var(--bg-gradient-mid) 50%,
+    var(--bg-gradient-end) 100%
+  );
   background-size: 600% 600%;
   animation: gradientShift 60s ease-in-out infinite;
   font-family: system-ui, sans-serif;
-  color: white;
+  color: var(--text-primary);
 }
 
 @keyframes gradientShift {
@@ -27,22 +79,20 @@ body,
   }
 }
 
-/* Center login/register card */
 .login-wrapper {
   display: flex;
-  justify-content: center; /* center horizontally */
-  align-items: center; /* center vertically */
-  min-height: 100vh; /* full viewport height */
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
-/* 🪟 Glass card container (login/register/etc.) */
 .card {
-  background: rgba(10, 14, 26, 0.6);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
   border-radius: 24px;
   padding: 3rem 2.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(79, 172, 254, 0.15);
+  box-shadow: 0 8px 32px var(--shadow-card);
+  border: 1px solid var(--border-card);
   animation: fadeInUp 0.6s ease-out;
   max-width: 420px;
   width: 100%;
@@ -61,18 +111,18 @@ body,
 
 /* ✨ Headings */
 h1 {
-  color: #4facfe;
+  color: var(--accent-primary);
   font-size: 2.4rem;
   font-weight: 800;
   margin: 0 0 0.5rem 0;
-  text-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+  text-shadow: 0 0 20px var(--accent-glow);
   letter-spacing: -0.02em;
   text-align: center;
 }
 
 .subtitle,
 .card-header p {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
   font-size: 1rem;
   text-align: center;
   margin-bottom: 2rem;
@@ -81,10 +131,10 @@ h1 {
 /* 📝 Inputs */
 input {
   width: 100%;
-  background: rgba(10, 14, 26, 0.6);
-  border: 1px solid rgba(79, 172, 254, 0.25);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 12px;
-  color: white;
+  color: var(--text-primary);
   font-size: 1.05rem;
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
@@ -92,34 +142,53 @@ input {
 }
 
 input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--input-placeholder);
 }
 
 input:focus {
-  background: rgba(10, 14, 26, 0.8);
-  border: 1px solid rgba(79, 172, 254, 0.6);
-  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
   outline: none;
 }
 
-/* 🔘 Primary action button */
 .btn-primary {
   width: 100%;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: #0a0e27;
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary) 0%,
+    var(--accent-secondary) 100%
+  );
+  color: var(--text-primary);
   border: none;
   border-radius: 12px;
   padding: 1rem 1.5rem;
   font-weight: 700;
   font-size: 1.05rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+  box-shadow: 0 4px 15px var(--shadow-btn);
+}
+
+@media (prefers-color-scheme: light) {
+  .btn-primary {
+    color: #ffffff;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-primary {
+    color: #0a0e27;
+  }
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(79, 172, 254, 0.6);
-  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  box-shadow: 0 6px 25px var(--shadow-btn);
+  background: linear-gradient(
+    135deg,
+    var(--accent-secondary) 0%,
+    var(--accent-primary) 100%
+  );
 }
 
 .btn-primary:active {
@@ -130,36 +199,34 @@ input:focus {
   opacity: 0.5;
 }
 
-/* ⚒️ Secondary / provider button (Forge, Google, etc.) */
 .btn-secondary {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background: rgba(79, 172, 254, 0.15);
-  color: white;
+  background: var(--input-bg);
+  color: var(--text-primary);
   border-radius: 12px;
   font-weight: 600;
   font-size: 1.05rem;
-  border: 1px solid rgba(79, 172, 254, 0.3);
+  border: 1px solid var(--input-border);
   width: 100%;
   transition: all 0.3s ease;
 }
 
 .btn-secondary:hover {
-  background: rgba(79, 172, 254, 0.25);
+  background: var(--card-bg);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.3);
-  border: 1px solid rgba(79, 172, 254, 0.5);
+  box-shadow: 0 6px 20px var(--accent-glow);
+  border: 1px solid var(--input-border-focus);
 }
 
-/* ─────────────── Divider line ─────────────── */
 .divider {
   display: flex;
   align-items: center;
   margin: 2rem 0 1.5rem 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -168,12 +235,13 @@ input:focus {
   content: "";
   flex: 1;
   height: 1px;
-  background: rgba(79, 172, 254, 0.2);
+  background: var(--divider-line);
 }
 
 .divider::before {
   margin-right: 1rem;
 }
+
 .divider::after {
   margin-left: 1rem;
 }
@@ -185,13 +253,14 @@ input:focus {
 }
 
 .back-link a {
-  color: rgba(79, 172, 254, 0.7);
+  color: var(--accent-primary);
   text-decoration: none;
   font-size: 0.95rem;
   transition: all 0.3s ease;
+  opacity: 0.8;
 }
 
 .back-link a:hover {
-  color: rgba(79, 172, 254, 1);
+  opacity: 1;
   text-decoration: underline;
 }

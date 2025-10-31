@@ -1,6 +1,16 @@
 import "../assets/styles/global.css";
 import { useContext, useState, useEffect } from "react";
-import { User, Mail, AtSign, Save, AlertCircle, CheckCircle2, Shield, Bell, Palette } from "lucide-react";
+import {
+  User,
+  Mail,
+  AtSign,
+  Save,
+  AlertCircle,
+  CheckCircle2,
+  Shield,
+  Bell,
+  Palette,
+} from "lucide-react";
 import { AuthContext } from "../contexts/Auth";
 import api from "../api/api";
 
@@ -25,11 +35,10 @@ const SettingsPage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-
     setSaving(true);
     setError("");
     setSuccess(false);
-    
+
     try {
       const updated = {
         first_name: profile.first_name,
@@ -49,10 +58,23 @@ const SettingsPage = () => {
 
   if (loading) {
     return (
-      <div className="w-full min-h-[60vh] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading your settings...</p>
+      <div
+        className="main-div flex items-center justify-center"
+        style={{ minHeight: "60vh" }}
+      >
+        <div style={{ textAlign: "center", color: "var(--text-secondary)" }}>
+          <div
+            style={{
+              width: "3rem",
+              height: "3rem",
+              border: "4px solid var(--accent-primary)",
+              borderTop: "4px solid transparent",
+              borderRadius: "50%",
+              margin: "0 auto 1rem",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <p>Loading your settings...</p>
         </div>
       </div>
     );
@@ -66,179 +88,223 @@ const SettingsPage = () => {
   ];
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+    <div
+      className="main-div"
+      style={{ padding: "2rem 1rem", minHeight: "80vh" }}
+    >
       <div className="max-w-5xl mx-auto">
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 mb-2">
             Settings
           </h1>
-          <p className="text-slate-400">Manage your account settings and preferences</p>
+          <p style={{ color: "var(--text-secondary)" }}>
+            Manage your account settings and preferences
+          </p>
         </div>
 
         {error && (
-          <div className="mb-4 bg-red-500/10 backdrop-blur-sm border border-red-500/50 text-red-400 px-6 py-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div
+            className="px-6 py-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 mb-4"
+            style={{
+              background: "rgba(239, 68, 68, 0.1)",
+              backdropFilter: "blur(4px)",
+              border: "1px solid rgba(239, 68, 68, 0.5)",
+              color: "var(--error-text, #f87171)",
+            }}
+          >
+            <AlertCircle size={20} />
             <p>{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="mb-4 bg-green-500/10 backdrop-blur-sm border border-green-500/50 text-green-400 px-6 py-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+          <div
+            className="mb-4 px-6 py-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2"
+            style={{
+              background: "rgba(34, 197, 94, 0.1)",
+              backdropFilter: "blur(4px)",
+              border: "1px solid rgba(34, 197, 94, 0.5)",
+              color: "var(--success-text, #4ade80)",
+            }}
+          >
             <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
             <p>Profile updated successfully!</p>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-2 space-y-1">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                      isActive
-                        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-                        : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/40"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", gap: "1.5rem" }}>
+          {/* Sidebar Tabs */}
+          <div
+            style={{
+              background: "var(--card-bg)",
+              borderRadius: "16px",
+              border: "1px solid var(--border-card)",
+              padding: "0.5rem",
+              boxShadow: "0 2px 10px var(--shadow-card)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.5rem",
+            }}
+          >
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="flex items-center gap-3 font-medium transition-all"
+                  style={{
+                    padding: "0.75rem 1rem",
+                    borderRadius: "12px",
+                    background: isActive ? "var(--accent-glow)" : "transparent",
+                    border: isActive
+                      ? "1px solid var(--accent-primary)"
+                      : "1px solid transparent",
+                    color: isActive
+                      ? "var(--accent-primary)"
+                      : "var(--text-secondary)",
+                    fontWeight: isActive ? 600 : 500,
+                  }}
+                >
+                  <Icon size={18} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="lg:col-span-3">
-            <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-blue-500/20 p-8">
-              {activeTab === "profile" && (
-                <form onSubmit={handleSave} className="space-y-6">
+          {/* Main Content */}
+          <div className="card w-full">
+            {activeTab === "profile" && (
+              <form
+                onSubmit={handleSave}
+                className="flex flex-col gap-6"
+              >
+                <h2 style={{ color: "var(--accent-primary)" }}>
+                  Profile Information
+                </h2>
+
+                <div>
+                  <label
+                    className="flex items-center gap-2 text-sm"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    <AtSign size={16} />
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={"🔒  " + (profile.username || "")}
+                    style={{ opacity: 0.7, cursor: "not-allowed" }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <h2 className="text-2xl font-bold text-blue-400 mb-6">Profile Information</h2>
-
-                    <div className="space-y-2 mb-6">
-                      <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                        <AtSign className="w-4 h-4 text-blue-400" />
-                        Username
-                      </label>
-                      <input
-                        type="text"
-                        readOnly
-                        className="w-full bg-slate-800 border border-blue-500/20 rounded-lg px-4 py-3 text-slate-500 cursor-not-allowed opacity-60 select-none"
-                        value={"🔒  " + (profile.username || "")}
-                        placeholder="username"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                          <User className="w-4 h-4 text-blue-400" />
-                          First Name
-                        </label>
-                        <input
-                          type="text"
-                          value={profile.first_name || ""}
-                          onChange={(e) => handleChange("first_name", e.target.value)}
-                          className="w-full bg-slate-800/50 border border-blue-500/30 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition"
-                          placeholder="Enter first name"
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                          <User className="w-4 h-4 text-blue-400" />
-                          Last Name
-                        </label>
-                        <input
-                          type="text"
-                          value={profile.last_name || ""}
-                          onChange={(e) => handleChange("last_name", e.target.value)}
-                          className="w-full bg-slate-800/50 border border-blue-500/30 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition"
-                          placeholder="Enter last name"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 mt-6">
-                      <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                        <Mail className="w-4 h-4 text-blue-400" />
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={profile.email || ""}
-                        onChange={(e) => handleChange("email", e.target.value)}
-                        className="w-full bg-slate-800/50 border border-blue-500/30 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition"
-                        placeholder="your.email@example.com"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Save Button */}
-                  <div className="flex justify-end pt-4 border-t border-blue-500/20">
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                        saving
-                          ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                          : "bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40"
-                      }`}
+                    <label
+                      className="flex items-center gap-2 text-sm"
+                      style={{ color: "var(--text-secondary)" }}
                     >
-                      {saving ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4" />
-                          Save Changes
-                        </>
-                      )}
-                    </button>
+                      <User size={16} />
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      value={profile.first_name || ""}
+                      onChange={(e) =>
+                        handleChange("first_name", e.target.value)
+                      }
+                      placeholder="Enter first name"
+                      required
+                    />
                   </div>
-                </form>
-              )}
 
-              {activeTab === "preferences" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-blue-400 mb-6">Preferences</h2>
-                  <div className="text-center py-12 text-slate-400">
-                    <Palette className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg">Preferences settings coming soon</p>
+                  <div>
+                    <label
+                      className="flex items-center gap-2 text-sm"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      <User size={16} />
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      value={profile.last_name || ""}
+                      onChange={(e) =>
+                        handleChange("last_name", e.target.value)
+                      }
+                      placeholder="Enter last name"
+                      required
+                    />
                   </div>
                 </div>
-              )}
 
-              {activeTab === "notifications" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-blue-400 mb-6">Notifications</h2>
-                  <div className="text-center py-12 text-slate-400">
-                    <Bell className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg">Notification settings coming soon</p>
-                  </div>
+                <div>
+                  <label
+                    className="flex items-center gap-2 text-sm"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    <Mail size={16} />
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={profile.email || ""}
+                    onChange={(e) => handleChange("email", e.target.value)}
+                    placeholder="your.email@example.com"
+                    required
+                  />
                 </div>
-              )}
 
-              {activeTab === "security" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-blue-400 mb-6">Security</h2>
-                  <div className="text-center py-12 text-slate-400">
-                    <Shield className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg">Security settings coming soon</p>
-                  </div>
+                <div
+                  className="flex justify-end border-t pt-4"
+                  style={{ borderColor: "var(--divider-line)" }}
+                >
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="btn-primary flex items-center gap-2"
+                    style={{ width: "fit-content" }}
+                  >
+                    {saving ? (
+                      "Saving..."
+                    ) : (
+                      <>
+                        <Save size={16} /> Save Changes
+                      </>
+                    )}
+                  </button>
                 </div>
-              )}
-            </div>
+              </form>
+            )}
+
+            {activeTab !== "profile" && (
+              <div
+                className="text-center py-16"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {activeTab === "preferences" && (
+                  <>
+                    <Palette size={48} style={{ opacity: 0.5, marginBottom: "1rem" }} />
+                    <p>Preferences settings coming soon</p>
+                  </>
+                )}
+                {activeTab === "notifications" && (
+                  <>
+                    <Bell size={48} style={{ opacity: 0.5, marginBottom: "1rem" }} />
+                    <p>Notification settings coming soon</p>
+                  </>
+                )}
+                {activeTab === "security" && (
+                  <>
+                    <Shield size={48} style={{ opacity: 0.5, marginBottom: "1rem" }} />
+                    <p>Security settings coming soon</p>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
