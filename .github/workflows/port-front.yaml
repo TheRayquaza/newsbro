@@ -8,8 +8,11 @@ on:
     tags:
       - 'port-front-v*.*.*'
 
+permissions:
+  write-all
+
 jobs:
-  ci:
+  port-front:
     uses: ./.github/workflows/react-svc-workflow.yml
     with:
       app_name: port-front
