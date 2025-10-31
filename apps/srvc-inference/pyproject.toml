@@ -36,10 +36,13 @@ strict_optional = true
 
 [tool.bandit]
 skips = ["B101"]
-exclude_dirs = [
+exclude = [
     "tests",
     "venv",
     ".venv",
+    "build",
+    "dist",
+    "__pycache__"
 ]
 
 [tool.radon]

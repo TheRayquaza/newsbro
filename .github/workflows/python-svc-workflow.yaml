@@ -54,8 +54,8 @@ jobs:
         working-directory: ${{ inputs.context_root }}/${{inputs.model_name }}
 
       - name: Run Bandit (security check)
-        run: bandit -r .
-        working-directory: ${{ inputs.context_root }}/${{inputs.model_name }}
+        run: bandit -c pyproject.toml -r ${{inputs.model_name }}
+        working-directory: ${{ inputs.context_root }}
 
   test:
     needs: [lint]
