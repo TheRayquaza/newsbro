@@ -7,9 +7,9 @@ data:
   # Application
   GIN_MODE: release
   PORT: "8080"
-  ENVIRONMENT: "prod"
+  ENVIRONMENT: prod
   # Postgres
-  DATABASE_NAME: "repo-account"
+  DATABASE_NAME: repo-account
   # Cookies
-  COOKIE_DOMAIN: ".newsbro.cc"
+  COOKIE_DOMAIN: .newsbro.cc
 

@@ -4,5 +4,5 @@ metadata:
   name: port-front-config
   namespace: apps
 data:
-  ACCOUNT_BASE_URL: "https://account.newsbro.cc"
-  ARTICLE_BASE_URL: "https://article.newsbro.cc"
+  ACCOUNT_BASE_URL: https://account.newsbro.cc
+  ARTICLE_BASE_URL: https://article.newsbro.cc

@@ -7,7 +7,7 @@ data:
   # Application
   GIN_MODE: release
   PORT: "8080"
-  ENVIRONMENT: "prod"
+  ENVIRONMENT: prod
   # Feed configuration
   DEFAULT_MODEL: tfidf
   FEEDBACK_EXPIRATION_SECONDS: "604800" # (7 days)
