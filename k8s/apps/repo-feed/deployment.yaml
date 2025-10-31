@@ -1,11 +1,10 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: repo-article
+  name: repo-feed
   namespace: apps
   labels:
-    app: repo-article
+    app: repo-feed
     type: backends
 spec:
   # replicas: 1 # managed by hpa
@@ -16,11 +15,11 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: repo-article
+      app: repo-feed
   template:
     metadata:
       labels:
-        app: repo-article
+        app: repo-feed
         monitoring: "enabled"
       annotations:
         prometheus.io/scrape: "true"
@@ -29,8 +28,8 @@ spec:
       imagePullSecrets:
         - name: pull-secret
       containers:
-        - name: repo-article
-          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.4.2
+        - name: repo-feed
+          image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -39,15 +38,17 @@ spec:
               name: metrics
           envFrom:
             - configMapRef:
-                name: repo-article-config
+                name: repo-feed-config
             - configMapRef:
-                name: postgres-config
+                name: redis-config # Redis master and sentinels
             - configMapRef:
                 name: kafka-config
             - configMapRef:
                 name: oidc-config
             - secretRef:
-                name: repo-article-secrets
+                name: repo-feed-secrets # Redis creds
+            - secretRef:
+                name: oidc-secrets # JWT
           resources:
             requests:
               memory: "256Mi"

@@ -1,0 +1,16 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: repo-feed
+  namespace: apps
+  labels:
+    app: repo-feed
+spec:
+    type: ClusterIP
+    selector:
+      app: repo-feed
+    ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 8080

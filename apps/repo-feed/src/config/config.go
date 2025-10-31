@@ -105,7 +105,7 @@ func Load() *Config {
 
 		KafkaBrokers:               kafkaBrokers,
 		KafkaInferenceCommandTopic: getEnv("KAFKA_INFERENCE_COMMAND_TOPIC", "inference-commands"),
-		KafkaFeedbackTopic:         getEnv("KAFKA_FEEDBACK_TOPIC", "user-feedback"),
+		KafkaFeedbackTopic:         getEnv("KAFKA_FEEDBACK_AGGREGATE_TOPIC", "feedback-aggregate"),
 		KafkaGroupID:               getEnv("KAFKA_GROUP_ID", "repo-feed-group"),
 		KafkaFeedbackGroupID:       getEnv("KAFKA_FEEDBACK_GROUP_ID", "repo-feed-feedback-group"),
 

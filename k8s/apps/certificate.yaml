@@ -11,4 +11,5 @@ spec:
   dnsNames:
     - account.newsbro.cc
     - article.newsbro.cc
+    - feed.newsbro.cc
     # add more for each service
