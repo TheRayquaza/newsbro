@@ -68,7 +68,6 @@ if __name__ == "__main__":
         batch_size=config.kafka_batch_size,
     )
     c1_config = TFIDFFeedbackConsumerConfig()
-    logger.info(c1_config)
     c1 = TFIDFFeedbackConsumer(model, producer, logger, c1_consumer_config, c1_config)
 
     c2_consumer_config = InferenceConsumerConfig(
@@ -78,7 +77,6 @@ if __name__ == "__main__":
         batch_size=config.kafka_batch_size,
     )
     c2_config = TFIDFArticleConsumerConfig()
-    logger.info(c2_config)
     c2 = TFIDFArticleConsumer(model, producer, logger, c2_consumer_config, c2_config)
     c2.bootstrap()
     c1.run()

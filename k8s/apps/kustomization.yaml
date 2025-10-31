@@ -9,6 +9,7 @@ resources:
   - repo-feed
   - port-front
   - srvc-scrapping
+  - srvc-inference
   - pull-secrets.yaml
   - certificate.yaml
   - oidc-secrets.yaml
@@ -18,7 +19,6 @@ configMapGenerator:
     literals:
       - REDIS_SENTINELS=redis-cluster-sentinel.redis.svc.cluster.local:26379
       - REDIS_MASTER_NAME=mymaster
-      - REDIS_DB=0
 
   - name: kafka-config
     literals:
@@ -35,6 +35,11 @@ configMapGenerator:
     literals:
       - DATABASE_HOST=postgres-cluster-rw.postgres.svc.cluster.local:5432
       - DATABASE_RO_HOST=postgres-cluster-ro.postgres.svc.cluster.local:5432
+
+  - name: qdrang-config
+    literals:
+      - QDRANT_URL=http://qdrant-cluster.qdrant.svc.cluster.local:6333
+      # - QDRANT_ARTICLES_COLLECTION=articles
 
   - name: oidc-config
     literals:

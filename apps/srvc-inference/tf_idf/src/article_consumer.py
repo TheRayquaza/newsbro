@@ -20,9 +20,9 @@ from abstract.producer import InferenceProducer
 
 class TFIDFArticleConsumerConfig(pydantic.BaseModel):
     article_vector_features: int = int(os.getenv("ARTICLE_VECTOR_FEATURES", "100"))
-    articles_collection: str = os.getenv("ARTICLES_COLLECTION", "articles")
+    articles_collection: str = os.getenv("QDRANT_ARTICLES_COLLECTION", "articles")
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
-    similarity_threshold: float = float(os.getenv("SIMILARITY_THRESHOLD", "0.7"))
+    similarity_threshold: float = float(os.getenv("MODEL_SIMILARITY_THRESHOLD", "0.7"))
     model_name: str = os.getenv("MODEL_NAME", "tfidf")
     redis_sentinels: str = os.getenv(
         "REDIS_SENTINELS", "localhost:26379,localhost:26380,localhost:26381"
@@ -31,6 +31,7 @@ class TFIDFArticleConsumerConfig(pydantic.BaseModel):
     redis_password: Optional[str] = os.getenv("REDIS_PASSWORD", None)
     redis_db: int = int(os.getenv("REDIS_DB", "0"))
     redis_scan_batch_size: int = int(os.getenv("REDIS_SCAN_BATCH_SIZE", "100"))
+    redis_user_profile_prefix: str = os.getenv("REDIS_USER_PROFILE_KEY", "user_profile")
 
 
 class TFIDFArticleConsumer(InferenceConsumer):
@@ -193,7 +194,7 @@ class TFIDFArticleConsumer(InferenceConsumer):
         """
         user_profiles = {}
         cursor = 0
-        pattern = "user_profile:*"
+        pattern = f"{self.config.redis_user_profile_prefix}:*"
 
         try:
             while True:
@@ -295,7 +296,7 @@ class TFIDFArticleConsumer(InferenceConsumer):
     def get_user_profile(self, user_id: int) -> Optional[dict]:
         """Retrieve a specific user profile from Redis."""
         try:
-            redis_key = f"user_profile:{user_id}"
+            redis_key = f"{self.config.redis_user_profile_prefix}:{user_id}"
             value = self.redis_client.get(redis_key)
 
             if value:

@@ -79,7 +79,7 @@ class InferenceConsumer(abc.ABC):
         batch_to_process = self.batch.copy()
         self.batch = []
         self.last_process_time = time.time()
-        
+
         try:
             self.logger.info(f"Processing batch of {len(batch_to_process)} messages")
             Thread(target=self.process, args=(batch_to_process,), daemon=True).start()
@@ -92,7 +92,7 @@ class InferenceConsumer(abc.ABC):
             f"Starting consumer with batch_size={self.consumer_config.batch_size}, "
             f"batch_interval={self.consumer_config.batch_interval}s"
         )
-        
+
         try:
             while not self.shutdown_event.is_set():
                 try:
@@ -100,17 +100,17 @@ class InferenceConsumer(abc.ABC):
                         article = message.value
                         if self.dict_to_msg:
                             article = self.dict_to_msg(article)
-                        
+
                         with self.batch_lock:
                             self.batch.append(article)
                             if len(self.batch) >= self.consumer_config.batch_size:
                                 self._process_batch()
-                        
+
                         # Check time-based processing outside the message loop
                         with self.batch_lock:
                             if self._should_process_batch():
                                 self._process_batch()
-                                
+
                 except StopIteration:
                     with self.batch_lock:
                         if self._should_process_batch():

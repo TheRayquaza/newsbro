@@ -27,6 +27,7 @@ class TFIDFFeedbackConsumerConfig(pydantic.BaseModel):
     redis_master_name: str = os.getenv("REDIS_MASTER_NAME", "mymaster")
     redis_password: Optional[str] = os.getenv("REDIS_PASSWORD", None)
     redis_db: int = int(os.getenv("REDIS_DB", "0"))
+    redis_user_profile_prefix: str = os.getenv("REDIS_USER_PROFILE_KEY", "user_profile")
     top_k_articles: int = int(os.getenv("TOP_K_ARTICLES", "10"))
 
 
@@ -97,7 +98,7 @@ class TFIDFFeedbackConsumer(InferenceConsumer):
             for feedback in batch:
                 if feedback.value == 1:
                     try:
-                        redis_key = f"user_profile:{feedback.user_id}"
+                        redis_key = f"{self.config.redis_user_profile_prefix}:{feedback.user_id}"
 
                         existing_profile = self.redis_client.get(redis_key)
 
@@ -174,7 +175,7 @@ class TFIDFFeedbackConsumer(InferenceConsumer):
 
     def get_user_profile(self, user_id: int) -> Optional[dict]:
         try:
-            redis_key = f"user_profile:{user_id}"
+            redis_key = f"{self.config.redis_user_profile_prefix}:{user_id}"
             value = self.redis_client.get(redis_key)
 
             if value:
