@@ -11,7 +11,7 @@ COPY ${model}/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY abstract ./abstract
-COPY ${model} ./{model}
+COPY ${model} ./${model}
 
 COPY ${model}/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
