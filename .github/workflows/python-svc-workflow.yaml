@@ -109,7 +109,7 @@ jobs:
       - id: build-and-push
         uses: docker/build-push-action@v5
         with:
-          context: ${{ inputs.context_root }}/${{ inputs.model_name }}
+          context: ${{ inputs.context_root }}
           file: ${{ inputs.dockerfile }}
           build-args: |
             model=${{ inputs.model_name }}
