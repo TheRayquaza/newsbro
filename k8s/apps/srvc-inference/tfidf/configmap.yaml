@@ -15,7 +15,7 @@ data:
   MODEL_SIMILARITY_THRESHOLD: "0.5"
   ARTICLE_VECTOR_FEATURES: "100" # check the model URI
   TOP_K_ARTICLES: "10"
-  MLFLOW_S3_ENDPOINT_URL: http://minio.minio.svc.cluster.local:9000
+  MLFLOW_S3_ENDPOINT_URL: http://minio-new.minio.svc.cluster.local:9000
   MLFLOW_TRACKING_URI: http://mlflow.mlflow.svc.cluster.local:5000
   # Misc
   FEEDBACK_RETENTION_DAYS: "30"
