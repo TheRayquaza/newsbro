@@ -53,10 +53,10 @@ class InferenceConsumer(abc.ABC):
         self.shutdown_event = Event()
 
     def health(self) -> bool:
-        topics = self.consumer.topics()
-        if not topics:
+        try:
+            return self.consumer._client.ready()
+        except Exception:
             return False
-        return True
 
     @abc.abstractmethod
     def process(self, batch: List[Any]):
