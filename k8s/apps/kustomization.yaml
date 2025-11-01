@@ -17,7 +17,7 @@ resources:
 configMapGenerator:
   - name: redis-config
     literals:
-      - REDIS_SENTINELS=redis-cluster-sentinel.redis.svc.cluster.local:26379
+      - REDIS_SENTINELS=rfs-kv.redis.svc.cluster.local:26379
       - REDIS_MASTER_NAME=mymaster
 
   - name: kafka-config
