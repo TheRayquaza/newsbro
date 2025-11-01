@@ -4,9 +4,9 @@ on:
   push:
     branches: ["**"]
     paths:
-      - "apps/srvc-inference/tf_idf/**"
+      - "apps/srvc-inference/sbert/**"
     tags:
-      - "srvc-inference-tf_idf-v*.*.*"
+      - "srvc-inference-sbert-v*.*.*"
 
 permissions:
   write-all
