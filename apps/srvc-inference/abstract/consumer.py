@@ -42,7 +42,9 @@ class InferenceConsumer(abc.ABC):
             enable_auto_commit=consumer_config.auto_commit,
             group_id=consumer_config.kafka_consumer_group,
             value_deserializer=lambda x: json.loads(x.decode("utf-8")),
-            consumer_timeout_ms=1000,
+            auto_commit_interval_ms=5000,
+            session_timeout_ms=30000,
+            heartbeat_interval_ms=10000
         )
         self.consumer_config = consumer_config
         self.batch: List[Any] = []
