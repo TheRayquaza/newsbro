@@ -4,4 +4,4 @@
 # DON'T MODIFY IT UNLESS YOU KNOW WHAT YOU ARE DOING
 
 set -e
-exec "$@" "${MODEL_NAME}.main:app" --host "${HOST}" --port "${PORT}"
+exec "$@" -m "tf_idf.main"

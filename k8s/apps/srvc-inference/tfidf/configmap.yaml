@@ -10,7 +10,7 @@ data:
   API_PORT: "8080"
   ENVIRONMENT: production
   # Model
-  MODEL_NAME: tfidf
+  MODEL_NAME: tf_idf
   MODEL_URI: s3://mlflow/11/models/m-d8a417b8607340ccaee01853145f9231/artifacts
   MODEL_SIMILARITY_THRESHOLD: "0.5"
   ARTICLE_VECTOR_FEATURES: "100" # check the model URI
@@ -29,4 +29,3 @@ data:
   REDIS_USER_PROFILE_KEY: user_profile
   # Qdrant
   QDRANT_ARTICLES_COLLECTION: articles # you may want to change this if model dim changes
-
