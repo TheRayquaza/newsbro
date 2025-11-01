@@ -69,3 +69,17 @@ spec:
   config:
     retention.ms: 864000000 # 10 days
     segment.bytes: 1073741824
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: inference-command
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  partitions: 3
+  replicas: 2
+  config:
+    retention.ms: 86400000 # 1 day
+    segment.bytes: 1073741824
