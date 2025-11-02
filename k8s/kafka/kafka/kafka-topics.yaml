@@ -9,7 +9,7 @@ metadata:
 spec:
   topicName: new-articles-command
   partitions: 2
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 3600000 # 1h
     segment.bytes: 1073741824
@@ -25,7 +25,7 @@ metadata:
 spec:
   topicName: article-aggregate
   partitions: 1
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 864000000 # 10 days
     segment.bytes: 1073741824
@@ -41,7 +41,7 @@ metadata:
 spec:
   topicName: rss-aggregate
   partitions: 1
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 864000000 # 10 days
     segment.bytes: 1073741824
@@ -57,7 +57,7 @@ metadata:
 spec:
   topicName: feedback-aggregate
   partitions: 3
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 86400000 # 1 day
     segment.bytes: 1073741824
@@ -73,7 +73,7 @@ metadata:
 spec:
   topicName: account-aggregate
   partitions: 1
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 864000000 # 10 days
     segment.bytes: 1073741824
@@ -89,7 +89,7 @@ metadata:
 spec:
   topicName: inference-command
   partitions: 3
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 86400000 # 1 day
     segment.bytes: 1073741824
