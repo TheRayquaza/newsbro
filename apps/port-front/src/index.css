@@ -25,6 +25,8 @@
   --success-hover: #059669; /* emerald-600 */
   --error: #ef4444; /* red-500 */
   --error-hover: #dc2626; /* red-600 */
+  --success-bg-hover: rgba(16, 185, 129, 0.1); /* emerald with opacity for hover */
+  --error-bg-hover: rgba(239, 68, 68, 0.1); 
 
   /* Navbar/Footer theme colors */
   --nav-bg: rgba(248, 250, 252, 0.95);
@@ -75,6 +77,8 @@
     --success-hover: #10b981; /* emerald-500 */
     --error: #f87171; /* red-400 */
     --error-hover: #ef4444; /* red-500 */
+    --success-bg-hover: rgba(52, 211, 153, 0.1);
+    --error-bg-hover: rgba(248, 113, 113, 0.1);
 
     /* Navbar/Footer theme colors */
     --nav-bg: rgba(15, 23, 42, 0.95);

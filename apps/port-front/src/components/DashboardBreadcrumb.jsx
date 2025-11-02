@@ -15,6 +15,9 @@ const DashboardBreadcrumb = ({
                     onClick={(e) => {
                         e.preventDefault();
                         setBreadcrumb([]);
+                        setCurrentItems([]);
+                        setCurrentItems([]);
+                        setArticles([])
                     }}
                     className={`flex items-center px-3 py-1.5 rounded-lg transition-all duration-200 ${breadcrumb.length <= 1
                         ? 'text-blue-400 font-semibold bg-blue-500/10 cursor-default'

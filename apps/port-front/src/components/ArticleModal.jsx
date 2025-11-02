@@ -33,42 +33,104 @@ const ArticleModal = ({ article, onClose, isAdmin }) => {
         }
     };
 
-    if (loading) return <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center"><div className="text-slate-300">Loading...</div></div>;
+    if (loading) {
+        return (
+            <div 
+                style={{ 
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    backdropFilter: 'blur(8px)'
+                }} 
+                className="fixed inset-0 flex items-center justify-center"
+            >
+                <div style={{ color: 'var(--nav-text)' }}>Loading...</div>
+            </div>
+        );
+    }
 
     return (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-blue-500/20 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div 
+            style={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                backdropFilter: 'blur(8px)'
+            }} 
+            className="fixed inset-0 flex items-center justify-center p-4 z-50"
+        >
+            <div 
+                style={{
+                    backgroundColor: 'var(--nav-bg)',
+                    borderColor: 'var(--nav-border)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid'
+                }}
+                className="backdrop-blur-xl rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            >
                 <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                        <h3 className="text-xl font-bold text-blue-400">{article.title}</h3>
-                        <button onClick={onClose} className="text-slate-400 hover:text-slate-300">
+                        <h3 
+                            style={{ color: 'var(--nav-active-text)' }}
+                            className="text-xl font-bold"
+                        >
+                            {article.title}
+                        </h3>
+                        <button 
+                            onClick={onClose}
+                            style={{ color: 'var(--nav-text-muted)' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--nav-text)'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--nav-text-muted)'}
+                            className="transition"
+                        >
                             <X className="w-6 h-6" />
                         </button>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 text-xs mb-4">
-                        <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full">{article.category}</span>
+                        <span 
+                            style={{
+                                backgroundColor: 'var(--nav-active-bg)',
+                                color: 'var(--nav-active-text)'
+                            }}
+                            className="px-3 py-1 rounded-full"
+                        >
+                            {article.category}
+                        </span>
                         {article.subcategory && (
-                            <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full">
+                            <span 
+                                style={{
+                                    backgroundColor: 'var(--search-button-active-bg)',
+                                    color: 'var(--nav-active-text)'
+                                }}
+                                className="px-3 py-1 rounded-full"
+                            >
                                 {article.subcategory}
                             </span>
                         )}
                         {article.published_at && (
-                            <span className="flex items-center gap-1 text-slate-500">
+                            <span 
+                                style={{ color: 'var(--nav-text-muted)' }}
+                                className="flex items-center gap-1"
+                            >
                                 <Calendar className="w-3 h-3" />
                                 {new Date(article.published_at).toLocaleDateString()}
                             </span>
                         )}
                     </div>
 
-                    <p className="text-slate-300 mb-4">{article.abstract}</p>
+                    <p 
+                        style={{ color: 'var(--nav-text)' }}
+                        className="mb-4"
+                    >
+                        {article.abstract}
+                    </p>
 
                     {article.link && (
                         <a
                             href={article.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-blue-400 hover:text-cyan-400 transition mb-4"
+                            style={{ color: 'var(--nav-active-text)' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--nav-gradient-to)'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--nav-active-text)'}
+                            className="flex items-center gap-2 transition mb-4"
                         >
                             <ExternalLink className="w-4 h-4" />
                             View Original Article
@@ -76,24 +138,57 @@ const ArticleModal = ({ article, onClose, isAdmin }) => {
                     )}
 
                     {isAdmin && feedback && (
-                        <div className="bg-slate-800/50 rounded-lg p-4 mb-4 border border-slate-700">
-                            <h4 className="text-sm font-semibold text-slate-300 mb-3">Feedback Stats</h4>
+                        <div 
+                            style={{
+                                backgroundColor: 'var(--nav-hover-bg)',
+                                borderColor: 'var(--nav-border)',
+                                borderWidth: '1px',
+                                borderStyle: 'solid'
+                            }}
+                            className="rounded-lg p-4 mb-4"
+                        >
+                            <h4 
+                                style={{ color: 'var(--nav-text)' }}
+                                className="text-sm font-semibold mb-3"
+                            >
+                                Feedback Stats
+                            </h4>
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <p className="text-slate-400">Likes</p>
-                                    <p className="text-lg font-bold text-green-400">{feedback.like_count}</p>
+                                    <p style={{ color: 'var(--nav-text-muted)' }}>Likes</p>
+                                    <p 
+                                        style={{ color: 'var(--success)' }}
+                                        className="text-lg font-bold"
+                                    >
+                                        {feedback.like_count}
+                                    </p>
                                 </div>
                                 <div>
-                                    <p className="text-slate-400">Dislikes</p>
-                                    <p className="text-lg font-bold text-red-400">{feedback.dislike_count}</p>
+                                    <p style={{ color: 'var(--nav-text-muted)' }}>Dislikes</p>
+                                    <p 
+                                        style={{ color: 'var(--error)' }}
+                                        className="text-lg font-bold"
+                                    >
+                                        {feedback.dislike_count}
+                                    </p>
                                 </div>
                                 <div>
-                                    <p className="text-slate-400">Total</p>
-                                    <p className="text-lg font-bold text-blue-400">{feedback.total_count}</p>
+                                    <p style={{ color: 'var(--nav-text-muted)' }}>Total</p>
+                                    <p 
+                                        style={{ color: 'var(--nav-active-text)' }}
+                                        className="text-lg font-bold"
+                                    >
+                                        {feedback.total_count}
+                                    </p>
                                 </div>
                                 <div>
-                                    <p className="text-slate-400">Like Ratio</p>
-                                    <p className="text-lg font-bold text-cyan-400">{(feedback.like_ratio).toFixed(1)}%</p>
+                                    <p style={{ color: 'var(--nav-text-muted)' }}>Like Ratio</p>
+                                    <p 
+                                        style={{ color: 'var(--nav-gradient-to)' }}
+                                        className="text-lg font-bold"
+                                    >
+                                        {(feedback.like_ratio).toFixed(1)}%
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -103,7 +198,19 @@ const ArticleModal = ({ article, onClose, isAdmin }) => {
                         <div className="flex justify-end">
                             <button
                                 onClick={handleDelete}
-                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition"
+                                style={{ 
+                                    color: 'var(--error)',
+                                    backgroundColor: 'transparent'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--error-hover)';
+                                    e.currentTarget.style.color = 'var(--error)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                    e.currentTarget.style.color = 'var(--error)';
+                                }}
+                                className="p-2 rounded-lg transition"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
