@@ -1,6 +1,9 @@
 FROM python:3.13-slim
 
 ARG model
+ENV MODEL_NAME=${model}
+ENV HOST=0.0.0.0
+ENV PORT=8080
 
 WORKDIR /app
 
@@ -8,10 +11,12 @@ COPY ${model}/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY abstract ./abstract
-COPY ${model} ./model
+COPY ${model} ./${model}
 
-ENV MODEL_NAME=${model}
+COPY ${model}/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["uvicorn", "${MODEL_NAME}.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["python3"]

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# THIS FILE IS PART OF THE SRVC-INFERENCE DOCKERFILE
+# DON'T MODIFY IT UNLESS YOU KNOW WHAT YOU ARE DOING
+
+set -e
+exec "$@" -m "sbert.main"

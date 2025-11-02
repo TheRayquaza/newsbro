@@ -7,8 +7,9 @@ metadata:
   labels:
     strimzi.io/cluster: kafka
 spec:
+  topicName: new-articles-command
   partitions: 2
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 3600000 # 1h
     segment.bytes: 1073741824
@@ -22,11 +23,13 @@ metadata:
   labels:
     strimzi.io/cluster: kafka
 spec:
+  topicName: article-aggregate
   partitions: 1
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 864000000 # 10 days
     segment.bytes: 1073741824
+
 ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
@@ -36,11 +39,13 @@ metadata:
   labels:
     strimzi.io/cluster: kafka
 spec:
+  topicName: rss-aggregate
   partitions: 1
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 864000000 # 10 days
     segment.bytes: 1073741824
+
 ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
@@ -50,11 +55,13 @@ metadata:
   labels:
     strimzi.io/cluster: kafka
 spec:
+  topicName: feedback-aggregate
   partitions: 3
   replicas: 2
   config:
-    retention.ms: 86400000 # 1 days
+    retention.ms: 86400000 # 1 day
     segment.bytes: 1073741824
+
 ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
@@ -64,8 +71,25 @@ metadata:
   labels:
     strimzi.io/cluster: kafka
 spec:
+  topicName: account-aggregate
   partitions: 1
-  replicas: 1
+  replicas: 2
   config:
     retention.ms: 864000000 # 10 days
+    segment.bytes: 1073741824
+
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: inference-command
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  topicName: inference-command
+  partitions: 3
+  replicas: 2
+  config:
+    retention.ms: 86400000 # 1 day
     segment.bytes: 1073741824

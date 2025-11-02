@@ -18,6 +18,13 @@ spec:
   values:
     replicaCount: 1
 
+    env:
+      QDRANT__SERVICE__API_KEY:
+        valueFrom:
+          secretKeyRef:
+            name: qdrant-secrets
+            key: QDRANT__SERVICE__API_KEY
+
     image:
       repository: docker.io/qdrant/qdrant
       pullPolicy: IfNotPresent

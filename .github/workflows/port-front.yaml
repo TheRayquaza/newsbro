@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   port-front:
-    uses: ./.github/workflows/react-svc-workflow.yml
+    uses: ./.github/workflows/react-svc-workflow.yaml
     with:
       app_name: port-front
       app_path: apps/port-front

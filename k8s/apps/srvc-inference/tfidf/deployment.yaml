@@ -31,7 +31,7 @@ spec:
         - name: pull-secret
       containers:
         - name: srvc-inference-tfidf
-          image: ghcr.io/therayquaza/newsbro/srvc-inference-tfidf:srvc-inference-tfidf-v1.0.0
+          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-tf_idf-v1.0.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -64,11 +64,11 @@ spec:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 20
+            initialDelaySeconds: 60
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /ready
+              path: /health
               port: 8080
-            initialDelaySeconds: 20
+            initialDelaySeconds: 60
             periodSeconds: 10

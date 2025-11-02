@@ -17,7 +17,7 @@ resources:
 configMapGenerator:
   - name: redis-config
     literals:
-      - REDIS_SENTINELS=redis-cluster-sentinel.redis.svc.cluster.local:26379
+      - REDIS_SENTINELS=rfs-kv.redis.svc.cluster.local:26379
       - REDIS_MASTER_NAME=mymaster
 
   - name: kafka-config
@@ -38,7 +38,7 @@ configMapGenerator:
 
   - name: qdrant-config
     literals:
-      - QDRANT_URL=http://qdrant-cluster.qdrant.svc.cluster.local:6333
+      - QDRANT_URL=http://qdrant.qdrant.svc.cluster.local:6333
       # - QDRANT_ARTICLES_COLLECTION=articles
 
   - name: oidc-config

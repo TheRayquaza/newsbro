@@ -1,6 +1,7 @@
-# Core messaging & vector DB
+# Core messaging, vector DB, redis
 kafka-python
 qdrant-client
+redis
 
 # ML stack (updated for Python 3.13)
 scikit-learn
