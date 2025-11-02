@@ -8,21 +8,18 @@ const RSS = ({
 }) => {
   const [feedCount, setFeedCount] = useState(0);
   const [loading, setLoading] = useState(false);
-
   const isMetaFeed = item.link === "";
   const isFeed = item.link && item.link !== "";
 
   useEffect(() => {
     const loadCounts = async () => {
       setLoading(true);
-      
       if (isMetaFeed) {
         const feeds = getFeedCount(item);
         setFeedCount(feeds);
       }
       setLoading(false);
     };
-
     loadCounts();
   }, [item, getFeedCount, isMetaFeed]);
 
@@ -30,33 +27,80 @@ const RSS = ({
     <button
       key={item.name}
       onClick={() => handleItemClick(item)}
-      className="group relative overflow-hidden bg-gradient-to-br from-slate-800/40 to-slate-800/20 border border-blue-500/20 rounded-2xl p-8 hover:border-blue-500/50 transition-all duration-300 text-left w-full"
+      style={{
+        backgroundColor: 'var(--nav-bg)',
+        borderColor: 'var(--nav-border)',
+        borderWidth: '1px',
+        borderStyle: 'solid'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'var(--nav-active-text)';
+        e.currentTarget.querySelector('.hover-overlay').style.opacity = '1';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--nav-border)';
+        e.currentTarget.querySelector('.hover-overlay').style.opacity = '0';
+      }}
+      className="group relative overflow-hidden rounded-2xl p-8 transition-all duration-300 text-left w-full"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div 
+        className="hover-overlay absolute inset-0 transition-opacity"
+        style={{
+          background: 'linear-gradient(to bottom right, var(--nav-active-bg), var(--search-button-active-bg))',
+          opacity: '0'
+        }}
+      />
       <div className="relative z-10">
-        <h3 className="text-2xl font-bold text-blue-300 group-hover:text-blue-200 transition mb-2">
+        <h3 
+          style={{ color: 'var(--nav-active-text)' }}
+          className="text-2xl font-bold transition mb-2"
+        >
           {item.display_name}
         </h3>
-        <p className="text-slate-400 group-hover:text-slate-300 transition mb-6 text-sm line-clamp-2">
+        <p 
+          style={{ color: 'var(--nav-text-muted)' }}
+          className="transition mb-6 text-sm line-clamp-2"
+        >
           {item.description}
         </p>
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             {loading ? (
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium">
-                <div className="animate-spin rounded-full h-3 w-3 border-t-2 border-blue-400"></div>
+              <div 
+                style={{
+                  backgroundColor: 'var(--nav-active-bg)',
+                  color: 'var(--nav-active-text)'
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
+              >
+                <div 
+                  style={{ borderTopColor: 'var(--nav-active-text)' }}
+                  className="animate-spin rounded-full h-3 w-3 border-t-2"
+                ></div>
                 Loading...
               </div>
             ) : (
               <>
                 {isMetaFeed && (
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 group-hover:bg-purple-500/30 text-purple-300 rounded-lg text-sm font-medium transition">
+                  <div 
+                    style={{
+                      backgroundColor: 'var(--nav-active-bg)',
+                      color: 'var(--nav-active-text)'
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition"
+                  >
                     <Link className="w-4 h-4" />
                     {feedCount} {feedCount === 1 ? 'feed' : 'feeds'}
                   </div>
                 )}
                 {!isMetaFeed && !isFeed && item.children && (
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 group-hover:bg-blue-500/30 text-blue-300 rounded-lg text-sm font-medium transition">
+                  <div 
+                    style={{
+                      backgroundColor: 'var(--nav-active-bg)',
+                      color: 'var(--nav-active-text)'
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition"
+                  >
                     <Folder className="w-4 h-4" />
                     {item.children.length} {item.children.length === 1 ? 'item' : 'items'}
                   </div>
@@ -66,11 +110,29 @@ const RSS = ({
           </div>
           <div>
             {isFeed ? (
-              <span className="px-3 py-1 text-xs rounded-full bg-green-500/20 text-green-300 border border-green-500/30">
+              <span 
+                style={{
+                  backgroundColor: 'var(--success)',
+                  color: '#ffffff',
+                  borderColor: 'var(--success-hover)',
+                  borderWidth: '1px',
+                  borderStyle: 'solid'
+                }}
+                className="px-3 py-1 text-xs rounded-full"
+              >
                 RSS
               </span>
             ) : (
-              <span className="px-3 py-1 text-xs rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <span 
+                style={{
+                  backgroundColor: 'var(--color-purple-500)',
+                  color: '#ffffff',
+                  borderColor: 'var(--nav-border)',
+                  borderWidth: '1px',
+                  borderStyle: 'solid'
+                }}
+                className="px-3 py-1 text-xs rounded-full"
+              >
                 Group
               </span>
             )}

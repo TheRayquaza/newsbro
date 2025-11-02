@@ -31,21 +31,56 @@ const Article = ({ article, onSelect, isAdmin }) => {
 
     return (
         <div
-            className="bg-slate-900/60 backdrop-blur-xl rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all p-6 cursor-pointer"
+            style={{
+                backgroundColor: 'var(--nav-bg)',
+                borderColor: 'var(--nav-border)',
+                borderWidth: '1px',
+                borderStyle: 'solid'
+            }}
+            className="backdrop-blur-xl rounded-xl transition-all p-6 cursor-pointer"
             onClick={onSelect}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--nav-active-text)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--nav-border)'}
         >
-            <h3 className="text-lg font-semibold text-slate-200 mb-2 line-clamp-2">{article.title}</h3>
-            <p className="text-slate-400 text-sm mb-3 line-clamp-3">{article.abstract}</p>
+            <h3 
+                style={{ color: 'var(--nav-text)' }}
+                className="text-lg font-semibold mb-2 line-clamp-2"
+            >
+                {article.title}
+            </h3>
+            <p 
+                style={{ color: 'var(--nav-text-muted)' }}
+                className="text-sm mb-3 line-clamp-3"
+            >
+                {article.abstract}
+            </p>
 
             <div className="flex flex-wrap items-center gap-2 text-xs mb-3">
-                <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full">{article.category}</span>
+                <span 
+                    style={{
+                        backgroundColor: 'var(--nav-active-bg)',
+                        color: 'var(--nav-active-text)'
+                    }}
+                    className="px-3 py-1 rounded-full"
+                >
+                    {article.category}
+                </span>
                 {article.subcategory && (
-                    <span className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full">
+                    <span 
+                        style={{
+                            backgroundColor: 'var(--search-button-active-bg)',
+                            color: 'var(--nav-active-text)'
+                        }}
+                        className="px-3 py-1 rounded-full"
+                    >
                         {article.subcategory}
                     </span>
                 )}
                 {article.published_at && (
-                    <span className="flex items-center gap-1 text-slate-500">
+                    <span 
+                        style={{ color: 'var(--nav-text-muted)' }}
+                        className="flex items-center gap-1"
+                    >
                         <Calendar className="w-3 h-3" />
                         {new Date(article.published_at).toLocaleDateString()}
                     </span>
@@ -57,7 +92,10 @@ const Article = ({ article, onSelect, isAdmin }) => {
                     href={article.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-blue-400 text-sm hover:text-cyan-400 mb-3"
+                    style={{ color: 'var(--nav-active-text)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--nav-gradient-to)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--nav-active-text)'}
+                    className="flex items-center gap-1 text-sm mb-3 transition"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <ExternalLink className="w-4 h-4" />
@@ -70,7 +108,10 @@ const Article = ({ article, onSelect, isAdmin }) => {
                     href={article.rss_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-blue-400 text-sm hover:text-cyan-400 mb-3"
+                    style={{ color: 'var(--nav-active-text)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--nav-gradient-to)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--nav-active-text)'}
+                    className="flex items-center gap-1 text-sm mb-3 transition"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <Link className="w-4 h-4" />
@@ -84,10 +125,28 @@ const Article = ({ article, onSelect, isAdmin }) => {
                         e.stopPropagation();
                         handleFeedback(true);
                     }}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${userFeedback === true
-                            ? "text-green-400 hover:text-green-300 hover:bg-green-500/10"
-                            : "bg-green-500 text-white border border-green-600 shadow-lg scale-105"
-                        }`}
+                    style={{
+                        backgroundColor: userFeedback === true ? 'var(--success)' : 'transparent',
+                        color: userFeedback === true ? '#ffffff' : 'var(--success)',
+                        borderColor: 'var(--success)',
+                        borderWidth: '1px',
+                        borderStyle: 'solid'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (userFeedback === true) {
+                            e.currentTarget.style.backgroundColor = 'var(--success-hover)';
+                        } else {
+                            e.currentTarget.style.backgroundColor = 'var(--success-bg-hover)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (userFeedback === true) {
+                            e.currentTarget.style.backgroundColor = 'var(--success)';
+                        } else {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                        }
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all"
                 >
                     <ThumbsUp className="w-4 h-4" />
                     {isAdmin && article.likes}
@@ -98,10 +157,28 @@ const Article = ({ article, onSelect, isAdmin }) => {
                         e.stopPropagation();
                         handleFeedback(false);
                     }}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${userFeedback === false
-                            ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                            : "bg-red-500 text-white border border-red-600 shadow-lg scale-105"
-                        }`}
+                    style={{
+                        backgroundColor: userFeedback === false ? 'var(--error)' : 'transparent',
+                        color: userFeedback === false ? '#ffffff' : 'var(--error)',
+                        borderColor: 'var(--error)',
+                        borderWidth: '1px',
+                        borderStyle: 'solid'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (userFeedback === false) {
+                            e.currentTarget.style.backgroundColor = 'var(--error-hover)';
+                        } else {
+                            e.currentTarget.style.backgroundColor = 'var(--error-bg-hover)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (userFeedback === false) {
+                            e.currentTarget.style.backgroundColor = 'var(--error)';
+                        } else {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                        }
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all"
                 >
                     <ThumbsDown className="w-4 h-4" />
                     {isAdmin && article.dislikes}
