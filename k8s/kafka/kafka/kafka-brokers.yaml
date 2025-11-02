@@ -6,7 +6,7 @@ metadata:
   labels:
     strimzi.io/cluster: kafka
 spec:
-  replicas: 1 # https://github.com/orgs/strimzi/discussions/6635 hard to auto scale ...
+  replicas: 2
   roles:
     - broker
   storage:
@@ -19,8 +19,8 @@ spec:
         deleteClaim: false
   resources:
     requests:
-      memory: 1Gi
+      memory: 512Mi
       cpu: 500m
     limits:
-      memory: 5Gi
+      memory: 3Gi
       cpu: 1000m
