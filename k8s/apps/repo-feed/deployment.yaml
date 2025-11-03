@@ -29,7 +29,7 @@ spec:
         - name: pull-secret
       containers:
         - name: repo-feed
-          image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.0.0
+          image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

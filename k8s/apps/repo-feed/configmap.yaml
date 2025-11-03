@@ -10,6 +10,7 @@ data:
   ENVIRONMENT: prod
   # Feed configuration
   DEFAULT_MODEL: tf_idf
+  AVAILABLE_MODELS: tfidf,sbert
   FEEDBACK_EXPIRATION_SECONDS: "604800" # (7 days)
   FEED_RESCORING_ENABLED: "true"
   FEED_RESCORING_INTERVAL: "12h"
