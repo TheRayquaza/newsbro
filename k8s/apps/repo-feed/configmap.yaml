@@ -21,3 +21,5 @@ data:
   FEED_RESCORING_DECAY_HALFLIFE: "60h" # (2.5 days)
   # Kafka
   KAFKA_GROUP_ID: repo-feed-group
+  # 
+  FRONTEND_ORIGIN: https://app.newsbro.cc

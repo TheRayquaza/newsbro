@@ -12,4 +12,4 @@ data:
   DATABASE_NAME: repo-account
   # Cookies
   COOKIE_DOMAIN: .newsbro.cc
-
+  FRONTEND_ORIGIN: https://app.newsbro.cc

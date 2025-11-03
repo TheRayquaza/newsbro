@@ -12,3 +12,4 @@ data:
   DATABASE_NAME: repo-article
   # Kafka
   KAFKA_GROUP_ID: repo-article-group
+  FRONTEND_ORIGIN: https://app.newsbro.cc
