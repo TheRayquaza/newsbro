@@ -68,10 +68,6 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/repo_feed_src_api_dto.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/repo_feed_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -79,12 +75,17 @@ paths:
       summary: Get user feed
       tags:
       - Feed
-  /feed/rescoring/reset:
-    post:
-      description: Resets the rescoring job’s cursor to start rescoring all feeds
-        from the beginning.
+  /feed/{id}:
+    delete:
+      description: Remove a specific article from the authenticated user's feed
       parameters:
-      - description: Bearer <Add access token here>
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: Bearer <Add access token here>
+        description: Insert your access token
         in: header
         name: Authorization
         required: true
@@ -94,24 +95,23 @@ paths:
       responses:
         "204":
           description: No Content
+        "401":
+          description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/repo_feed_src_api_dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Reset rescoring cursor
+            $ref: '#/definitions/repo_feed_src_api_dto.ErrorResponse'
+      summary: Remove article from feed
       tags:
-      - Feed Rescoring
-  /feed/rescoring/status:
+      - Feed
+  /feed/models:
     get:
-      description: Returns progress information about the feed rescoring job.
+      description: Get the models available for user feed
       parameters:
-      - description: Bearer <Add access token here>
+      - default: Bearer <Add access token here>
+        description: Insert your access token
         in: header
         name: Authorization
         required: true
@@ -122,15 +122,10 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
+            items:
               type: string
-            type: object
-      summary: Get rescoring job status
+            type: array
+      summary: Get user feed models
       tags:
-      - Feed Rescoring
+      - Feed
 swagger: "2.0"

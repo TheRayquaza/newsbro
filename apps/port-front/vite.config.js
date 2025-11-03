@@ -100,6 +100,24 @@ export default defineConfig({
           });
         },
       },
+      '/api/v1/feed': {
+        target: 'http://localhost:8083',
+        changeOrigin: true,
+        secure: true,
+        cookieDomainRewrite: 'localhost',
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            const cookies = proxyRes.headers['set-cookie'];
+            if (cookies) {
+              proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
+                cookie
+                  .replace(/Domain=[^;]+/i, 'Domain=localhost')
+                  .replace(/; *Secure/gi, '')
+              );
+            }
+          });
+        },
+      },
     },
   }
 });

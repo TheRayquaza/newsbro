@@ -32,6 +32,7 @@ type Config struct {
 
 	// Feedback settings
 	DefaultModel       string
+	Models             []string
 	FeedbackExpiration time.Duration
 
 	// Feed Rescoring
@@ -110,6 +111,7 @@ func Load() *Config {
 		KafkaFeedbackGroupID:       getEnv("KAFKA_FEEDBACK_GROUP_ID", "repo-feed-feedback-group"),
 
 		DefaultModel:       getEnv("DEFAULT_MODEL", "tfidf"),
+		Models:             splitAndTrim(getEnv("AVAILABLE_MODELS", "tfidf,sbert"), ","),
 		FeedbackExpiration: feedbackExpiration,
 
 		FeedRescoring: feedRescoring,

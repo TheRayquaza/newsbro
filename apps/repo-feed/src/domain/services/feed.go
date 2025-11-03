@@ -33,15 +33,52 @@ type FeedService struct {
 	defaultModel       string
 	feedbackExpiration time.Duration
 	decayHalfLife      time.Duration
+	models             []string
 }
 
-func NewFeedService(rdb *redis.Client, defaultModel string, feedbackExpiration time.Duration, decayHalfLife time.Duration) *FeedService {
+func NewFeedService(rdb *redis.Client, defaultModel string, feedbackExpiration time.Duration, decayHalfLife time.Duration, models []string) *FeedService {
 	return &FeedService{
 		RDB:                rdb,
 		defaultModel:       defaultModel,
 		feedbackExpiration: feedbackExpiration,
 		decayHalfLife:      decayHalfLife,
+		models:             models,
 	}
+}
+
+func (s *FeedService) GetModels() []string {
+	return s.models
+}
+
+func (s *FeedService) RemoveArticleFromFeed(userID, articleID uint, model string) error {
+	ctx := context.Background()
+	if model == "" {
+		model = s.defaultModel
+	}
+
+	key := fmt.Sprintf("feed:%d:%s", userID, model)
+	articleKey := fmt.Sprintf("article:%d", articleID)
+
+	data, err := s.RDB.Get(ctx, articleKey).Result()
+	if err == redis.Nil {
+		return fmt.Errorf("article %d not found in Redis", articleID)
+	} else if err != nil {
+		return fmt.Errorf("failed to fetch article %d: %w", articleID, err)
+	}
+
+	var article models.ArticleModel
+	if err := json.Unmarshal([]byte(data), &article); err != nil {
+		return fmt.Errorf("failed to unmarshal article data for ID %d: %w", articleID, err)
+	}
+
+	member := encodeZSetMember(article.ID, article.Score, article.PublishedAt)
+
+	if err := s.RDB.ZRem(ctx, key, member).Err(); err != nil {
+		return fmt.Errorf("failed to remove article ID %d from ZSET %s: %w", articleID, key, err)
+	}
+
+	log.Printf("Successfully removed article ID %d from feed %s (member=%s)", articleID, key, member)
+	return nil
 }
 
 func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]models.ArticleModel, error) {
@@ -50,10 +87,10 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 		model = s.defaultModel
 	}
 	key := fmt.Sprintf("feed:%d:%s", userID, model)
-	log.Println("Fetching feed for user ID:", userID, "with model:", model)
 
 	zItems, err := s.RDB.ZRevRangeWithScores(ctx, key, 0, limit-1).Result()
 	if err != nil {
+		log.Printf("Error retrieving feed ZSET %s: %v", key, err)
 		return nil, fmt.Errorf("failed to retrieve feed ZSET: %w", err)
 	}
 
@@ -169,9 +206,8 @@ func (s *FeedService) RemoveArticleZSET(userID, articleID uint, model string) er
 func (s *FeedService) AddNewFeedback(userID uint, articleID uint) error {
 	ctx := context.Background()
 	key := fmt.Sprintf("feedback:%d", userID)
-	log.Printf("Adding negative feedback for user %d on article %d", userID, articleID)
+	log.Printf("Adding feedback for user %d on article %d", userID, articleID)
 
-	// Add article ID to user's negative feedback set
 	if err := s.RDB.SAdd(ctx, key, articleID).Err(); err != nil {
 		log.Println("Failed to add feedback to Redis:", err)
 		return fmt.Errorf("failed to save feedback: %w", err)

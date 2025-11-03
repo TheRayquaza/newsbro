@@ -28,7 +28,7 @@ func SetupRouter(cfg *config.Config, feedService *services.FeedService, rescorin
 	router.Use(middleware.Secure())
 
 	// Controllers
-	feedController := controllers.NewFeedController(feedService, cfg.DefaultModel)
+	feedController := controllers.NewFeedController(feedService, cfg.DefaultModel, cfg.Models)
 	//rescoringController := controllers.NewRescoringController(rescoringService)
 
 	// Health check
@@ -66,6 +66,8 @@ func SetupRouter(cfg *config.Config, feedService *services.FeedService, rescorin
 			feeds := protected.Group("/feed")
 			{
 				feeds.GET("", feedController.GetUserFeed)
+				feeds.GET("/models", feedController.GetModels)
+				feeds.DELETE("/:id", feedController.RemoveArticleFromFeed)
 				/*
 					rescoring := feeds.Group("/rescoring")
 					rescoring.Use(authMiddleware.AdminMiddleware())
