@@ -33,7 +33,7 @@ func main() {
 	}
 
 	// Initialize feed service
-	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.FeedbackExpiration, cfg.FeedRescoring.DecayHalfLife)
+	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.FeedbackExpiration, cfg.FeedRescoring.DecayHalfLife, cfg.Models)
 
 	// Initialize and start rescoring job
 	rescoringConfig := services.RescoringConfig{

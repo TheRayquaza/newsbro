@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, ExternalLink, ChevronLeft, ChevronRight, Heart, X } from 'lucide-react';
+import api from "../api/api";
 
 const FeedPage = () => {
+    // Data States
     const [articles, setArticles] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [models, setModels] = useState([]);
+    const [selectedModel, setSelectedModel] = useState('');
+
+    // UI States
+    const [isLoading, setLoading] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [removing, setRemoving] = useState(false);
@@ -22,85 +29,42 @@ const FeedPage = () => {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Mock articles data
     useEffect(() => {
-        const mockArticles = [
-            {
-                id: 1,
-                title: "AI Breakthrough: New Language Model Achieves Human-Level Reasoning",
-                abstract: "Researchers announce a significant advancement in artificial intelligence with a model that demonstrates unprecedented reasoning capabilities across multiple domains.",
-                category: "Technology",
-                subcategory: "AI & ML",
-                published_at: "2025-10-15T10:30:00Z",
-                link: "https://example.com/ai-breakthrough"
-            },
-            {
-                id: 2,
-                title: "Global Climate Summit Reaches Historic Agreement",
-                abstract: "World leaders unite to commit to aggressive carbon reduction targets, marking a turning point in international climate policy and cooperation.",
-                category: "Environment",
-                subcategory: "Climate Change",
-                published_at: "2025-10-14T14:20:00Z",
-                link: "https://example.com/climate-summit"
-            },
-            {
-                id: 3,
-                title: "Quantum Computing Startup Secures $500M in Funding",
-                abstract: "Silicon Valley startup announces massive funding round to scale quantum computing technology for commercial applications in healthcare and finance.",
-                category: "Business",
-                subcategory: "Startups",
-                published_at: "2025-10-13T09:15:00Z",
-                link: "https://example.com/quantum-funding"
-            },
-            {
-                id: 4,
-                title: "Scientists Discover Potential Treatment for Alzheimer's Disease",
-                abstract: "Medical researchers report promising results from clinical trials of a new drug that shows significant improvements in cognitive function for patients.",
-                category: "Health",
-                subcategory: "Medical Research",
-                published_at: "2025-10-12T16:45:00Z",
-                link: "https://example.com/alzheimers-treatment"
-            },
-            {
-                id: 5,
-                title: "Electric Vehicle Sales Surpass Traditional Cars in Europe",
-                abstract: "For the first time in history, electric vehicle sales have overtaken gasoline-powered cars across major European markets, signaling a major shift.",
-                category: "Automotive",
-                subcategory: "Electric Vehicles",
-                published_at: "2025-10-11T11:30:00Z",
-                link: "https://example.com/ev-sales"
-            },
-            {
-                id: 6,
-                title: "New Space Telescope Captures Never-Before-Seen Galaxies",
-                abstract: "NASA's latest space observatory reveals stunning images of distant galaxies formed just after the Big Bang, offering insights into the early universe.",
-                category: "Science",
-                subcategory: "Space",
-                published_at: "2025-10-10T08:00:00Z",
-                link: "https://example.com/space-telescope"
-            },
-            {
-                id: 7,
-                title: "Breakthrough in Fusion Energy Brings Clean Power Closer",
-                abstract: "Scientists achieve net energy gain in fusion reaction for the third consecutive time, demonstrating the viability of fusion as a clean energy source.",
-                category: "Energy",
-                subcategory: "Fusion",
-                published_at: "2025-10-09T13:20:00Z",
-                link: "https://example.com/fusion-energy"
-            },
-            {
-                id: 8,
-                title: "Major Tech Companies Announce AI Safety Coalition",
-                abstract: "Leading technology firms form unprecedented alliance to establish ethical guidelines and safety standards for artificial intelligence development.",
-                category: "Technology",
-                subcategory: "AI Ethics",
-                published_at: "2025-10-08T15:40:00Z",
-                link: "https://example.com/ai-safety"
-            }
-        ];
+        if (!selectedModel) return;
 
-        setArticles(mockArticles);
+        const loadFeed = async () => {
+            setLoading(true);
+            try {
+                const feedData = await api.getFeed({ model: selectedModel });
+                setArticles(feedData.articles || []);
+                setCurrentIndex(0);
+            } catch (error) {
+                console.error('Error loading feed:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadFeed();
+    }, [selectedModel]);
+
+    useEffect(() => {
+        const loadModels = async () => {
+            try {
+                const modelsData = await api.getFeedModels();
+                setModels(modelsData || []);
+                // Set first model as default if available
+                if (modelsData && modelsData.length > 0) {
+                    setSelectedModel(modelsData[0]);
+                }
+            } catch (error) {
+                console.error('Error loading models:', error);
+            }
+        };
+
+        loadModels();
     }, []);
+
 
     // Keyboard navigation for desktop
     useEffect(() => {
@@ -120,31 +84,44 @@ const FeedPage = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [currentIndex, articles.length, removing, isMobile]);
 
-    const handleSwipe = (direction) => {
+    const handleSwipe = async (direction) => {
         if (removing) return;
         if (direction !== 'left' && direction !== 'right') return;
 
+        const isPositive = direction === 'right' ? true : false;
+        const currentArticle = articles[currentIndex];
+        if (!currentArticle) return;
+
         setRemoving(true);
 
-        if (cardRef.current && isMobile) {
-            const moveX = direction === 'right' ? 1000 : -1000;
-            cardRef.current.style.transition = 'transform 0.3s ease-out';
-            cardRef.current.style.transform = `translateX(${moveX}px) rotate(${direction === 'right' ? 20 : -20}deg)`;
-        }
-
-        setTimeout(() => {
-            setArticles(prev => prev.filter((_, idx) => idx !== currentIndex));
-            setRemoving(false);
-            setDragOffset({ x: 0, y: 0 });
-
-            if (cardRef.current) {
-                cardRef.current.style.transition = '';
-                cardRef.current.style.transform = '';
+        try {
+            if (cardRef.current && isMobile) {
+                const moveX = direction === 'right' ? 1000 : -1000;
+                cardRef.current.style.transition = 'transform 0.3s ease-out';
+                cardRef.current.style.transform = `translateX(${moveX}px) rotate(${direction === 'right' ? 20 : -20}deg)`;
             }
-        }, isMobile ? 300 : 0);
 
-        if (currentIndex === articles.length - 1) {
-            setCurrentIndex(prev => Math.max(0, prev - 1));
+            await api.createArticleFeedback(currentArticle.id, { value: isPositive });
+            await api.removeArticleFromFeed(currentArticle.id);
+
+            setTimeout(() => {
+                setArticles(prev => prev.filter((_, idx) => idx !== currentIndex));
+                setRemoving(false);
+                setDragOffset({ x: 0, y: 0 });
+
+                if (cardRef.current) {
+                    cardRef.current.style.transition = '';
+                    cardRef.current.style.transform = '';
+                }
+            }, isMobile ? 300 : 0);
+
+            if (currentIndex === articles.length - 1) {
+                setCurrentIndex(prev => Math.max(0, prev - 1));
+            }
+
+        } catch (error) {
+            console.error('Error processing swipe:', error);
+            setRemoving(false);
         }
     };
 
@@ -194,32 +171,106 @@ const FeedPage = () => {
         }
     };
 
+    const handleModelChange = (e) => {
+        const newModel = e.target.value;
+        setSelectedModel(newModel);
+    };
+
     const rotation = isDragging && isMobile ? dragOffset.x / 20 : 0;
     const opacity = isDragging && isMobile ? Math.max(0.5, 1 - Math.abs(dragOffset.x) / 300) : 1;
 
-    if (articles.length === 0) {
+    if (isLoading) {
         return (
             <div className="flex-grow flex items-center justify-center p-4">
                 <div className="text-center">
-                    <div className="mb-6 flex justify-center">
-                        <div 
-                            style={{
-                                background: 'linear-gradient(to bottom right, var(--nav-gradient-from), var(--nav-gradient-to))'
-                            }}
-                            className="w-20 h-20 rounded-full flex items-center justify-center"
-                        >
-                            <Heart className="w-12 h-12 text-white" fill="white" />
+                    <div
+                        style={{
+                            background: 'linear-gradient(to bottom right, var(--nav-gradient-from), var(--nav-gradient-to))'
+                        }}
+                        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse"
+                    >
+                        <Calendar className="w-8 h-8 text-white" />
+                    </div>
+                    <p style={{ color: 'var(--nav-text-muted)' }} className="text-lg">
+                        Loading your feed...
+                    </p>
+                </div>
+            </div>
+        )
+    }
+
+    if (articles.length === 0) {
+        return (
+            <div className="flex items-center justify-center p-4 md:p-8 overflow-hidden">
+                <div className="w-full max-w-6xl">
+                    {/* Model Selector */}
+                    {models.length > 0 && (
+                        <div className="mb-6 flex justify-center">
+                            <div
+                                style={{
+                                    backgroundColor: 'var(--nav-hover-bg)',
+                                    backdropFilter: 'blur(16px)',
+                                    borderColor: 'var(--nav-border)',
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid'
+                                }}
+                                className="inline-flex items-center gap-3 px-4 py-2 rounded-full"
+                            >
+                                <span
+                                    style={{ color: 'var(--nav-text-muted)' }}
+                                    className="text-sm font-medium"
+                                >
+                                    Model:
+                                </span>
+                                <select
+                                    value={selectedModel}
+                                    onChange={handleModelChange}
+                                    disabled={removing}
+                                    style={{
+                                        backgroundColor: 'var(--nav-active-bg)',
+                                        color: 'var(--nav-text)',
+                                        borderColor: 'var(--nav-border)',
+                                        borderWidth: '1px',
+                                        borderStyle: 'solid'
+                                    }}
+                                    className="px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                    onFocus={(e) => e.target.style.borderColor = 'var(--nav-active-text)'}
+                                    onBlur={(e) => e.target.style.borderColor = 'var(--nav-border)'}
+                                >
+                                    {models.map((model) => (
+                                        <option key={model} value={model}>
+                                            {model}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Centered Empty State */}
+                    <div className="flex items-center justify-center" style={{ minHeight: '50vh' }}>
+                        <div className="text-center">
+                            <div className="mb-6 flex justify-center">
+                                <div
+                                    style={{
+                                        background: 'linear-gradient(to bottom right, var(--nav-gradient-from), var(--nav-gradient-to))'
+                                    }}
+                                    className="w-20 h-20 rounded-full flex items-center justify-center"
+                                >
+                                    <Heart className="w-12 h-12 text-white" fill="white" />
+                                </div>
+                            </div>
+                            <h2
+                                style={{ color: 'var(--nav-text)' }}
+                                className="text-3xl font-bold mb-4"
+                            >
+                                All Caught Up!
+                            </h2>
+                            <p style={{ color: 'var(--nav-text-muted)' }}>
+                                You've reviewed all articles in your feed.
+                            </p>
                         </div>
                     </div>
-                    <h2 
-                        style={{ color: 'var(--nav-text)' }}
-                        className="text-3xl font-bold mb-4"
-                    >
-                        All Caught Up!
-                    </h2>
-                    <p style={{ color: 'var(--nav-text-muted)' }}>
-                        You've reviewed all articles in your feed.
-                    </p>
                 </div>
             </div>
         );
@@ -228,12 +279,56 @@ const FeedPage = () => {
     return (
         <div ref={containerRef} className="flex items-center justify-center p-4 md:p-8 overflow-hidden">
             <div className="w-full max-w-6xl">
+                {/* Model Selector */}
+                {models.length > 0 && (
+                    <div className="mb-6 flex justify-center">
+                        <div
+                            style={{
+                                backgroundColor: 'var(--nav-hover-bg)',
+                                backdropFilter: 'blur(16px)',
+                                borderColor: 'var(--nav-border)',
+                                borderWidth: '1px',
+                                borderStyle: 'solid'
+                            }}
+                            className="inline-flex items-center gap-3 px-4 py-2 rounded-full"
+                        >
+                            <span
+                                style={{ color: 'var(--nav-text-muted)' }}
+                                className="text-sm font-medium"
+                            >
+                                Model:
+                            </span>
+                            <select
+                                value={selectedModel}
+                                onChange={handleModelChange}
+                                disabled={removing}
+                                style={{
+                                    backgroundColor: 'var(--nav-active-bg)',
+                                    color: 'var(--nav-text)',
+                                    borderColor: 'var(--nav-border)',
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid'
+                                }}
+                                className="px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                onFocus={(e) => e.target.style.borderColor = 'var(--nav-active-text)'}
+                                onBlur={(e) => e.target.style.borderColor = 'var(--nav-border)'}
+                            >
+                                {models.map((model) => (
+                                    <option key={model} value={model}>
+                                        {model}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                )}
+
                 {/* Desktop Carousel View */}
                 {!isMobile && (
                     <div className="relative">
                         {/* Header */}
                         <div className="mb-8 text-center">
-                            <div 
+                            <div
                                 style={{
                                     backgroundColor: 'var(--nav-hover-bg)',
                                     backdropFilter: 'blur(16px)',
@@ -243,7 +338,7 @@ const FeedPage = () => {
                                 }}
                                 className="inline-flex items-center gap-4 px-6 py-3 rounded-full"
                             >
-                                <span 
+                                <span
                                     style={{ color: 'var(--nav-text)' }}
                                     className="font-medium"
                                 >
@@ -269,16 +364,16 @@ const FeedPage = () => {
                                 onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = 'var(--nav-hover-bg)')}
                                 className="flex-shrink-0 w-14 h-14 rounded-full transition-all hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center group"
                             >
-                                <ChevronLeft 
+                                <ChevronLeft
                                     style={{ color: 'var(--nav-text)' }}
-                                    className="w-7 h-7 transition-colors" 
-                                    strokeWidth={2.5} 
+                                    className="w-7 h-7 transition-colors"
+                                    strokeWidth={2.5}
                                 />
                             </button>
 
                             {/* Main Card */}
                             <div className="flex-1 transition-all duration-500 ease-out">
-                                <div 
+                                <div
                                     style={{
                                         backgroundColor: 'var(--nav-bg)',
                                         borderColor: 'var(--nav-border)',
@@ -288,14 +383,14 @@ const FeedPage = () => {
                                     className="rounded-3xl overflow-hidden shadow-2xl"
                                 >
                                     <div className="p-12">
-                                        <h2 
+                                        <h2
                                             style={{ color: 'var(--nav-text)' }}
                                             className="text-4xl font-bold mb-6 leading-tight"
                                         >
                                             {articles[currentIndex].title}
                                         </h2>
 
-                                        <p 
+                                        <p
                                             style={{ color: 'var(--nav-text-muted)' }}
                                             className="text-xl mb-8 leading-relaxed"
                                         >
@@ -303,7 +398,7 @@ const FeedPage = () => {
                                         </p>
 
                                         <div className="flex flex-wrap gap-3 mb-6">
-                                            <span 
+                                            <span
                                                 style={{
                                                     backgroundColor: 'var(--nav-active-bg)',
                                                     borderColor: 'var(--nav-border)',
@@ -316,7 +411,7 @@ const FeedPage = () => {
                                                 {articles[currentIndex].category}
                                             </span>
                                             {articles[currentIndex].subcategory && (
-                                                <span 
+                                                <span
                                                     style={{
                                                         backgroundColor: 'var(--search-button-active-bg)',
                                                         borderColor: 'var(--nav-border)',
@@ -332,7 +427,7 @@ const FeedPage = () => {
                                         </div>
 
                                         {articles[currentIndex].published_at && (
-                                            <div 
+                                            <div
                                                 style={{ color: 'var(--nav-text-muted)' }}
                                                 className="flex items-center gap-2 mb-8"
                                             >
@@ -412,10 +507,10 @@ const FeedPage = () => {
                                 onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = 'var(--nav-hover-bg)')}
                                 className="flex-shrink-0 w-14 h-14 rounded-full transition-all hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center group"
                             >
-                                <ChevronRight 
+                                <ChevronRight
                                     style={{ color: 'var(--nav-text)' }}
-                                    className="w-7 h-7 transition-colors" 
-                                    strokeWidth={2.5} 
+                                    className="w-7 h-7 transition-colors"
+                                    strokeWidth={2.5}
                                 />
                             </button>
                         </div>
@@ -427,8 +522,8 @@ const FeedPage = () => {
                                     key={idx}
                                     onClick={() => !removing && setCurrentIndex(idx)}
                                     style={{
-                                        backgroundColor: idx === currentIndex 
-                                            ? 'var(--nav-active-text)' 
+                                        backgroundColor: idx === currentIndex
+                                            ? 'var(--nav-active-text)'
                                             : 'var(--nav-text-muted)',
                                         opacity: idx === currentIndex ? 1 : 0.3
                                     }}
@@ -444,14 +539,14 @@ const FeedPage = () => {
                 {/* Mobile Swipe View */}
                 {isMobile && (
                     <div className="flex flex-col items-center justify-center">
-                        <div 
+                        <div
                             style={{
                                 backgroundColor: 'var(--nav-hover-bg)',
                                 backdropFilter: 'blur(16px)'
                             }}
                             className="mb-6 px-4 py-2 rounded-full"
                         >
-                            <span 
+                            <span
                                 style={{ color: 'var(--nav-text)' }}
                                 className="font-medium text-sm"
                             >
@@ -476,7 +571,7 @@ const FeedPage = () => {
                                 onTouchMove={(e) => handleMove(e.touches[0].clientX, e.touches[0].clientY)}
                                 onTouchEnd={handleEnd}
                             >
-                                <div 
+                                <div
                                     style={{
                                         backgroundColor: 'var(--nav-bg)',
                                         borderColor: 'var(--nav-border)',
@@ -520,14 +615,14 @@ const FeedPage = () => {
                                         )}
 
                                         <div className="flex-1 flex flex-col justify-center">
-                                            <h2 
+                                            <h2
                                                 style={{ color: 'var(--nav-text)' }}
                                                 className="text-2xl font-bold mb-4 leading-tight"
                                             >
                                                 {articles[currentIndex].title}
                                             </h2>
 
-                                            <p 
+                                            <p
                                                 style={{ color: 'var(--nav-text-muted)' }}
                                                 className="text-base mb-6 leading-relaxed"
                                             >
@@ -535,7 +630,7 @@ const FeedPage = () => {
                                             </p>
 
                                             <div className="flex flex-wrap gap-2 mb-4">
-                                                <span 
+                                                <span
                                                     style={{
                                                         backgroundColor: 'var(--nav-active-bg)',
                                                         borderColor: 'var(--nav-border)',
@@ -548,7 +643,7 @@ const FeedPage = () => {
                                                     {articles[currentIndex].category}
                                                 </span>
                                                 {articles[currentIndex].subcategory && (
-                                                    <span 
+                                                    <span
                                                         style={{
                                                             backgroundColor: 'var(--search-button-active-bg)',
                                                             borderColor: 'var(--nav-border)',
@@ -564,7 +659,7 @@ const FeedPage = () => {
                                             </div>
 
                                             {articles[currentIndex].published_at && (
-                                                <div 
+                                                <div
                                                     style={{ color: 'var(--nav-text-muted)' }}
                                                     className="flex items-center gap-2 mb-4"
                                                 >

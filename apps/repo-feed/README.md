@@ -84,6 +84,7 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 | `KAFKA_GROUP_ID`              | Consumer group ID for inference commands.                | `repo-feed-group`                        |
 | `KAFKA_FEEDBACK_GROUP_ID`     | Consumer group ID for user feedback.                     | `repo-feed-feedback-group`               |
 | `DEFAULT_MODEL`               | Default recommendation model to use.                     | `tfidf`                                  |
+| `AVAILABLE_MODELS`            | List of available models that can be used                | `tfidf,sbert`                            |
 | `FEEDBACK_EXPIRATION_SECONDS` | Duration (in seconds) to keep user feedback.             | `604800 (7 days)`                        |
 | `FEED_RESCORING_ENABLED`      | Enable/disable the feed rescoring background job.        | `false`                                  |
 | `FEED_RESCORING_INTERVAL`     | Frequency of the feed rescoring job.                     | `10m`                                    |

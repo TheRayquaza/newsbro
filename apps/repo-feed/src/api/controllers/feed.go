@@ -17,13 +17,27 @@ import (
 type FeedController struct {
 	feedService  *services.FeedService
 	defaultModel string
+	models       []string
 }
 
-func NewFeedController(feedService *services.FeedService, defaultModel string) *FeedController {
+func NewFeedController(feedService *services.FeedService, defaultModel string, models []string) *FeedController {
 	return &FeedController{
 		feedService:  feedService,
 		defaultModel: defaultModel,
+		models:       models,
 	}
+}
+
+// @Summary Get user feed models
+// @Description Get the models available for user feed
+// @Tags Feed
+// @Produce json
+// @Success 200 {array} string
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /feed/models [get]
+func (uc *FeedController) GetModels(c *gin.Context) {
+	models := uc.feedService.GetModels()
+	c.JSON(http.StatusOK, models)
 }
 
 // FeedController - Add model query parameter
@@ -102,4 +116,65 @@ func (uc *FeedController) GetUserFeed(c *gin.Context) {
 		Articles:  articleDTOs,
 		UpdatedAt: time.Now(),
 	})
+}
+
+// @Summary Remove article from feed
+// @Description Remove a specific article from the authenticated user's feed
+// @Tags Feed
+// @Produce json
+// @Param id path int true "Article ID"
+// @Success 204
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /feed/{id} [delete]
+func (uc *FeedController) RemoveArticleFromFeed(c *gin.Context) {
+	articleIDParam := c.Param("id")
+	articleID, err := strconv.Atoi(articleIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid article ID",
+		})
+		return
+	}
+	model := c.Query("model")
+	if model == "" {
+		model = uc.defaultModel
+	}
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: "User not found in context",
+		})
+		return
+	}
+
+	usr, ok := user.(*entities.JWTClaims)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Invalid user type in context",
+		})
+		return
+	}
+
+	err = uc.feedService.RemoveArticleFromFeed(usr.UserID, uint(articleID), model)
+	if err != nil {
+		switch err.(type) {
+		case *dto.NotFoundError:
+			c.Status(http.StatusNoContent)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
+			})
+			return
+		}
+	}
+
+	c.Status(http.StatusNoContent)
 }

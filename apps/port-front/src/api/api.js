@@ -4,6 +4,7 @@ import FeedbackApi from './articles/src/api/FeedbackApi';
 import RSSApi from './articles/src/api/RSSApi';
 import UserApi from './users/src/api/UserApi';
 import AuthApi from './users/src/api/AuthApi';
+import FeedApi from './feed/src/api/FeedApi';
 
 import RepoAccountSrcApiDtoLoginRequest from './users/src/model/RepoAccountSrcApiDtoLoginRequest';
 import RepoAccountSrcApiDtoRegisterRequest from './users/src/model/RepoAccountSrcApiDtoRegisterRequest';
@@ -14,6 +15,7 @@ import RepoArticleSrcApiDtoFeedbackRequest from './articles/src/model/RepoArticl
 
 import AccountApiClient from "./users/src/ApiClient";
 import ArticlesApiClient from "./articles/src/ApiClient";
+import FeedApiClient from "./feed/src/ApiClient";
 
 
 class ApiService {
@@ -24,6 +26,7 @@ class ApiService {
     this.rssApi = new RSSApi(new ArticlesApiClient(ENV.ARTICLE_BASE_URL));
     this.authApi = new AuthApi(new AccountApiClient(ENV.ACCOUNT_BASE_URL));
     this.userApi = new UserApi(new AccountApiClient(ENV.ACCOUNT_BASE_URL));
+    this.feedApi = new FeedApi(new FeedApiClient(ENV.FEED_BASE_URL));
   }
 
   // -------------------- AUTH --------------------
@@ -299,6 +302,34 @@ class ApiService {
   async getRssTree(opts = {}) {
     return new Promise((resolve, reject) => {
       this.rssApi.rssTreeGet(opts, (error, data) => {
+        if (error) return reject(error);
+        resolve(data);
+      });
+    });
+  }
+
+  // -------------------- FEED --------------------
+  async getFeedModels() {
+    return new Promise((resolve, reject) => {
+      this.feedApi.feedModelsGet((error, data) => {
+        if (error) return reject(error);
+        resolve(data);
+      });
+    });
+  }
+
+  async getFeed(opts = {}) {
+    return new Promise((resolve, reject) => {
+      this.feedApi.feedGet(opts, (error, data) => {
+        if (error) return reject(error);
+        resolve(data);
+      });
+    });
+  }
+
+  async removeArticleFromFeed(articleId) {
+    return new Promise((resolve, reject) => {
+      this.feedApi.feedIdDelete(articleId, (error, data) => {
         if (error) return reject(error);
         resolve(data);
       });
