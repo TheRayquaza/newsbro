@@ -29,16 +29,42 @@ class ApiService {
     this.feedApi = new FeedApi(new FeedApiClient(ENV.FEED_BASE_URL));
   }
 
-  // Helper function to extract and clean error messages from API responses
+  /**
+   * Extract and clean error messages from API responses.
+   * 
+   * This function extracts error messages from backend error responses and preprocesses
+   * them to remove technical noise, making them more user-friendly.
+   * 
+   * @param {Object} error - The error object from the API client
+   * @param {Object} error.response - The HTTP response object (if available)
+   * @param {Object} error.response.body - The response body
+   * @param {string} error.response.body.message - The error message from the backend
+   * @param {string} error.message - Fallback generic error message
+   * 
+   * @returns {string} A user-friendly error message
+   * 
+   * @example
+   * // Backend validation error:
+   * // Input: "Key: 'RegisterRequest.Password' Error:Field validation for 'Password' failed on the 'min' tag"
+   * // Output: "Password validation failed: must meet 'min' requirement"
+   * 
+   * @example
+   * // Generic backend error:
+   * // Input: "Invalid credentials"
+   * // Output: "Invalid credentials"
+   */
   extractErrorMessage(error) {
     // Try to get the message from the response body
     if (error?.response?.body?.message) {
       let message = error.response.body.message;
-      // Remove technical noise from validation error messages
-      // Example: "Key: 'RegisterRequest.Password' Error:Field validation for 'Password' failed on the 'min' tag"
-      // becomes: "Password failed on the 'min' tag"
+      
+      // Preprocess validation error messages to remove technical noise.
+      // Backend uses Gin binding validation which produces messages in this format:
+      // "Key: 'RegisterRequest.Password' Error:Field validation for 'Password' failed on the 'min' tag"
+      // We transform this to be more user-friendly while keeping the essential information.
       message = message.replace(/Key: '[^']+' Error:Field validation for '([^']+)' failed on the '([^']+)' tag/g, 
         "$1 validation failed: must meet '$2' requirement");
+      
       return message;
     }
     // Fallback to generic error message
