@@ -62,10 +62,15 @@ class ApiService {
       // Backend uses Gin binding validation which produces messages in this format:
       // "Key: 'RegisterRequest.Password' Error:Field validation for 'Password' failed on the 'min' tag"
       // We transform this to be more user-friendly while keeping the essential information.
-      message = message.replace(/Key: '[^']+' Error:Field validation for '([^']+)' failed on the '([^']+)' tag/g, 
-        "$1 validation failed: must meet '$2' requirement");
+      // Split by newlines or spaces between errors, transform each, and rejoin with newlines
+      // for better readability when multiple errors occur.
+      const parts = message.split(/\n| (?=Key: )/);
+      const transformedParts = parts.map(part => 
+        part.replace(/Key: '[^']+' Error:Field validation for '([^']+)' failed on the '([^']+)' tag/, 
+          "$1 validation failed: must meet '$2' requirement")
+      ).filter(part => part.trim().length > 0);
       
-      return message;
+      return transformedParts.join('\n');
     }
     // Fallback to generic error message
     return error?.message || 'An error occurred';
