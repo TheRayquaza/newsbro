@@ -29,6 +29,29 @@ class ApiService {
     this.feedApi = new FeedApi(new FeedApiClient(ENV.FEED_BASE_URL));
   }
 
+  // Helper function to extract and clean error messages from API responses
+  extractErrorMessage(error) {
+    // Try to get the message from the response body
+    if (error?.response?.body?.message) {
+      let message = error.response.body.message;
+      // Clean up validation error messages by removing technical prefixes
+      message = message.replace(/Key: '[^']+' Error:Field validation for '([^']+)' failed on the '([^']+)' tag/g, 
+        (match, field, tag) => {
+          const fieldName = field.charAt(0).toUpperCase() + field.slice(1);
+          const tagMessages = {
+            'min': `${fieldName} is too short`,
+            'max': `${fieldName} is too long`,
+            'required': `${fieldName} is required`,
+            'email': `${fieldName} must be a valid email`
+          };
+          return tagMessages[tag] || `${fieldName} validation failed: ${tag}`;
+        });
+      return message;
+    }
+    // Fallback to generic error message
+    return error?.message || 'An error occurred';
+  }
+
   // -------------------- AUTH --------------------
   async login(email, password) {
     const loginRequest = new RepoAccountSrcApiDtoLoginRequest();
@@ -37,7 +60,12 @@ class ApiService {
 
     return new Promise((resolve, reject) => {
       this.authApi.authLoginPost(loginRequest, (error, data) => {
-        if (error) return reject(error);
+        if (error) {
+          const errorMessage = this.extractErrorMessage(error);
+          const enhancedError = new Error(errorMessage);
+          enhancedError.originalError = error;
+          return reject(enhancedError);
+        }
         resolve(data);
       });
     });
@@ -75,7 +103,12 @@ class ApiService {
 
     return new Promise((resolve, reject) => {
       this.authApi.authRegisterPost(registerRequest, (error, data) => {
-        if (error) return reject(error);
+        if (error) {
+          const errorMessage = this.extractErrorMessage(error);
+          const enhancedError = new Error(errorMessage);
+          enhancedError.originalError = error;
+          return reject(enhancedError);
+        }
         resolve(data);
       });
     });
