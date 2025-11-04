@@ -17,6 +17,7 @@
       in {
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
+            just
             nodejs
           ];
         };
