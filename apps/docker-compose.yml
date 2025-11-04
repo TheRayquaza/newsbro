@@ -103,7 +103,6 @@ services:
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
-      POSTGRES_INITDB_ARGS: "-c shared_buffers=128MB -c max_connections=50"
     ports:
       - "5432:5432"
     volumes:
