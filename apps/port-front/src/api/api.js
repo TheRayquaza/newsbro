@@ -34,18 +34,11 @@ class ApiService {
     // Try to get the message from the response body
     if (error?.response?.body?.message) {
       let message = error.response.body.message;
-      // Clean up validation error messages by removing technical prefixes
+      // Remove technical noise from validation error messages
+      // Example: "Key: 'RegisterRequest.Password' Error:Field validation for 'Password' failed on the 'min' tag"
+      // becomes: "Password failed on the 'min' tag"
       message = message.replace(/Key: '[^']+' Error:Field validation for '([^']+)' failed on the '([^']+)' tag/g, 
-        (match, field, tag) => {
-          const fieldName = field.charAt(0).toUpperCase() + field.slice(1);
-          const tagMessages = {
-            'min': `${fieldName} is too short`,
-            'max': `${fieldName} is too long`,
-            'required': `${fieldName} is required`,
-            'email': `${fieldName} must be a valid email`
-          };
-          return tagMessages[tag] || `${fieldName} validation failed: ${tag}`;
-        });
+        "$1 validation failed: must meet '$2' requirement");
       return message;
     }
     // Fallback to generic error message
