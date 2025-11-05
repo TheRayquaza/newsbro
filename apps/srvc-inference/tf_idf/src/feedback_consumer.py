@@ -48,10 +48,7 @@ class TFIDFFeedbackConsumer(InferenceConsumer):
         )
         self.model = model
         self.producer = producer
-        self.qdrant = QdrantClient(
-            url=config.qdrant_url,
-            api_key=config.qdrant_api_key
-        )
+        self.qdrant = QdrantClient(url=config.qdrant_url, api_key=config.qdrant_api_key)
         self.config = config
         self._init_redis()
 
