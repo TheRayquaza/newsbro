@@ -7,7 +7,7 @@ ENV PORT=8080
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl=7.88.1-10+deb12u14 \
+RUN apt-get update && apt-get install -y --no-install-recommends curl=8.14.1-2 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ${model}/requirements.txt .
