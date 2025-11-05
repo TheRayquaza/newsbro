@@ -17,6 +17,8 @@ import (
 func main() {
 	// Load configuration
 	cfg := config.Load()
+	log.Println(cfg);
+	log.Println(cfg.FrontendOrigin);
 	if cfg.Environment == "dev" {
 		log.Println("Running in development mode")
 	}

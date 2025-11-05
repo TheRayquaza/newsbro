@@ -19,6 +19,7 @@
           buildInputs = with pkgs; [
             just
             nodejs
+            gopls
           ];
         };
       }
