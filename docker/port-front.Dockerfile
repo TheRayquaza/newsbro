@@ -19,9 +19,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 RUN chown -R appuser:appgroup /usr/share/nginx/html /etc/nginx/conf.d
 
 USER appuser
-EXPOSE 80
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:80/health || exit 1
+  CMD curl -f http://localhost:8080/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

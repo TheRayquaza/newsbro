@@ -7,6 +7,9 @@ ENV PORT=8080
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl=7.88.1-10+deb12u14 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY ${model}/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
