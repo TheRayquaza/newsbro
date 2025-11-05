@@ -22,6 +22,7 @@ class TFIDFArticleConsumerConfig(pydantic.BaseModel):
     article_vector_features: int = int(os.getenv("ARTICLE_VECTOR_FEATURES", "100"))
     articles_collection: str = os.getenv("QDRANT_ARTICLES_COLLECTION", "articles")
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
+    qdrant_api_key: Optional[str] = os.getenv("QDRANT_API_KEY", None)
     similarity_threshold: float = float(os.getenv("MODEL_SIMILARITY_THRESHOLD", "0.7"))
     model_name: str = os.getenv("MODEL_NAME", "tfidf")
     redis_sentinels: str = os.getenv(
@@ -50,7 +51,7 @@ class TFIDFArticleConsumer(InferenceConsumer):
         )
         self.model = model
         self.producer = producer
-        self.qdrant = QdrantClient(url=config.qdrant_url)
+        self.qdrant = QdrantClient(url=config.qdrant_url, api_key=config.qdrant_api_key)
         self.config = config
         self._init_redis()
 
