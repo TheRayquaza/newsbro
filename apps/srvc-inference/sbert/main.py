@@ -9,7 +9,6 @@ from fastapi import FastAPI, HTTPException
 from abstract.consumer import InferenceConsumerConfig
 from abstract.mlflow_model import MlflowModel
 from abstract.producer import InferenceProducer, InferenceProducerConfig
-from sbert.src.config import Config  # centralized config
 
 if __name__ == "__main__":
     # Load .env if not in production
@@ -21,6 +20,17 @@ if __name__ == "__main__":
         elif len(sys.argv) > 1:
             raise FileNotFoundError(f"Environment file {env_file} not found")
 
+    # Setup article consumer
+    from sbert.src.article_consumer import (
+        SBERTArticleConsumer,
+        SBERTArticleConsumerConfig,
+    )
+    from sbert.src.config import Config 
+    # Setup feedback consumer
+    from sbert.src.feedback_consumer import (
+        SBERTFeedbackConsumer,
+        SBERTFeedbackConsumerConfig,
+    )
     config = Config()
     print(config)
 
@@ -59,11 +69,6 @@ if __name__ == "__main__":
     )
     producer = InferenceProducer(logger, producer_config)
 
-    # Setup feedback consumer
-    from sbert.src.feedback_consumer import (
-        SBERTFeedbackConsumer,
-        SBERTFeedbackConsumerConfig,
-    )
 
     c1_consumer_config = InferenceConsumerConfig(
         kafka_bootstrap_servers=config.kafka_bootstrap_servers,
@@ -74,11 +79,6 @@ if __name__ == "__main__":
     c1_config = SBERTFeedbackConsumerConfig()
     c1 = SBERTFeedbackConsumer(model, producer, logger, c1_consumer_config, c1_config)
 
-    # Setup article consumer
-    from sbert.src.article_consumer import (
-        SBERTArticleConsumer,
-        SBERTArticleConsumerConfig,
-    )
 
     c2_consumer_config = InferenceConsumerConfig(
         kafka_bootstrap_servers=config.kafka_bootstrap_servers,
