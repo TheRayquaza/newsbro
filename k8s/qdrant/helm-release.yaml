@@ -35,7 +35,6 @@ spec:
     nameOverride: ""
     fullnameOverride: ""
     args: ["./config/initialize.sh"]
-    env: {}
 
     service:
       type: ClusterIP
