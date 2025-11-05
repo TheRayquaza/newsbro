@@ -44,7 +44,7 @@ class InferenceConsumer(abc.ABC):
             value_deserializer=lambda x: json.loads(x.decode("utf-8")),
             auto_commit_interval_ms=5000,
             session_timeout_ms=30000,
-            heartbeat_interval_ms=10000
+            heartbeat_interval_ms=10000,
         )
         self.consumer_config = consumer_config
         self.batch: List[Any] = []
