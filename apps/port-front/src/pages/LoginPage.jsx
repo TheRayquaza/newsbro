@@ -54,7 +54,7 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-4">
+            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-4 whitespace-pre-wrap">
               {error}
             </div>
           )}
