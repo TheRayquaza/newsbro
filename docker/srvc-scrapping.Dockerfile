@@ -9,12 +9,17 @@ RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main src/cmd/main.go
 
 FROM debian:bookworm-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends bash ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash=5.2.15-1 \
+    ca-certificates=20231012~deb12u1 \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd -m -s /bin/bash nonroot
 
 WORKDIR /app
 COPY --from=builder /app/main .
 
 USER nonroot
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://${APP_HOST}:${PORT}/health || exit 1
 
 CMD ["./main"]

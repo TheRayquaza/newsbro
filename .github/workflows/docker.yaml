@@ -1,0 +1,34 @@
+name: dockerfiles
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - 'docker/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Find Dockerfiles
+        id: files
+        run: |
+          echo "dockerfiles<<EOF" >> $GITHUB_OUTPUT
+          find docker -type f -name "*.Dockerfile" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Run Hadolint
+        run: |
+          for dockerfile in $(find docker -type f -name "*.Dockerfile"); do
+            docker run --rm -v "$PWD":/workspace -w /workspace hadolint/hadolint:v2.14.0-alpine hadolint "$dockerfile" || exit 1
+          done
+
+      - name: Run Checkov
+        run: |
+          for dockerfile in $(find docker -type f -name "*.Dockerfile"); do
+            echo "Checkov scan $dockerfile..."
+            docker run --rm -v "$PWD":/workspace -w /workspace bridgecrew/checkov:3.2.490 -f "$dockerfile" || exit 1
+          done
