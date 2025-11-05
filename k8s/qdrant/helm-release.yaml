@@ -19,7 +19,7 @@ spec:
     replicaCount: 1
 
     env:
-      QDRANT__SERVICE__API_KEY:
+      - name: QDRANT__SERVICE__API_KEY
         valueFrom:
           secretKeyRef:
             name: qdrant-secrets
