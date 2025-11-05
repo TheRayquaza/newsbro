@@ -72,7 +72,7 @@ swag init -g src/cmd/main.go -o docs --parseDependency --parseInternal
 |-------------------------------|----------------------------------------------------------|------------------------------------------|
 | `PORT`                        | HTTP server port.                                        | `8080`                                   |
 | `JWT_SECRET`                  | Secret key for signing JWTs.                             | `your-secret-key`                        |
-| `FRONTEND_ORIGIN`             | The origin URL of the frontend application.              | `http://localhost:3000`                  |
+| `FRONTEND_ORIGIN`             | The origin URL of the frontend application.              | `https://app.newsbro.cc`                 |
 | `LOGIN_REDIRECT_URL`          | URL for post-login redirection.                          | `http://localhost:3000/auth/callback`    |
 | `REDIS_SENTINELS`             | Comma-separated list of Redis Sentinel addresses.        | `localhost:26379`                        |
 | `REDIS_MASTER_NAME`           | Name of the Redis master instance.                       | `mymaster`                               |
