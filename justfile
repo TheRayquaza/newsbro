@@ -17,3 +17,7 @@ init-db:
 dev:
     cd apps/ && docker compose up -d
     cd apps/port-front/ && npm i && npm run dev
+
+# Shuts down docker compose
+down:
+    cd apps/ && docker compose down

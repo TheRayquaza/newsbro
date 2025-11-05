@@ -96,7 +96,7 @@ func Load() *Config {
 	return &Config{
 		Port:             getEnv("PORT", "8080"),
 		JWTSecret:        getEnv("JWT_SECRET", "your-secret-key"),
-		FrontendOrigin:   getEnv("FRONTEND_ORIGIN", "http://localhost:3000"),
+		FrontendOrigin:   getEnv("FRONTEND_ORIGIN", "https://app.newsbro.cc"),
 		LoginRedirectURL: getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000/auth/callback"),
 
 		RedisSentinels:  redisSentinels,
