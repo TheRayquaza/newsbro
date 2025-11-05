@@ -7,10 +7,14 @@ RUN go mod download
 COPY . .
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main src/cmd/main.go
 
-FROM gcr.io/distroless/base-debian12:nonroot
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends bash ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -s /bin/bash nonroot
 
 WORKDIR /app
 COPY --from=builder /app/main .
-USER nonroot:nonroot
+
+USER nonroot
 
 CMD ["./main"]
