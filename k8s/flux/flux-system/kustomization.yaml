@@ -14,3 +14,4 @@ resources:
 - vault.yaml
 - cert-manager.yaml
 - kafka.yaml
+- ingress-nginx.yaml
