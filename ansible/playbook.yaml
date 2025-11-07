@@ -1,0 +1,6 @@
+---
+- name: Setup WireGuard VPN Server
+  hosts: master
+  become: yes
+  roles:
+    - wg
