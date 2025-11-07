@@ -1,11 +1,12 @@
 ---
+# --- Private Ingress Controller ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: ingress-nginx-private
   namespace: ingress-nginx
 spec:
-  interval: 10m0s
+  interval: 10m
   chart:
     spec:
       chart: ingress-nginx
@@ -16,19 +17,24 @@ spec:
         namespace: ingress-nginx
   values:
     controller:
+      watchIngressWithoutClass: false
+      electionID: ingress-controller-private-leader
       ingressClass:
         name: private
         create: true
         setAsDefaultIngress: false
+        controllerValue: "k8s.io/ingress-nginx-private"
+      ingressClassResource:
+        name: private
+        enabled: true
+        controllerValue: "k8s.io/ingress-nginx-private"
+        default: false
       service:
-        enableHttp: true
-        enableHttps: true
         type: LoadBalancer
         externalTrafficPolicy: Cluster
-        loadBalancerIP: 10.0.0.1 # wg vpn
+        loadBalancerIP: 10.0.0.1
+      hostPort:
+        enabled: false
+      hostNetwork: false
       replicaCount: 2
       logLevel: info
-      watchNamespace: ""
-    serviceAccount:
-      create: true
-    enableCustomResources: false # defined by public ingress
