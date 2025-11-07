@@ -1,5 +1,7 @@
 # SBERT
 
+These tests were conducted using the all-MiniLM-L6-v2 Sentence-BERT (SBERT) model.
+
 | #   | First Text (Reference)                                                                 | Second Text (Paraphrased)                                                                                           | **Cosine Similarity** |
 | --- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | 1   | Palestinian citizens of Israel express fear and distrust over a fragile Gaza ceasefire | Palestinian citizens of Israel voice concern and mistrust amid a fragile Gaza truce.                                | **0.7746**            |
