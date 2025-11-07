@@ -1,15 +1,14 @@
----
-kind: Ingress
 apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: capacitor
   namespace: flux-system
   labels:
     app: capacitor
 spec:
-  ingressClassName: traefik
+  ingressClassName: private 
   rules:
-    - host: capacitor.localhost
+    - host: capacitor.internal.newsbro.cc 
       http:
         paths:
           - path: /

@@ -66,15 +66,7 @@ spec:
         purge: false
 
     ingress:
-      enabled: true
-      ingressClassName: traefik
-      path: /
-      hosts:
-        - minio-svc.localhost
+      enabled: false
 
     consoleIngress:
-      enabled: true
-      ingressClassName: traefik
-      path: /
-      hosts:
-        - minio.localhost
+      enabled: false

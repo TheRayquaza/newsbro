@@ -1,5 +1,5 @@
 kind: Kustomization
 resources:
-- helm-release.yaml
-- helm-repo.yaml
+- operator.yaml
+- repo.yaml
 - namespace.yaml

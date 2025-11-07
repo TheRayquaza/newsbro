@@ -1,31 +1,28 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: port-front
-  namespace: apps
+  name: redpanda
+  namespace: kafka
   labels:
-    app: port-front
+    app: redpanda
   annotations:
-    nginx.ingress.kubernetes.io/limit-rpm: "300"
-    nginx.ingress.kubernetes.io/limit-burst: "100"
-    
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
-  ingressClassName: public
-  
+  ingressClassName: private
+
   tls:
     - hosts:
-        - app.newsbro.cc
+        - redpanda.internal.newsbro.cc
       secretName: newsbro-wildcard-tls
 
   rules:
-    - host: app.newsbro.cc
+    - host: redpanda.internal.newsbro.cc
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: port-front
+                name: redpanda-service
                 port:
                   number: 80

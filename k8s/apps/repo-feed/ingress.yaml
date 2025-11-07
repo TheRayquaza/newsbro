@@ -1,64 +1,32 @@
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: rate-limit-repo-feed
-  namespace: apps
-spec:
-  rateLimit:
-    average: 100
-    period: 1m
-    burst: 50
-
----
-# feed.localhost
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: repo-feed-localhost
-  namespace: apps
-  labels:
-    app: repo-feed
-spec:
-  entryPoints:
-    - web
-  routes:
-    - match: Host(`feed.localhost`) && PathPrefix(`/api/v1/feed`)
-      kind: Rule
-      services:
-        - name: repo-feed
-          port: 80
-      middlewares:
-        - name: rate-limit-repo-feed
-    - match: Host(`feed.localhost`) && PathPrefix(`/swagger`)
-      kind: Rule
-      services:
-        - name: repo-feed
-          port: 80
-      middlewares:
-        - name: rate-limit-repo-feed
-
----
-# feed.newsbro.cc
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+# NGINX Ingress resource for the 'repo-feed' service, 
+# consolidating all path-based routing and applying rate limiting.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: repo-feed
   namespace: apps
   labels:
     app: repo-feed
   annotations:
+    nginx.ingress.kubernetes.io/limit-rpm: "100"
+    nginx.ingress.kubernetes.io/limit-burst: "50"
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`feed.newsbro.cc`) && PathPrefix(`/api/v1/feed`)
-      kind: Rule
-      services:
-        - name: repo-feed
-          port: 80
-      middlewares:
-        - name: rate-limit-repo-feed
+  ingressClassName: public
+
   tls:
-    secretName: newsbro-wildcard-tls
+    - hosts:
+        - feed.newsbro.cc
+      secretName: newsbro-wildcard-tls
+
+  rules:
+    - host: feed.newsbro.cc
+      http:
+        paths:
+          - path: /api/v1/feed
+            pathType: Prefix
+            backend:
+              service:
+                name: repo-feed
+                port:
+                  number: 80

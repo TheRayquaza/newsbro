@@ -9,7 +9,14 @@ spec:
     name: letsencrypt-dns01
     kind: ClusterIssuer
   dnsNames:
+    - app.newsbro.cc
     - account.newsbro.cc
     - article.newsbro.cc
     - feed.newsbro.cc
+    - capacitor.internal.newsbro.cc
+    - redpanda.internal.newsbro.cc
+    - minio.internal.newsbro.cc
+    - redis.internal.newsbro.cc
+    - mlflow.internal.newsbro.cc
+    - vault.internal.newsbro.cc
     # add more for each service

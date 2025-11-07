@@ -61,17 +61,7 @@ spec:
           checksEnabled: false
 
     ingress:
-      enabled: true
-      ingressClassName: "traefik"
-      additionalLabels: {}
-      annotations: {}
-      hosts:
-        - host: qdrant.localhost
-          paths:
-            - path: /
-              pathType: Prefix
-              servicePort: 6333
-      tls: []
+      enabled: false
 
     livenessProbe:
       enabled: false

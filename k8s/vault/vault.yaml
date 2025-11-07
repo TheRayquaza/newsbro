@@ -59,13 +59,7 @@ spec:
         accessMode: ReadWriteOnce
 
       ingress:
-        enabled: true
-        ingressClassName: traefik
-        hosts:
-          - host: vault.localhost
-            paths:
-              - /
-        tls: []   # configure if you want HTTPS from traefik
+        enabled: false
 
     ui:
       enabled: true

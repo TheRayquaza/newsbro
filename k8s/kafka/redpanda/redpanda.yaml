@@ -42,13 +42,6 @@ spec:
         cpu: 100m
 
     ingress:
-      enabled: true
-      className: traefik
-      hosts:
-        - host: "redpanda.localhost"
-          paths:
-            - path: /
-              pathType: Prefix
-      tls: []
+      enabled: false
 
     replicaCount: 1
