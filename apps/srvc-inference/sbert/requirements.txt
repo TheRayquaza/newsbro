@@ -5,13 +5,16 @@ transformers
 
 # MLflow integration
 mlflow
+boto3
 
 # Vector database
 qdrant-client
 
 # Data processing
-numpy
+scikit-learn
 pandas
+numpy
+pyarrow
 
 # Message queue
 kafka-python
@@ -20,8 +23,9 @@ kafka-python
 redis
 
 # API framework
+python-dotenv
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
 
 # Utilities
