@@ -8,8 +8,8 @@ spec:
   interval: 10m0s
   chart:
     spec:
-      chart: nginx-ingress
-      version: 5.2.1
+      chart: ingress-nginx
+      version: 4.14.0
       sourceRef:
         kind: HelmRepository
         name: helm-repo
@@ -27,7 +27,7 @@ spec:
         externalTrafficPolicy: Cluster
         loadBalancerIP: 10.0.0.1 # wg vpn
       replicaCount: 2
-      logLevel: notice
+      logLevel: info
       watchNamespace: ""
     serviceAccount:
       create: true
