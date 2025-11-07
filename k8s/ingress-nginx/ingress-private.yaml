@@ -1,0 +1,34 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: ingress-nginx-private
+  namespace: ingress-nginx
+spec:
+  interval: 10m0s
+  chart:
+    spec:
+      chart: nginx-ingress
+      version: 5.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: helm-repo
+        namespace: ingress-nginx
+  values:
+    controller:
+      ingressClass:
+        name: private
+        create: true
+        setAsDefaultIngress: false
+      service:
+        enableHttp: true
+        enableHttps: true
+        type: LoadBalancer
+        externalTrafficPolicy: Cluster
+        loadBalancerIP: 10.0.0.1 # wg vpn
+      replicaCount: 2
+      logLevel: notice
+      watchNamespace: ""
+    serviceAccount:
+      create: true
+    enableCustomResources: false # defined by public ingress
