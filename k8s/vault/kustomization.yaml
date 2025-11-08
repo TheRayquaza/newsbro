@@ -8,3 +8,4 @@ resources:
 - service-account.yaml
 - cluster-role-binding.yaml
 - vault-auth-token.yaml
+- cluster-secret-store.yaml
