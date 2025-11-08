@@ -2,7 +2,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: helm-repo
+  name: repo
   namespace: vault
 spec:
   interval: 10m0s
