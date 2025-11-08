@@ -29,6 +29,53 @@ class ApiService {
     this.feedApi = new FeedApi(new FeedApiClient(ENV.FEED_BASE_URL));
   }
 
+  /**
+   * Extract and clean error messages from API responses.
+   * 
+   * This function extracts error messages from backend error responses and preprocesses
+   * them to remove technical noise, making them more user-friendly.
+   * 
+   * @param {Object} error - The error object from the API client
+   * @param {Object} error.response - The HTTP response object (if available)
+   * @param {Object} error.response.body - The response body
+   * @param {string} error.response.body.message - The error message from the backend
+   * @param {string} error.message - Fallback generic error message
+   * 
+   * @returns {string} A user-friendly error message
+   * 
+   * @example
+   * // Backend validation error:
+   * // Input: "Key: 'RegisterRequest.Password' Error:Field validation for 'Password' failed on the 'min' tag"
+   * // Output: "Password validation failed: must meet 'min' requirement"
+   * 
+   * @example
+   * // Generic backend error:
+   * // Input: "Invalid credentials"
+   * // Output: "Invalid credentials"
+   */
+  extractErrorMessage(error) {
+    // Try to get the message from the response body
+    if (error?.response?.body?.message) {
+      let message = error.response.body.message;
+      
+      // Preprocess validation error messages to remove technical noise.
+      // Backend uses Gin binding validation which produces messages in this format:
+      // "Key: 'RegisterRequest.Password' Error:Field validation for 'Password' failed on the 'min' tag"
+      // We transform this to be more user-friendly while keeping the essential information.
+      // Split by newlines or spaces between errors, transform each, and rejoin with newlines
+      // for better readability when multiple errors occur.
+      const parts = message.split(/\n| (?=Key: )/);
+      const transformedParts = parts.map(part => 
+        part.replace(/Key: '[^']+' Error:Field validation for '([^']+)' failed on the '([^']+)' tag/, 
+          "$1 validation failed: must meet '$2' requirement")
+      ).filter(part => part.trim().length > 0);
+      
+      return transformedParts.join('\n');
+    }
+    // Fallback to generic error message
+    return error?.message || 'An error occurred';
+  }
+
   // -------------------- AUTH --------------------
   async login(email, password) {
     const loginRequest = new RepoAccountSrcApiDtoLoginRequest();
@@ -37,7 +84,12 @@ class ApiService {
 
     return new Promise((resolve, reject) => {
       this.authApi.authLoginPost(loginRequest, (error, data) => {
-        if (error) return reject(error);
+        if (error) {
+          const errorMessage = this.extractErrorMessage(error);
+          const enhancedError = new Error(errorMessage);
+          enhancedError.originalError = error;
+          return reject(enhancedError);
+        }
         resolve(data);
       });
     });
@@ -75,7 +127,12 @@ class ApiService {
 
     return new Promise((resolve, reject) => {
       this.authApi.authRegisterPost(registerRequest, (error, data) => {
-        if (error) return reject(error);
+        if (error) {
+          const errorMessage = this.extractErrorMessage(error);
+          const enhancedError = new Error(errorMessage);
+          enhancedError.originalError = error;
+          return reject(enhancedError);
+        }
         resolve(data);
       });
     });

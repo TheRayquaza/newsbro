@@ -12,7 +12,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
-      maxSurge: 1
+      maxSurge: 2
   selector:
     matchLabels:
       app: port-front
@@ -25,10 +25,10 @@ spec:
         - name: pull-secret
       containers:
         - name: port-front
-          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.5.0
+          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.5.1
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: http
           envFrom:
             - configMapRef:
@@ -43,6 +43,6 @@ spec:
           healthProbe:
             httpGet:
               path: /health
-              port: 80
+              port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10

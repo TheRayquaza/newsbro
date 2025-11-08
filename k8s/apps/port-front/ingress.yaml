@@ -1,57 +1,31 @@
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: rate-limit-frontend
-  namespace: apps
-spec:
-  rateLimit:
-    average: 300
-    period: 1m
-    burst: 100
-
----
-# app.localhost
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
-metadata:
-  name: port-front-localhost
-  namespace: apps
-  labels:
-    app: port-front
-spec:
-  entryPoints:
-    - web
-  routes:
-    - match: Host(`app.localhost`)
-      kind: Rule
-      services:
-        - name: port-front
-          port: 80
-      middlewares:
-        - name: rate-limit-frontend
-
----
-# app.newsbro.cc
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: port-front
   namespace: apps
   labels:
     app: port-front
   annotations:
+    nginx.ingress.kubernetes.io/limit-rpm: "300"
+    nginx.ingress.kubernetes.io/limit-burst: "100"
+    
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`app.newsbro.cc`)
-      kind: Rule
-      services:
-        - name: port-front
-          port: 80
-      middlewares:
-        - name: rate-limit-frontend
+  ingressClassName: public
+  
   tls:
-    secretName: newsbro-wildcard-tls
+    - hosts:
+        - app.newsbro.cc
+      secretName: newsbro-wildcard-tls
+
+  rules:
+    - host: app.newsbro.cc
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: port-front
+                port:
+                  number: 80

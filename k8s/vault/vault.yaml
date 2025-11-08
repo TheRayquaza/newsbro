@@ -12,7 +12,7 @@ spec:
       version: 0.30.1
       sourceRef:
         kind: HelmRepository
-        name: helm-repo
+        name: repo
         namespace: vault
   values:
     global:
@@ -59,13 +59,7 @@ spec:
         accessMode: ReadWriteOnce
 
       ingress:
-        enabled: true
-        ingressClassName: traefik
-        hosts:
-          - host: vault.localhost
-            paths:
-              - /
-        tls: []   # configure if you want HTTPS from traefik
+        enabled: false
 
     ui:
       enabled: true

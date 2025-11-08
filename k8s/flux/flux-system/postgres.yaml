@@ -12,17 +12,3 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: pgadmin
-  namespace: postgres
-spec:
-  interval: 1m
-  path: ./k8s/pgadmin
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system

@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: redpanda-tls
+  namespace: kafka
+spec:
+  secretName: redpanda-tls
+  issuerRef:
+    name: letsencrypt-dns01
+    kind: ClusterIssuer
+  dnsNames:
+    - redpanda.internal.newsbro.cc

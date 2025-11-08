@@ -7,16 +7,21 @@ ENV PORT=8080
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl=8.14.1-2 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY ${model}/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY abstract ./abstract
 COPY ${model} ./${model}
-
 COPY ${model}/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh && useradd -m -s /bin/bash appuser
 
-EXPOSE 8080
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=6 \
+  CMD curl -f http://${HOST}:${PORT}/health || exit 1
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python3"]

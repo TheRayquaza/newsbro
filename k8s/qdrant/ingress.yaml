@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qdrant
+  namespace: qdrant
+  labels:
+    app: qdrant
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
+spec:
+  ingressClassName: private
+
+  tls:
+    - hosts:
+        - qdrant.internal.newsbro.cc
+      secretName: qdrant-tls
+
+  rules:
+    - host: qdrant.internal.newsbro.cc
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qdrant
+                port:
+                  number: 6333

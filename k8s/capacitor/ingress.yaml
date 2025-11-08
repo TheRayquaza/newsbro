@@ -1,21 +1,28 @@
----
-kind: Ingress
 apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: capacitor
   namespace: flux-system
   labels:
     app: capacitor
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
-  ingressClassName: traefik
+  ingressClassName: private
+
+  tls:
+    - hosts:
+        - capacitor.internal.newsbro.cc
+      secretName: capacitor-tls
+
   rules:
-    - host: capacitor.localhost
+    - host: capacitor.internal.newsbro.cc
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: capacitor-next
+                name: capacitor-service
                 port:
                   number: 80

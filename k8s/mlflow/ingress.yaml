@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mlflow
+  namespace: mlflow
+  labels:
+    app: mlflow
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
+spec:
+  ingressClassName: private
+  
+  tls:
+    - hosts:
+        - mlflow.internal.newsbro.cc
+      secretName: newsbro-wildcard-tls
+
+  rules:
+    - host: mlflow.internal.newsbro.cc
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mlflow
+                port:
+                  number: 80

@@ -1,0 +1,43 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: ingress-nginx-public
+  namespace: ingress-nginx
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: ingress-nginx
+      version: 4.14.0
+      sourceRef:
+        kind: HelmRepository
+        name: helm-repo
+        namespace: ingress-nginx
+  values:
+    controller:
+      watchIngressWithoutClass: true
+      electionID: ingress-controller-public-leader
+      ingressClass:
+        name: public
+        create: true
+        setAsDefaultIngress: true
+        controllerValue: "k8s.io/ingress-nginx-public"
+      ingressClassResource:
+        name: public
+        enabled: true
+        controllerValue: "k8s.io/ingress-nginx-public"
+        default: true
+      service:
+        type: LoadBalancer
+        externalTrafficPolicy: Local
+        loadBalancerIP: 192.168.0.10
+        annotations:
+          metallb.io/address-pool: public-pool
+        ports:
+          http: 80
+          https: 443
+      hostNetwork: false
+      hostPort:
+        enabled: false
+      replicaCount: 2
+      logLevel: info
