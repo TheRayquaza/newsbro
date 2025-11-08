@@ -4,3 +4,4 @@ resources:
 - repo.yaml
 - metallb.yaml
 - pools.yaml
+- crds.yaml
