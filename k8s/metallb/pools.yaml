@@ -16,15 +16,4 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 10.0.0.100-10.0.0.105
-
----
-apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
-metadata:
-  name: l2-advertisement
-  namespace: metallb-system
-spec:
-  ipAddressPools:
-  - public-pool
-  - private-pool
+  - 10.0.0.1/32
