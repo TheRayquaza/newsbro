@@ -12,7 +12,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
-      maxSurge: 1
+      maxSurge: 2
   selector:
     matchLabels:
       app: port-front
@@ -25,7 +25,7 @@ spec:
         - name: pull-secret
       containers:
         - name: port-front
-          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.5.2
+          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.5.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

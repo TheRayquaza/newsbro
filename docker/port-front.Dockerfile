@@ -12,15 +12,14 @@ FROM nginx:alpine3.22
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-RUN rm -rf /usr/share/nginx/html/*
+RUN mkdir -p /var/cache/nginx /var/run /var/log/nginx && \
+    chown -R appuser:appgroup /var/cache/nginx /var/run /var/log/nginx /usr/share/nginx/html /etc/nginx/conf.d
+
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN chown -R appuser:appgroup /usr/share/nginx/html /etc/nginx/conf.d
-
 USER appuser
 EXPOSE 8080
-
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
 
