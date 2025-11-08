@@ -1,28 +1,28 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: redisinsight
-  namespace: redis
+  name: qdrant
+  namespace: qdrant
   labels:
-    app: redisinsight
+    app: qdrant
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
   ingressClassName: private
-  
+
   tls:
     - hosts:
-        - redis.internal.newsbro.cc
-      secretName: redis-tls
+        - qdrant.internal.newsbro.cc
+      secretName: qdrant-tls
 
   rules:
-    - host: redis.internal.newsbro.cc
+    - host: qdrant.internal.newsbro.cc
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: redisinsight-service
+                name: qdrant
                 port:
-                  number: 80
+                  number: 6333

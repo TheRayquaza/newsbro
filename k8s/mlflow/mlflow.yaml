@@ -19,13 +19,7 @@ spec:
       enabled: true
 
     ingress:
-      enabled: true
-      className: "traefik"
-      hosts:
-        - host: mlflow.localhost
-          paths:
-            - path: /
-              pathType: Prefix
+      enabled: false
 
     extraVolumes:
       - name: mlflow-volume

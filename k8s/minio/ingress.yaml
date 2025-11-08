@@ -1,28 +1,28 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: redisinsight
-  namespace: redis
+  name: minio-console
+  namespace: minio
   labels:
-    app: redisinsight
+    app: minio
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
   ingressClassName: private
-  
+
   tls:
     - hosts:
-        - redis.internal.newsbro.cc
-      secretName: redis-tls
+        - minio.internal.newsbro.cc
+      secretName: minio-tls
 
   rules:
-    - host: redis.internal.newsbro.cc
+    - host: minio.internal.newsbro.cc
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: redisinsight-service
+                name: minio
                 port:
-                  number: 80
+                  number: 9001

@@ -13,7 +13,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
-      maxSurge: 1
+      maxSurge: 2
   selector:
     matchLabels:
       app: repo-article
@@ -30,7 +30,7 @@ spec:
         - name: pull-secret
       containers:
         - name: repo-article
-          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.4.2
+          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.4.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

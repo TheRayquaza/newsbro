@@ -1,28 +1,30 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: redisinsight
-  namespace: redis
+  name: vault
+  namespace: vault
   labels:
-    app: redisinsight
+    app: vault
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
 spec:
   ingressClassName: private
   
   tls:
     - hosts:
-        - redis.internal.newsbro.cc
-      secretName: redis-tls
+        - vault.internal.newsbro.cc
+      secretName: vault-tls
 
   rules:
-    - host: redis.internal.newsbro.cc
+    - host: vault.internal.newsbro.cc
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: redisinsight-service
+                name: vault
                 port:
-                  number: 80
+                  number: 8200

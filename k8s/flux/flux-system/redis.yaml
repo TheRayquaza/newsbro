@@ -3,7 +3,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: redis-operator
-  namespace: redis
+  namespace: flux-system
 spec:
   interval: 1m
   path: ./k8s/redis/operator
@@ -17,7 +17,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: redis
-  namespace: redis
+  namespace: flux-system
 spec:
   interval: 1m
   path: ./k8s/redis/redis
@@ -33,7 +33,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: redisinsight
-  namespace: redis
+  namespace: flux-system
 spec:
   interval: 1m
   path: ./k8s/redis/insight

@@ -15,3 +15,4 @@ resources:
 - cert-manager.yaml
 - kafka.yaml
 - ingress-nginx.yaml
+- metallb.yaml

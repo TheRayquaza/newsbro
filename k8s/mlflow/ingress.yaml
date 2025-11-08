@@ -1,10 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: redisinsight
-  namespace: redis
+  name: mlflow
+  namespace: mlflow
   labels:
-    app: redisinsight
+    app: mlflow
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
@@ -12,17 +12,17 @@ spec:
   
   tls:
     - hosts:
-        - redis.internal.newsbro.cc
-      secretName: redis-tls
+        - mlflow.internal.newsbro.cc
+      secretName: newsbro-wildcard-tls
 
   rules:
-    - host: redis.internal.newsbro.cc
+    - host: mlflow.internal.newsbro.cc
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: redisinsight-service
+                name: mlflow
                 port:
                   number: 80

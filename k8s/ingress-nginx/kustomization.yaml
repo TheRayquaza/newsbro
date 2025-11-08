@@ -4,4 +4,4 @@ resources:
 - namespace.yaml
 - ingress-private.yaml
 - ingress-public.yaml
-- helm-repo.yaml
+- repo.yaml

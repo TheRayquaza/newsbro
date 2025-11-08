@@ -1,28 +1,28 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: redisinsight
-  namespace: redis
+  name: redpanda
+  namespace: kafka
   labels:
-    app: redisinsight
+    app: redpanda
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
   ingressClassName: private
-  
+
   tls:
     - hosts:
-        - redis.internal.newsbro.cc
-      secretName: redis-tls
+        - redpanda.internal.newsbro.cc
+      secretName: redpanda-tls
 
   rules:
-    - host: redis.internal.newsbro.cc
+    - host: redpanda.internal.newsbro.cc
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: redisinsight-service
+                name: redpanda-service
                 port:
                   number: 80
