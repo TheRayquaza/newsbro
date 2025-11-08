@@ -13,7 +13,7 @@ spec:
   tls:
     - hosts:
         - redis.internal.newsbro.cc
-      secretName: newsbro-wildcard-tls
+      secretName: redis-tls
 
   rules:
     - host: redis.internal.newsbro.cc

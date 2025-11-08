@@ -13,7 +13,7 @@ spec:
   tls:
     - hosts:
         - qdrant.internal.newsbro.cc
-      secretName: newsbro-wildcard-tls
+      secretName: qdrant-tls
 
   rules:
     - host: qdrant.internal.newsbro.cc

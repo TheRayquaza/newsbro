@@ -5,16 +5,24 @@ metadata:
   namespace: flux-system
   labels:
     app: capacitor
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
-  ingressClassName: private 
+  ingressClassName: private
+
+  tls:
+    - hosts:
+        - capacitor.internal.newsbro.cc
+      secretName: capacitor-tls
+
   rules:
-    - host: capacitor.internal.newsbro.cc 
+    - host: capacitor.internal.newsbro.cc
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: capacitor-next
+                name: capacitor-service
                 port:
                   number: 80

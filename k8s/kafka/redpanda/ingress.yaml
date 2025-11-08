@@ -13,7 +13,7 @@ spec:
   tls:
     - hosts:
         - redpanda.internal.newsbro.cc
-      secretName: newsbro-wildcard-tls
+      secretName: redpanda-tls
 
   rules:
     - host: redpanda.internal.newsbro.cc
