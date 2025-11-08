@@ -4,3 +4,4 @@ resources:
 - namespace.yaml
 - repo.yaml
 - external-secrets.yaml
+- https://raw.githubusercontent.com/external-secrets/external-secrets/main/deploy/crds/bundle.yaml # crd bundle
