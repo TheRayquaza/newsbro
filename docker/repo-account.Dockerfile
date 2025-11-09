@@ -1,7 +1,7 @@
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
-RUN go install github.com/DataDog/orchestrion@latest
+RUN go install github.com/DataDog/orchestrion@v1.6.1
 COPY go.mod go.sum ./
 RUN go mod download
 
