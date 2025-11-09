@@ -19,14 +19,14 @@ class Config(pydantic.BaseModel):
         "KAFKA_ARTICLE_CONSUMER_TOPIC", "article-aggregate"
     )
     kafka_article_consumer_group: str = os.getenv(
-        "KAFKA_ARTICLE_CONSUMER_GROUP", "article-tfidf-group"
+        "KAFKA_ARTICLE_CONSUMER_GROUP", "article-sbert-group"
     )
     ## Feedback Consumer
     kafka_feedback_consumer_topic: str = os.getenv(
         "KAFKA_FEEDBACK_CONSUMER_TOPIC", "feedback-aggregate"
     )
     kafka_feedback_consumer_group: str = os.getenv(
-        "KAFKA_FEEDBACK_CONSUMER_GROUP", "feedback-tfidf-group"
+        "KAFKA_FEEDBACK_CONSUMER_GROUP", "feedback-sbert-group"
     )
 
     # Qdrant
