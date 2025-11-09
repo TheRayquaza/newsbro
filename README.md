@@ -7,12 +7,12 @@ and interact with 100k+ articles.
 
 ![login page](./assets/login.png) ![home page](./assets/home.png)
 
-We provide automatic update everyday (9am / 6pm UTC), 10k articles ingested
+We provide automatic update everyday (9am / 6pm UTC), 1k articles ingested
 from various sources. We also provide new recommendation based on your liked articles.
 
 Feel free to open issues if you see anything relevant that could be added.
 
-⚠ App will be down at the end of our project (~ Jan. 2026)
+⚠ App will be down at the end of our project (~ January 2026)
 
 ## Table of Contents
 - [Project Structure](#project-structure)
@@ -97,8 +97,8 @@ The project is built with a microservices architecture including the following c
 We want light speed recommendation and scalable infrastructure. Behind the scene:
 - Kafka consumers consuming articles, processing articles by batch and creating new recommendations.
 - Qdrant storing vector embeddings to pre compute recommendation as they come. These representation are then used in various way.
-- Redis Sentinels with [zsets](https://redis.io/docs/latest/develop/data-types/sorted-sets/) to ready for usage feed queue
-- Repo Feed, a dedicated service managing feed, storing feedbacks / articles for short periods
+- Redis Sentinels with [zsets](https://redis.io/docs/latest/develop/data-types/sorted-sets/) to create efficient feed queue.
+- Repo Feed, a dedicated service managing feed, storing feedbacks / articles for short periods?
 
 ![User Feed](docs/misc/user_feed_2.png)
 
