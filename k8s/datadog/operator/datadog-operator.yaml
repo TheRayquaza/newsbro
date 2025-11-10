@@ -1,0 +1,121 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: datadog-operator
+  namespace: datadog
+spec:
+  interval: 10m0s
+  chart:
+    spec:
+      chart: datadog-operator
+      version: v1.18.2
+      sourceRef:
+        kind: HelmRepository
+        name: repo
+        namespace: datadog
+  values:
+    replicaCount: 1
+
+    apiKeyExistingSecret: api-key
+
+    clusterName: kube
+
+    site: datadoghq.eu
+
+    env: []
+
+    image:
+      repository: gcr.io/datadoghq/operator
+      tag: 1.20.0-rc.4
+      pullPolicy: IfNotPresent
+      doNotCheckTag: false
+    imagePullSecrets: []
+    nameOverride: ""
+    fullnameOverride: ""
+    logLevel: "info"
+
+    introspection:
+      enabled: false
+    datadogAgentProfile:
+      enabled: false
+    supportExtendedDaemonset: "false"
+    operatorMetricsEnabled: "true"
+    metricsPort: 8383
+    secretBackend:
+      command: ""
+      arguments: ""
+    datadogAgent:
+      enabled: true
+    datadogAgentInternal:
+      enabled: false
+    datadogDashboard:
+      enabled: false
+    datadogGenericResource:
+      enabled: false
+    datadogMonitor:
+      enabled: false
+    datadogSLO:
+      enabled: false
+    remoteConfiguration:
+      enabled: false
+
+    deployment:
+      annotations: {}
+
+    rbac:
+      create: true
+    serviceAccount:
+      create: true
+      name:
+      annotations: {}
+      automountServiceAccountToken: true
+
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+    installCRDs: true
+
+    datadogCRDs:
+      crds:
+        datadogAgents: true
+        datadogMetrics: true
+        datadogPodAutoscalers: true
+        datadogMonitors: true
+        datadogSLOs: false
+        datadogDashboards: false
+        datadogGenericResources: false
+        datadogAgentProfiles: false
+
+    podAnnotations: {}
+    podLabels: {}
+
+    collectOperatorMetrics: true
+
+    watchNamespaces: ["datadog"]
+    watchNamespacesAgent: ["datadog"]
+    watchNamespacesMonitor: []
+    watchNamespacesSLO: []
+    watchNamespacesAgentProfile: []
+
+    containerSecurityContext: {}
+
+    volumes: []
+    volumeMounts: []
+
+    livenessProbe:
+      periodSeconds: 10
+      initialDelaySeconds: 15
+
+    clusterRole:
+      allowReadAllResources: false
+      allowCreatePodsExec: false
