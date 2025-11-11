@@ -22,6 +22,9 @@ class InferenceConsumerConfig(pydantic.BaseModel):
     auto_commit: bool = True
     batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "50"))
     batch_interval: int = int(os.getenv("KAFKA_BATCH_INTERVAL", "10"))
+    session_timeout_ms: int = int(os.getenv("KAFKA_SESSION_TIMEOUT_MS", "60000"))
+    heartbeat_interval_ms: int = int(os.getenv("KAFKA_HEARTBEAT_INTERVAL_MS", "10000"))
+    max_poll_interval_ms: int = int(os.getenv("KAFKA_MAX_POLL_INTERVAL_MS", "300000"))
 
 
 class InferenceConsumer(abc.ABC):
@@ -43,8 +46,9 @@ class InferenceConsumer(abc.ABC):
             group_id=consumer_config.kafka_consumer_group,
             value_deserializer=lambda x: json.loads(x.decode("utf-8")),
             auto_commit_interval_ms=5000,
-            session_timeout_ms=30000,
-            heartbeat_interval_ms=10000,
+            session_timeout_ms=consumer_config.session_timeout_ms,
+            heartbeat_interval_ms=consumer_config.heartbeat_interval_ms,
+            max_poll_interval_ms=consumer_config.max_poll_interval_ms,
         )
         self.consumer_config = consumer_config
         self.batch: List[Any] = []
