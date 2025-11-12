@@ -76,7 +76,7 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 			{
 				users.GET("/profile", userController.GetProfile)
 				users.PUT("/profile", userController.UpdateProfile)
-				//users.DELETE("/profile", userController.DeleteProfile)
+				users.DELETE("/profile", userController.DeleteProfile)
 				users.GET("", userController.GetUsers) // Admin only in production
 			}
 		}
