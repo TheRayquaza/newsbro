@@ -12,36 +12,6 @@ provider "vault" {
   token   = var.vault_root_token
 }
 
-variable "vault_address" {
-  description = "Vault server address"
-  type        = string
-  default     = "http://localhost:8200"
-}
-
-variable "vault_root_token" {
-  description = "Vault root token"
-  type        = string
-  sensitive   = true
-}
-
-variable "kubernetes_host" {
-  description = "Kubernetes API host"
-  type        = string
-  default     = "https://kubernetes.default.svc.cluster.local"
-}
-
-variable "kubernetes_ca_cert" {
-  description = "Kubernetes CA certificate (base64 encoded)"
-  type        = string
-  sensitive   = true
-}
-
-variable "vault_auth_token" {
-  description = "Token from vault-auth service account"
-  type        = string
-  sensitive   = true
-}
-
 # ==========================================
 # Enable Kubernetes Auth Method
 # ==========================================
@@ -177,32 +147,4 @@ resource "vault_kubernetes_auth_backend_role" "flux_system" {
   token_max_ttl                    = 86400
   token_policies                   = [vault_policy.external_secrets.name]
   audience                         = null
-}
-
-# ==========================================
-# Outputs
-# ==========================================
-
-output "kubernetes_auth_path" {
-  value       = vault_auth_backend.kubernetes.path
-  description = "Path where Kubernetes auth is mounted"
-}
-
-output "policy_name" {
-  value       = vault_policy.external_secrets.name
-  description = "Name of the External Secrets policy"
-}
-
-output "flux_system_role" {
-  value       = vault_kubernetes_auth_backend_role.flux_system.role_name
-  description = "Kubernetes auth role name for flux-system"
-}
-
-output "auth_configuration" {
-  value = {
-    kubernetes_host = var.kubernetes_host
-    auth_path       = vault_auth_backend.kubernetes.path
-    policy          = vault_policy.external_secrets.name
-  }
-  description = "Authentication configuration summary"
 }

@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: datadog-operator
-      version: v1.18.2
+      version: 2.14.3
       sourceRef:
         kind: HelmRepository
         name: repo
@@ -17,7 +17,7 @@ spec:
   values:
     replicaCount: 1
 
-    apiKeyExistingSecret: api-key
+    apiKeyExistingSecret: datadog-secret
 
     clusterName: kube
 
