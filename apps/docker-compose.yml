@@ -216,6 +216,9 @@ services:
 
   # APP SERVICES
   repo-account:
+    build:
+      context: repo-account
+      dockerfile: ../../docker/repo-account.Dockerfile
     image: ghcr.io/therayquaza/newsbro/repo-account:repo-account-v1.2.7
     container_name: repo-account
     environment:

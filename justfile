@@ -6,7 +6,7 @@ help:
 init-db:
     #!/bin/sh
     cd apps
-    docker compose up --wait -d postgres
+    docker compose up -d postgres
     docker compose exec postgres bash -c "
         psql -U username -d postgres -c 'CREATE DATABASE account;';
         psql -U username -d postgres -c 'CREATE DATABASE article;';
@@ -15,7 +15,7 @@ init-db:
 
 # Runs all servers & frontend using docker compose and npm
 dev:
-    cd apps/ && docker compose up -d
+    cd apps/ && docker compose up  --build -d
     cd apps/port-front/ && npm i && npm run dev
 
 # Shuts down docker compose
