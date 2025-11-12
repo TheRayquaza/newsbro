@@ -152,6 +152,11 @@ path "kv/data/qdrant" {
   capabilities = ["read", "list"]
 }
 
+# Datadog secrets
+path "kv/data/datadog" {
+  capabilities = ["read", "list"]
+}
+
 # List capability for the secret mount
 path "secret/metadata/*" {
   capabilities = ["list"]
