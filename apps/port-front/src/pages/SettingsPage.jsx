@@ -1,5 +1,6 @@
 import "../assets/styles/global.css";
 import { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Mail,
@@ -10,18 +11,21 @@ import {
   Shield,
   Bell,
   Palette,
+  Trash2,
 } from "lucide-react";
 import { AuthContext } from "../contexts/Auth";
 import api from "../api/api";
 
 const SettingsPage = () => {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     setProfile(user);
@@ -53,6 +57,17 @@ const SettingsPage = () => {
       setError(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setError("");
+    try {
+      await api.deleteProfile();
+      logout();
+      navigate("/");
+    } catch (err) {
+      setError(err.message || "Failed to delete account");
     }
   };
 
@@ -298,16 +313,52 @@ const SettingsPage = () => {
                   </>
                 )}
                 {activeTab === "security" && (
-                  <>
-                    <Shield size={48} style={{ opacity: 0.5, marginBottom: "1rem" }} />
-                    <p>Security settings coming soon</p>
-                  </>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
+                      Account Deletion
+                    </h2>
+                    <p className="mb-4" style={{ color: "var(--text-secondary)" }}>
+                      Permanently delete your account and all associated data. This action is irreversible.
+                    </p>
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="btn-danger flex items-center gap-2"
+                    >
+                      <Trash2 size={16} />
+                      Delete My Account
+                    </button>
+                  </div>
                 )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="card max-w-sm w-full">
+            <h2 className="text-lg font-bold mb-4">Are you sure?</h2>
+            <p className="mb-6" style={{ color: "var(--text-secondary)" }}>
+              This action cannot be undone. All your data will be permanently deleted.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="btn-danger"
+              >
+                Yes, Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
