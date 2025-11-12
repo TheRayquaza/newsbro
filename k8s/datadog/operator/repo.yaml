@@ -7,6 +7,6 @@ metadata:
   namespace: datadog
 spec:
   interval: 10m0s
-  type: datadog
+  type: default
   url: https://helm.datadoghq.com
   provider: generic

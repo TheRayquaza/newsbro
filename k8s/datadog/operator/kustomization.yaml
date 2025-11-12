@@ -5,3 +5,4 @@ resources:
 - repo.yaml
 - datadog-operator.yaml
 - secrets.yaml
+- namespace.yaml
