@@ -57,3 +57,18 @@ func (s *UserService) GetAllUsers(limit, offset int) ([]models.User, error) {
 	}
 	return users, err
 }
+
+func (s *UserService) DeleteUser(id uint) error {
+	var user models.User
+	if err := s.Db.First(&user, id).Error; err != nil {
+		log.Println("Error fetching user for deletion:", err)
+		return err
+	}
+
+	if err := s.Db.Delete(&user).Error; err != nil {
+		log.Println("Error deleting user:", err)
+		return err
+	}
+
+	return nil
+}
