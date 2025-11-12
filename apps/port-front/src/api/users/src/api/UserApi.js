@@ -157,5 +157,41 @@ export default class UserApi {
       );
     }
 
+    /**
+     * Callback function to receive the result of the usersProfileDelete operation.
+     * @callback module:api/UserApi~usersProfileDeleteCallback
+     * @param {String} error Error message, if any.
+     * @param data This operation does not return a value.
+     * @param {String} response The complete HTTP response.
+     */
+
+    /**
+     * Delete user profile
+     * Delete the profile of the authenticated user
+     * @param {module:api/UserApi~usersProfileDeleteCallback} callback The callback function, accepting three arguments: error, data, response
+     */
+    usersProfileDelete(callback) {
+      let postBody = null;
+
+      let pathParams = {
+      };
+      let queryParams = {
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = [];
+      let contentTypes = [];
+      let accepts = ['application/json'];
+      let returnType = null;
+      return this.apiClient.callApi(
+        '/api/v1/users/profile', 'DELETE',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, null, callback
+      );
+    }
+
 
 }
