@@ -40,4 +40,4 @@ class Config(pydantic.BaseModel):
 
     # API
     api_port: int = int(os.getenv("API_PORT", "8000"))
-    api_host: str = os.getenv("API_HOST", "")
+    api_host: str = os.getenv("API_HOST", "0.0.0.0")
