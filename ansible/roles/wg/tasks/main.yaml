@@ -32,7 +32,7 @@
 
 - name: Generate WireGuard server configuration
   template:
-    src: wg0.conf.j2
+    src: wg.conf.j2
     dest: "/etc/wireguard/{{ wg_interface }}.conf"
     mode: '0600'
   notify: restart wireguard
@@ -75,3 +75,17 @@
   ansible.builtin.command: >
     iptables -t nat -A POSTROUTING -s {{ wg_private_subnet }} -o {{ wan_interface }} -j MASQUERADE
   when: nat_rule_check.rc != 0
+
+- name: Render all WireGuard client configurations locally
+  delegate_to: localhost
+  become: false
+  run_once: true
+  vars:
+    ansible_connection: local
+  template:
+    src: wg-client.conf.j2
+    dest: "./{{ client.name }}.conf"
+    mode: '0600'
+  loop: "{{ wg_clients }}"
+  loop_control:
+    loop_var: client
