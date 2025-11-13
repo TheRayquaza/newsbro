@@ -16,3 +16,4 @@ resources:
 - kafka.yaml
 - ingress-nginx.yaml
 - metallb.yaml
+- datadog.yaml
