@@ -23,6 +23,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: capacitor-service
+                name: capacitor-next
                 port:
                   number: 80
