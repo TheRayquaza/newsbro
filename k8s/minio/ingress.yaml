@@ -23,6 +23,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: minio
+                name: minio-new-console
                 port:
                   number: 9001

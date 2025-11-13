@@ -34,8 +34,8 @@ spec:
         annotations:
           metallb.io/address-pool: private-pool
         ports:
-          http: 80
-          https: 443
+          http: 8080
+          https: 8443
       hostNetwork: false
       replicaCount: 2
       logLevel: info
