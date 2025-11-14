@@ -14,16 +14,6 @@ variable "vault_root_token" {
 # Variables for all secrets
 # ==========================================
 
-variable "postgres_minio_username" {
-    type      = string
-    sensitive = true
-}
-
-variable "postgres_minio_password" {
-    type      = string
-    sensitive = true
-}
-
 # PostgreSQL variables
 variable "mlflow_postgres_username" {
   type      = string
