@@ -46,6 +46,9 @@ python3 -m tf_idf.main tf_idf/.env
 | `KAFKA_FEEDBACK_CONSUMER_GROUP` | `tfidf-feedback-group`  | Kafka consumer group for feedback                       |
 | `KAFKA_BATCH_SIZE`              | `64`                    | Kafka batch size (before triggering ingestion)          |
 | `KAFKA_BATCH_INTERVAL`          | `10`                    | Seconds before hold values gets release and processed   |
+| `KAFKA_SESSION_TIMEOUT_MS`          | `60000`                    |   |
+| `KAFKA_HEARTBEAT_INTERVAL_MS`          | `10000`                    |   |
+| `KAFKA_MAX_POLL_INTERVAL_MS`          | `300000`                    |   |
 | `QDRANT_URL`                    | `http://localhost:6333` | URL for Qdrant vector database                          |
 | `QDRANT_ARTICLES_COLLECTION`    | `articles`              | articles collection name in Qdrant                      |
 | `QDRANT_API_KEY`    | *(None) *              | Qdrant API key for authentication                      |
