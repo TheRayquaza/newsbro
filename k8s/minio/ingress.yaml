@@ -13,7 +13,7 @@ spec:
   tls:
     - hosts:
         - minio.internal.newsbro.cc
-      secretName: minio-tls
+      secretName: newsbro-wildcard-tls
 
   rules:
     - host: minio.internal.newsbro.cc
