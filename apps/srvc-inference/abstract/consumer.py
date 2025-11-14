@@ -37,6 +37,7 @@ class InferenceConsumer(abc.ABC):
         **kwargs,
     ):
         self.logger = logger
+        self.thread: None | Thread = None
         self.dict_to_msg = dict_to_msg
         self.consumer = KafkaConsumer(
             consumer_config.kafka_consumer_topic,
@@ -65,7 +66,7 @@ class InferenceConsumer(abc.ABC):
             if self.consumer._closed:
                 return False
 
-            if not self.thread.is_alive():
+            if self.thread is None or not self.thread.is_alive():
                 return False
 
             return True
@@ -143,6 +144,7 @@ class InferenceConsumer(abc.ABC):
     def run(self) -> Thread:
         """Start the consumer thread."""
         self.logger.info("Starting consumer thread")
+        assert self.thread is None, "Consumer is already running"
         self.thread = Thread(target=self.run_impl, daemon=True)
         self.thread.start()
         return self.thread
