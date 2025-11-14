@@ -24,6 +24,9 @@ data:
   KAFKA_BATCH_INTERVAL: "10" # in seconds
   KAFKA_ARTICLE_CONSUMER_GROUP: srvc-inference-tfidf-article-group
   KAFKA_FEEDBACK_CONSUMER_GROUP: srvc-inference-tfidf-feedback-group
+  KAFKA_SESSION_TIMEOUT_MS: "60000" # 60 seconds
+  KAFKA_HEARTBEAT_INTERVAL_MS: "10000" # 10 seconds
+  KAFKA_MAX_POLL_INTERVAL_MS: "300000" # 5 minutes
   # Redis
   REDIS_SCAN_BATCH_SIZE: "100"
   REDIS_USER_PROFILE_KEY: user_profile
