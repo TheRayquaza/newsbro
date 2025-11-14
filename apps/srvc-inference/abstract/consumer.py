@@ -58,7 +58,18 @@ class InferenceConsumer(abc.ABC):
 
     def health(self) -> bool:
         try:
-            return self.consumer._client.ready()
+
+            if self.consumer is None:
+                return False
+
+            if self.consumer._closed:
+                return False
+
+            if not self.thread.is_alive():
+                return False
+
+            return True
+
         except Exception:
             return False
 
@@ -132,9 +143,9 @@ class InferenceConsumer(abc.ABC):
     def run(self) -> Thread:
         """Start the consumer thread."""
         self.logger.info("Starting consumer thread")
-        thread = Thread(target=self.run_impl, daemon=True)
-        thread.start()
-        return thread
+        self.thread = Thread(target=self.run_impl, daemon=True)
+        self.thread.start()
+        return self.thread
 
     def shutdown(self) -> None:
         """Gracefully shutdown the consumer."""
