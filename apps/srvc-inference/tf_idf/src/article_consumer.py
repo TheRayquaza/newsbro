@@ -63,8 +63,6 @@ class TFIDFArticleConsumer(InferenceConsumer):
                 for host, port in [s.strip().split(":")]
             ]
 
-            self.logger.info(sentinel_list)
-
             self.sentinel = Sentinel(
                 sentinel_list,
                 socket_timeout=5.0,
