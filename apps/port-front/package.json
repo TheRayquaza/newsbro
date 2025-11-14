@@ -1,7 +1,7 @@
 {
   "name": "port-front",
   "private": true,
-  "version": "1.5.5",
+  "version": "1.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@datadog/browser-rum": "^6.24.0",
+    "@datadog/browser-rum-react": "^6.24.0",
     "@tailwindcss/vite": "^4.1.14",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
