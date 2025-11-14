@@ -1,7 +1,7 @@
 import { datadogRum } from '@datadog/browser-rum';
 import { reactPlugin } from '@datadog/browser-rum-react';
 
-void initDatadog() {
+export function initDatadog() {
   datadogRum.init({
       applicationId: '26ebd80b-edb8-497c-8dcf-7c083ebdfa99',
       clientToken: 'pub293c79f261a3e60c25b277a0314945f7',
