@@ -143,6 +143,31 @@ variable "capacitor_token" {
   sensitive = true
 }
 
+variable "capacitor_auth" {
+  type    = string
+  default = "noauth"
+}
+
+variable "capacitor_impersonate_sa_rules" {
+  type    = string
+  default = "noauth=flux-system:capacitor-next-builtin-editor"
+}
+
+variable "capacitor_session_hash_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "capacitor_session_block_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "capacitor_registry_yaml" {
+  type      = string
+  sensitive = true
+}
+
 # OIDC variables
 variable "oidc_jwt_secret" {
   type      = string

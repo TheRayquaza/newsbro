@@ -3,7 +3,7 @@ apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
   name: capacitor-next
-  namespace: flux-system
+  namespace: capacitor
 spec:
   interval: 10m0s
   url: https://github.com/gimlet-io/capacitor
