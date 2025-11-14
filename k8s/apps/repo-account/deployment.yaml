@@ -8,7 +8,7 @@ metadata:
     type: backends
     tags.datadoghq.com/env: prod
     tags.datadoghq.com/service: repo-account
-    tags.datadoghq.com/version: v1.2.8
+    tags.datadoghq.com/version: v1.3.0
 spec:
   # replicas: 1 # managed by hpa
   strategy:
