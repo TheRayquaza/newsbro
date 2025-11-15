@@ -22,7 +22,6 @@ spec:
             namespaceSelector:
               matchNames:
                 - "apps"
-                - "flux-system"
             ddTraceVersions:
               java: "1"
               python: "3"

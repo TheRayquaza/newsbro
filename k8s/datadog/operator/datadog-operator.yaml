@@ -48,17 +48,17 @@ spec:
     datadogAgent:
       enabled: true
     datadogAgentInternal:
-      enabled: false
+      enabled: true
     datadogDashboard:
-      enabled: false
+      enabled: true
     datadogGenericResource:
-      enabled: false
+      enabled: true
     datadogMonitor:
-      enabled: false
+      enabled: true
     datadogSLO:
-      enabled: false
+      enabled: true
     remoteConfiguration:
-      enabled: false
+      enabled: true
 
     deployment:
       annotations: {}
@@ -91,10 +91,10 @@ spec:
         datadogMetrics: true
         datadogPodAutoscalers: true
         datadogMonitors: true
-        datadogSLOs: false
-        datadogDashboards: false
-        datadogGenericResources: false
-        datadogAgentProfiles: false
+        datadogSLOs: true
+        datadogDashboards: true
+        datadogGenericResources: true
+        datadogAgentProfiles: true
 
     podAnnotations: {}
     podLabels: {}
