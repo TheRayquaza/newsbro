@@ -11,4 +11,4 @@ spec:
   sourceRef:
     kind: GitRepository
     name: capacitor-next
-  targetNamespace: flux-system
+  targetNamespace: capacitor
