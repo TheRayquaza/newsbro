@@ -5,7 +5,7 @@ metadata:
   name: kafka
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/kafka
   prune: true
   sourceRef:

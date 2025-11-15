@@ -5,7 +5,7 @@ metadata:
   name: postgres
   namespace: postgres
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/postgres
   prune: true
   sourceRef:

@@ -8,8 +8,11 @@ spec:
     site: "us5.datadoghq.com"
     credentials:
       apiSecret:
-        secretName: "datadog-secret"
-        keyName: "api-key"
+        secretName: datadog-secret
+        keyName: api-key
+      appSecret:
+        secretName: datadog-secret
+        keyName: app-key
     registry: "docker.io/datadog"
     tags:
       - "env:prod"

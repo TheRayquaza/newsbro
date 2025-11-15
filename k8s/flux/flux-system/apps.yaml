@@ -5,7 +5,7 @@ metadata:
   name: apps
   namespace: apps
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/apps
   prune: true
   sourceRef:

@@ -5,7 +5,7 @@ metadata:
   name: redis-operator
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/redis/operator
   prune: true
   sourceRef:
@@ -19,7 +19,7 @@ metadata:
   name: redis
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/redis/redis
   prune: true
   sourceRef:
@@ -35,7 +35,7 @@ metadata:
   name: redisinsight
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/redis/insight
   prune: true
   sourceRef:

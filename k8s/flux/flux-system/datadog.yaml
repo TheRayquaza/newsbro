@@ -5,7 +5,7 @@ metadata:
   name: datadog-operator
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/datadog/operator
   prune: true
   sourceRef:
@@ -19,7 +19,7 @@ metadata:
   name: datadog-agent
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/datadog/agent
   prune: true
   sourceRef:
