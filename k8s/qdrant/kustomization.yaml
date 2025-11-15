@@ -6,4 +6,3 @@ resources:
 - qdrant.yaml
 - secrets.yaml
 - ingress.yaml
-- certificate.yaml

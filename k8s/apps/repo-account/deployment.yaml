@@ -6,6 +6,9 @@ metadata:
   labels:
     app: repo-account
     type: backends
+    tags.datadoghq.com/env: prod
+    tags.datadoghq.com/service: repo-account
+    tags.datadoghq.com/version: v1.3.0
 spec:
   # replicas: 1 # managed by hpa
   strategy:
@@ -21,16 +24,26 @@ spec:
       labels:
         app: repo-account
         monitoring: "enabled"
+        tags.datadoghq.com/env: prod
+        tags.datadoghq.com/service: repo-account
+        tags.datadoghq.com/version: v1.3.0
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090" 
     spec:
       imagePullSecrets:
         - name: pull-secret
+      volumes:
+        - hostPath:
+            path: /var/run/datadog/
+          name: apmsocketpath
       containers:
         - name: repo-account
-          image: ghcr.io/therayquaza/newsbro/repo-account:repo-account-v1.2.8
+          image: ghcr.io/therayquaza/newsbro/repo-account:repo-account-v1.3.0
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: apmsocketpath
+              mountPath: /var/run/datadog
           ports:
             - containerPort: 8080
               name: http
@@ -47,6 +60,27 @@ spec:
                 name: repo-account-secrets
             - secretRef:
                 name: oidc-secrets
+          env:
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_DATA_STREAMS_ENABLED
+              value: "true"
+            - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+              value: "true"
+            - name: DD_APPSEC_ENABLED
+              value: "true"
           resources:
             requests:
               memory: "256Mi"

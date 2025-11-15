@@ -15,7 +15,7 @@ spec:
   tls:
     - hosts:
         - vault.internal.newsbro.cc
-      secretName: vault-tls
+      secretName: newsbro-wildcard-tls
 
   rules:
     - host: vault.internal.newsbro.cc

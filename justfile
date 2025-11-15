@@ -15,7 +15,7 @@ init-db:
 
 # Runs all servers & frontend using docker compose and npm
 dev:
-    cd apps/ && docker compose up  --build -d
+    cd apps/ && docker compose up -d --build
     cd apps/port-front/ && npm i && npm run dev
 
 # Shuts down docker compose

@@ -1,10 +1,7 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/21808d22b1cda1898b71cf1a1beb524a97add2c4";
-    utils = {
-      url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    utils.url = "github:numtide/flake-utils";
   };
   outputs = {
     self,
@@ -17,8 +14,13 @@
       in {
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
+            alejandra
+            kubernetes-helm
+            age
+            ansible
             just
             nodejs
+            go
             gopls
             playwright-test
             go-swag

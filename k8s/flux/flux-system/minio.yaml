@@ -5,7 +5,7 @@ metadata:
   name: minio
   namespace: minio
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/minio
   prune: true
   sourceRef:

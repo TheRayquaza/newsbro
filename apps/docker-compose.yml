@@ -220,6 +220,9 @@ services:
       context: repo-account
       dockerfile: ../../docker/repo-account.Dockerfile
     image: ghcr.io/therayquaza/newsbro/repo-account:repo-account-v1.2.7
+    build:
+      context: ./repo-account
+      dockerfile: ../../docker/repo-account.Dockerfile
     container_name: repo-account
     environment:
       DATABASE_HOST: postgres:5432

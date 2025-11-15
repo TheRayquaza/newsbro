@@ -1,0 +1,91 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install WireGuard
+  package:
+    name: wireguard
+    state: present
+
+- name: Enable IP forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Enable IPv6 forwarding (optional)
+  sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Create WireGuard config directory
+  file:
+    path: /etc/wireguard
+    state: directory
+    mode: '0700'
+
+- name: Generate WireGuard server configuration
+  template:
+    src: wg.conf.j2
+    dest: "/etc/wireguard/{{ wg_interface }}.conf"
+    mode: '0600'
+  notify: restart wireguard
+
+- name: Enable and start WireGuard service
+  systemd:
+    name: "wg-quick@{{ wg_interface }}"
+    enabled: yes
+    state: started
+
+- name: Allow WireGuard UDP port
+  ansible.builtin.command: >
+    iptables -C INPUT -p udp --dport {{ wg_port }} -j ACCEPT
+  ignore_errors: true
+  register: wg_port_rule_check
+
+- name: Add iptables rule to allow WireGuard UDP port
+  ansible.builtin.command: >
+    iptables -A INPUT -p udp --dport {{ wg_port }} -j ACCEPT
+  when: wg_port_rule_check.rc != 0
+
+- name: Allow forwarding from VPN subnet
+  ansible.builtin.command: >
+    iptables -C FORWARD -s {{ wg_private_subnet }} -j ACCEPT
+  ignore_errors: true
+  register: forward_rule_check
+
+- name: Add iptables forwarding rule
+  ansible.builtin.command: >
+    iptables -A FORWARD -s {{ wg_private_subnet }} -j ACCEPT
+  when: forward_rule_check.rc != 0
+
+- name: Enable NAT (MASQUERADE) for VPN clients
+  ansible.builtin.command: >
+    iptables -t nat -C POSTROUTING -s {{ wg_private_subnet }} -o {{ wan_interface }} -j MASQUERADE
+  ignore_errors: true
+  register: nat_rule_check
+
+- name: Add NAT rule for VPN clients
+  ansible.builtin.command: >
+    iptables -t nat -A POSTROUTING -s {{ wg_private_subnet }} -o {{ wan_interface }} -j MASQUERADE
+  when: nat_rule_check.rc != 0
+
+- name: Render all WireGuard client configurations locally
+  delegate_to: localhost
+  become: false
+  run_once: true
+  vars:
+    ansible_connection: local
+  template:
+    src: wg-client.conf.j2
+    dest: "./{{ client.name }}.conf"
+    mode: '0600'
+  loop: "{{ wg_clients }}"
+  loop_control:
+    loop_var: client
