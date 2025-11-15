@@ -1,0 +1,44 @@
+---
+- name: Install bind9
+  apt:
+    name: bind9
+    state: present
+    update_cache: yes
+
+- name: Deploy main named.conf
+  ansible.builtin.copy:
+    src: named.conf
+    dest: /etc/bind/named.conf
+    owner: root
+    group: bind
+    mode: '0644'
+  notify: restart bind9
+
+- name: Ensure /etc/bind/named.conf.local contains internal zone
+  blockinfile:
+    path: /etc/bind/named.conf.local
+    block: |
+      zone "internal.newsbro.cc" {
+          type master;
+          file "/etc/bind/db.internal.newsbro.cc";
+      };
+    marker: "# {mark} ANSIBLE MANAGED ZONE internal.newsbro.cc"
+
+- name: Deploy internal zone file
+  template:
+    src: db.internal.newsbro.cc.j2
+    dest: /etc/bind/db.internal.newsbro.cc
+    owner: root
+    group: bind
+    mode: '0644'
+
+- name: Check named.conf syntax
+  command: named-checkconf
+  register: check_named_conf
+  failed_when: check_named_conf.rc != 0
+
+- name: Check zone file syntax
+  command: named-checkzone internal.newsbro.cc /etc/bind/db.internal.newsbro.cc
+  register: check_zone
+  failed_when: check_zone.rc != 0
+  notify: restart bind9

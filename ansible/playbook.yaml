@@ -1,0 +1,18 @@
+---
+- name: Setup WireGuard VPN Server
+  hosts:
+    - master
+  become: yes
+  roles:
+    - wg
+  tags:
+    - wg
+
+- name: Setup DNS Server
+  hosts:
+    - master
+  become: yes
+  roles:
+    - dns
+  tags:
+    - dns

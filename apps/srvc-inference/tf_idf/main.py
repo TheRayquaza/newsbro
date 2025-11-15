@@ -12,7 +12,6 @@ from abstract.producer import InferenceProducer, InferenceProducerConfig
 
 if __name__ == "__main__":
     if os.getenv("ENVIRONMENT") != "production":
-        print("Loading .env file for development environment")
         env_file = sys.argv[1] if len(sys.argv) > 1 else ".env"
         if os.path.exists(env_file):
             load_dotenv(env_file)

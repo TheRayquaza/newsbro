@@ -13,7 +13,7 @@ spec:
   tls:
     - hosts:
         - minio.internal.newsbro.cc
-      secretName: minio-tls
+      secretName: newsbro-wildcard-tls
 
   rules:
     - host: minio.internal.newsbro.cc
@@ -23,6 +23,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: minio
+                name: minio-new-console
                 port:
                   number: 9001

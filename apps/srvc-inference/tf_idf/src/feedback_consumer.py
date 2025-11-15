@@ -81,6 +81,7 @@ class TFIDFFeedbackConsumer(InferenceConsumer):
     def health(self) -> bool:
         """Check health of consumer, Qdrant, and Redis connections."""
         if not super().health():
+            self.logger.error("Kafka consumer is unhealthy")
             return False
         try:
             self.qdrant.get_collections()

@@ -10,18 +10,7 @@ terraform {
 provider "vault" {
   address = var.vault_address
   token   = var.vault_root_token
-}
-
-variable "vault_address" {
-  description = "Vault server address"
-  type        = string
-  default     = "http://localhost:8200"
-}
-
-variable "vault_root_token" {
-  description = "Vault root token"
-  type        = string
-  sensitive   = true
+  skip_tls_verify= true
 }
 
 # Enable KV v2 secrets engine if not already enabled
@@ -85,17 +74,6 @@ resource "vault_kv_secret_v2" "srvc_scrapping_postgres" {
     password = var.srvc_scrapping_postgres_password
   })
 }
-
-resource "vault_kv_secret_v2" "postgres-minio" {
-  mount = vault_mount.kv.path
-  name  = "postgres/minio"
-
-  data_json = jsonencode({
-    user = var.postgres_minio_username
-    password = var.postgres_minio_password
-  })
-}
-
 
 # ==========================================
 # Cloudflare Secrets
@@ -161,6 +139,25 @@ resource "vault_kv_secret_v2" "capacitor" {
 
   data_json = jsonencode({
     token = var.capacitor_token
+    auth  = var.capacitor_auth
+    impersonate_sa_rules  = var.capacitor_impersonate_sa_rules
+    session_hash_key      = var.capacitor_session_hash_key
+    session_block_key     = var.capacitor_session_block_key
+    "registry.yaml"        = var.capacitor_registry_yaml
+  })
+}
+
+# ==========================================
+# Datadog Secrets
+# ==========================================
+
+resource "vault_kv_secret_v2" "datadog" {
+  mount = vault_mount.kv.path
+  name  = "datadog"
+
+  data_json = jsonencode({
+    api_key = var.datadog_api_key
+    app_key = var.datadog_app_key
   })
 }
 
@@ -264,250 +261,4 @@ resource "vault_kv_secret_v2" "qdrant" {
   data_json = jsonencode({
     api_key = var.qdrant_api_key
   })
-}
-
-# ==========================================
-# Variables for all secrets
-# ==========================================
-
-# PostgreSQL variables
-variable "mlflow_postgres_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "mlflow_postgres_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "repo_account_postgres_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "repo_account_postgres_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "repo_article_postgres_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "repo_article_postgres_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "postgres_admin_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "postgres_admin_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "srvc_scrapping_postgres_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "srvc_scrapping_postgres_password" {
-  type      = string
-  sensitive = true
-}
-
-# Cloudflare variables
-variable "cloudflare_api_token" {
-  type      = string
-  sensitive = true
-}
-
-variable "cloudflare_email" {
-  type      = string
-  sensitive = true
-}
-
-# MinIO variables
-variable "minio_root_user" {
-  type      = string
-  sensitive = true
-}
-
-variable "minio_root_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "minio_console_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "minio_console_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "minio_console_disabled" {
-  type    = string
-  default = "false"
-}
-
-variable "minio_console_policies" {
-  type    = string
-  default = "consoleAdmin"
-}
-
-variable "minio_console_set_policies" {
-  type    = string
-  default = "false"
-}
-
-variable "minio_minio_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "minio_minio_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "minio_minio_disabled" {
-  type    = string
-  default = "false"
-}
-
-variable "minio_minio_policies" {
-  type    = string
-  default = "readwrite"
-}
-
-variable "minio_minio_set_policies" {
-  type    = string
-  default = "false"
-}
-
-# Capacitor variables
-variable "capacitor_token" {
-  type      = string
-  sensitive = true
-}
-
-# OIDC variables
-variable "oidc_jwt_secret" {
-  type      = string
-  sensitive = true
-}
-
-variable "oidc_client_id" {
-  type      = string
-  sensitive = true
-}
-
-variable "oidc_client_secret" {
-  type      = string
-  sensitive = true
-}
-
-variable "oidc_issuer_url" {
-  type      = string
-  sensitive = true
-}
-
-# Service Inference variables
-variable "srvc_inference_tfidf_access_key_id" {
-  type      = string
-  sensitive = true
-}
-
-variable "srvc_inference_tfidf_secret_access_key" {
-  type      = string
-  sensitive = true
-}
-
-variable "srvc_inference_tfidf_redis_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "srvc_inference_tfidf_redis_db" {
-  type    = string
-  default = "0"
-}
-
-# Docker variables
-variable "docker_ghcr_auth" {
-  type        = string
-  sensitive   = true
-  description = "Base64 encoded username:token for GitHub Container Registry"
-}
-
-# Repo Feed variables
-variable "repo_feed_redis_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "repo_feed_redis_db" {
-  type    = string
-  default = "0"
-}
-
-# Service Scrapping variables
-variable "srvc_scrapping_webhook_url" {
-  type      = string
-  sensitive = true
-}
-
-# Qdrant variables
-variable "qdrant_api_key" {
-  type      = string
-  sensitive = true
-}
-
-# ==========================================
-# Outputs
-# ==========================================
-
-output "vault_mount_path" {
-  value       = vault_mount.kv.path
-  description = "The path where the KV secrets engine is mounted"
-}
-
-output "secrets_created" {
-  value = {
-    postgres = [
-      vault_kv_secret_v2.mlflow_postgres.name,
-      vault_kv_secret_v2.repo_account_postgres.name,
-      vault_kv_secret_v2.repo_article_postgres.name,
-      vault_kv_secret_v2.postgres_admin.name,
-      vault_kv_secret_v2.srvc_scrapping_postgres.name
-    ]
-    minio = [
-      vault_kv_secret_v2.minio_credentials.name,
-      vault_kv_secret_v2.minio_user_console.name,
-      vault_kv_secret_v2.minio_user_minio.name
-    ]
-    services = [
-      vault_kv_secret_v2.srvc_inference_tfidf_s3.name,
-      vault_kv_secret_v2.srvc_inference_tfidf_qdrant.name,
-      vault_kv_secret_v2.srvc_inference_tfidf_redis.name,
-      vault_kv_secret_v2.repo_feed_redis.name,
-      vault_kv_secret_v2.srvc_scrapping_discord.name
-    ]
-    infrastructure = [
-      vault_kv_secret_v2.cloudflare.name,
-      vault_kv_secret_v2.capacitor.name,
-      vault_kv_secret_v2.oidc.name,
-      vault_kv_secret_v2.docker_ghcr.name,
-      vault_kv_secret_v2.qdrant.name
-    ]
-  }
-  description = "List of all secrets created in Vault"
 }
