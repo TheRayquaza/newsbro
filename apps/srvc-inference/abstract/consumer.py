@@ -22,6 +22,9 @@ class InferenceConsumerConfig(pydantic.BaseModel):
     auto_commit: bool = True
     batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "50"))
     batch_interval: int = int(os.getenv("KAFKA_BATCH_INTERVAL", "10"))
+    session_timeout_ms: int = int(os.getenv("KAFKA_SESSION_TIMEOUT_MS", "60000"))
+    heartbeat_interval_ms: int = int(os.getenv("KAFKA_HEARTBEAT_INTERVAL_MS", "10000"))
+    max_poll_interval_ms: int = int(os.getenv("KAFKA_MAX_POLL_INTERVAL_MS", "300000"))
 
 
 class InferenceConsumer(abc.ABC):
@@ -34,6 +37,7 @@ class InferenceConsumer(abc.ABC):
         **kwargs,
     ):
         self.logger = logger
+        self.thread: None | Thread = None
         self.dict_to_msg = dict_to_msg
         self.consumer = KafkaConsumer(
             consumer_config.kafka_consumer_topic,
@@ -43,8 +47,9 @@ class InferenceConsumer(abc.ABC):
             group_id=consumer_config.kafka_consumer_group,
             value_deserializer=lambda x: json.loads(x.decode("utf-8")),
             auto_commit_interval_ms=5000,
-            session_timeout_ms=30000,
-            heartbeat_interval_ms=10000,
+            session_timeout_ms=consumer_config.session_timeout_ms,
+            heartbeat_interval_ms=consumer_config.heartbeat_interval_ms,
+            max_poll_interval_ms=consumer_config.max_poll_interval_ms,
         )
         self.consumer_config = consumer_config
         self.batch: List[Any] = []
@@ -54,7 +59,18 @@ class InferenceConsumer(abc.ABC):
 
     def health(self) -> bool:
         try:
-            return self.consumer._client.ready()
+
+            if self.consumer is None:
+                return False
+
+            if self.consumer._closed:
+                return False
+
+            if self.thread is None or not self.thread.is_alive():
+                return False
+
+            return True
+
         except Exception:
             return False
 
@@ -128,9 +144,10 @@ class InferenceConsumer(abc.ABC):
     def run(self) -> Thread:
         """Start the consumer thread."""
         self.logger.info("Starting consumer thread")
-        thread = Thread(target=self.run_impl, daemon=True)
-        thread.start()
-        return thread
+        assert self.thread is None, "Consumer is already running"
+        self.thread = Thread(target=self.run_impl, daemon=True)
+        self.thread.start()
+        return self.thread
 
     def shutdown(self) -> None:
         """Gracefully shutdown the consumer."""

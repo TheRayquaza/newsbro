@@ -10,6 +10,7 @@ terraform {
 provider "vault" {
   address = var.vault_address
   token   = var.vault_root_token
+  skip_tls_verify= true
 }
 
 # Enable KV v2 secrets engine if not already enabled
@@ -73,17 +74,6 @@ resource "vault_kv_secret_v2" "srvc_scrapping_postgres" {
     password = var.srvc_scrapping_postgres_password
   })
 }
-
-resource "vault_kv_secret_v2" "postgres-minio" {
-  mount = vault_mount.kv.path
-  name  = "postgres/minio"
-
-  data_json = jsonencode({
-    user = var.postgres_minio_username
-    password = var.postgres_minio_password
-  })
-}
-
 
 # ==========================================
 # Cloudflare Secrets
@@ -149,6 +139,11 @@ resource "vault_kv_secret_v2" "capacitor" {
 
   data_json = jsonencode({
     token = var.capacitor_token
+    auth  = var.capacitor_auth
+    impersonate_sa_rules  = var.capacitor_impersonate_sa_rules
+    session_hash_key      = var.capacitor_session_hash_key
+    session_block_key     = var.capacitor_session_block_key
+    "registry.yaml"        = var.capacitor_registry_yaml
   })
 }
 

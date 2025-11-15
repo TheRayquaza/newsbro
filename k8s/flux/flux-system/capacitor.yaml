@@ -8,6 +8,7 @@ spec:
   interval: 1m
   path: ./k8s/capacitor
   prune: true
+  targetNamespace: capacitor
   sourceRef:
     kind: GitRepository
     name: flux-system

@@ -14,16 +14,6 @@ variable "vault_root_token" {
 # Variables for all secrets
 # ==========================================
 
-variable "postgres_minio_username" {
-    type      = string
-    sensitive = true
-}
-
-variable "postgres_minio_password" {
-    type      = string
-    sensitive = true
-}
-
 # PostgreSQL variables
 variable "mlflow_postgres_username" {
   type      = string
@@ -149,6 +139,31 @@ variable "minio_minio_set_policies" {
 
 # Capacitor variables
 variable "capacitor_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "capacitor_auth" {
+  type    = string
+  default = "noauth"
+}
+
+variable "capacitor_impersonate_sa_rules" {
+  type    = string
+  default = "noauth=flux-system:capacitor-next-builtin-editor"
+}
+
+variable "capacitor_session_hash_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "capacitor_session_block_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "capacitor_registry_yaml" {
   type      = string
   sensitive = true
 }

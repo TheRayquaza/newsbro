@@ -3,7 +3,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: capacitor-next
-  namespace: flux-system
+  namespace: capacitor
 spec:
   interval: 1m
   path: "./self-host/yaml"
