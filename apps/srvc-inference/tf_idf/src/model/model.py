@@ -57,7 +57,7 @@ class TfidfSVDPipelineModel:
         self,
         experiment_name="tfidf_pipeline_experiment",
         run_name="TFIDF_Pipeline_Training",
-        tracking_uri="http://mlflow.localhost:8084",
+        tracking_uri="https://mlflow.internal.newsbro.cc:8084",
     ):
         """Logs the pipeline to MLflow"""
         mlflow.set_tracking_uri(tracking_uri)

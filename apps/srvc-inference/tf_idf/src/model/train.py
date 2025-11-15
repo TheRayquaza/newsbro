@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     model.save_to_mlflow(
         experiment_name="tfidf_experiment_4",
-        tracking_uri="http://mlflow.localhost:8084",
+        tracking_uri="https://mlflow.internal.newsbro.cc:8084",
     )
 
     print("✅ TF-IDF + SVD pipeline trained and saved to MLflow successfully.")

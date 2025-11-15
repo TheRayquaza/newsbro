@@ -9,7 +9,7 @@ class Config(pydantic.BaseModel):
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
     # Kafka
-    kafka_bootstrap_servers: str = os.getenv("KAFKA_BROKERS", "localhost:9092")
+    kafka_bootstrap_servers: str = os.getenv("KAFKA_BROKERS", "https://redpanda.internal.newsbro.cc:9092")
     kafka_batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "50"))
     ## Producer
     kafka_producer_topic: str = os.getenv(
@@ -31,12 +31,12 @@ class Config(pydantic.BaseModel):
     )
 
     # Qdrant
-    qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
+    qdrant_url: str = os.getenv("QDRANT_URL", "https://qdrant.internal.newsbro.cc:6333")
 
     # Model
     model_uri: str = os.getenv("MODEL_URI", "")
     model_name: str = os.getenv("MODEL_NAME", "tfidf")
-    tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+    tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "https://mlflow.internal.newsbro.cc:5000")
 
     # API
     api_port: int = int(os.getenv("API_PORT", "8000"))
