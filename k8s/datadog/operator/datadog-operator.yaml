@@ -18,6 +18,7 @@ spec:
     replicaCount: 1
 
     apiKeyExistingSecret: datadog-secret
+    appKeyExistingSecret: datadog-secret
 
     clusterName: kube
 
