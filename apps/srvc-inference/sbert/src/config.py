@@ -34,7 +34,7 @@ class Config(pydantic.BaseModel):
 
     # Model
     model_uri: str = os.getenv("MODEL_URI", "")
-    tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+    tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "https://mlflow.internal.newsbro.cc")
 
     # API
     api_port: int = int(os.getenv("API_PORT", "8000"))

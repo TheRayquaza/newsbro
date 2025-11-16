@@ -47,7 +47,7 @@ if __name__ == "__main__":
     print("💾 Saving model to MLflow...")
     model.save_to_mlflow(
         experiment_name="sbert_experiment",
-        tracking_uri="http://mlflow.localhost:8084",
+        tracking_uri="https://mlflow.internal.newsbro.cc",
     )
 
     print("✅ SBERT model prepared and saved to MLflow successfully.")

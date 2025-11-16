@@ -11,7 +11,7 @@ from abstract.model import BaseRecommendationModel
 load_dotenv()
 
 mlflow.autolog()
-mlflow.set_tracking_uri("http://mlflow.localhost:8080")
+mlflow.set_tracking_uri("https://mlfow.internal.newsbro.cc")
 
 
 class SBERTModel:
