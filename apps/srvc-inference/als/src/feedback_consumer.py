@@ -19,11 +19,11 @@ from abstract.producer import InferenceProducer
 
 class ALSFeedbackConsumerConfig(pydantic.BaseModel):
     articles_collection: str = os.getenv("QDRANT_ARTICLES_COLLECTION", "articles")
-    qdrant_url: str = os.getenv("QDRANT_URL", "https://qdrant.internal.newsbro.cc:6333")
+    qdrant_url: str = os.getenv("QDRANT_URL", "localhost:6333")
     qdrant_api_key: Optional[str] = os.getenv("QDRANT_API_KEY", None)
     feedback_retention_days: int = int(os.getenv("FEEDBACK_RETENTION_DAYS", "30"))
     redis_sentinels: str = os.getenv(
-        "REDIS_SENTINELS", "https://redis.internal.newsbro.cc:26379,https://redis.internal.newsbro.cc:26380,https://redis.internal.newsbro.cc:26381"
+        "REDIS_SENTINELS", "localhost:26379,localhost:26380,localhost:26381"
     )
     redis_master_name: str = os.getenv("REDIS_MASTER_NAME", "mymaster")
     redis_password: Optional[str] = os.getenv("REDIS_PASSWORD", None)

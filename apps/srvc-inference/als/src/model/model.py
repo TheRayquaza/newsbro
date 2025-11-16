@@ -188,7 +188,7 @@ class ALSModel:
         self,
         experiment_name: str = "als_experiment",
         run_name: str = "ALS_Training",
-        tracking_uri: str = "http://mlflow.localhost:8084",
+        tracking_uri: str = "https://mlflow.internal.newsbro.cc",
     ):
         """Log the ALS model to MLflow."""
         mlflow.set_tracking_uri(tracking_uri)
