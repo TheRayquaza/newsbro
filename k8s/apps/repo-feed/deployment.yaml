@@ -44,8 +44,6 @@ spec:
           ports:
             - containerPort: 8080
               name: http
-            - containerPort: 9090
-              name: metrics
           envFrom:
             - configMapRef:
                 name: repo-feed-config
