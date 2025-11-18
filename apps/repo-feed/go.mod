@@ -204,7 +204,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.6.0 // indirect
-	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.7.6 // indirect
@@ -324,7 +324,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/gorm v1.25.5 // indirect
+	gorm.io/driver/postgres v1.6.0 // indirect
+	gorm.io/gorm v1.25.10 // indirect
 	k8s.io/apimachinery v0.32.3 // indirect
 	k8s.io/client-go v0.31.4 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
