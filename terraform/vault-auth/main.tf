@@ -31,7 +31,7 @@ resource "vault_kubernetes_auth_backend_config" "kubernetes" {
 }
 
 # ==========================================
-# Create Policy for External Secrets
+# External Secrets Operator Role
 # ==========================================
 
 resource "vault_policy" "external_secrets" {
@@ -134,10 +134,6 @@ path "secret/metadata/*" {
 EOT
 }
 
-# ==========================================
-# Create Kubernetes Auth Role for flux-system
-# ==========================================
-
 resource "vault_kubernetes_auth_backend_role" "flux_system" {
   backend                          = vault_auth_backend.kubernetes.path
   role_name                        = "flux-system"
@@ -146,5 +142,45 @@ resource "vault_kubernetes_auth_backend_role" "flux_system" {
   token_ttl                        = 3600
   token_max_ttl                    = 86400
   token_policies                   = [vault_policy.external_secrets.name]
+  audience                         = null
+}
+
+# ==========================================
+# Datadog Integration
+# ==========================================
+
+resource "vault_policy" "datadog_agent" {
+  name = "datadog-agent-policy"
+  
+  policy = <<EOT
+path "kv/data/datadog" {
+  capabilities = ["read", "list"]
+}
+
+# Read access to Vault metrics for monitoring
+path "sys/metrics" {
+  capabilities = ["read"]
+}
+
+# Health check endpoint
+path "sys/health" {
+  capabilities = ["read"]
+}
+
+# Seal status for monitoring
+path "sys/seal-status" {
+  capabilities = ["read"]
+}
+EOT
+}
+
+resource "vault_kubernetes_auth_backend_role" "datadog_agent" {
+  backend                          = vault_auth_backend.kubernetes.path
+  role_name                        = "datadog-agent"
+  bound_service_account_names      = ["datadog-agent"]
+  bound_service_account_namespaces = ["datadog"]
+  token_ttl                        = 3600
+  token_max_ttl                    = 86400
+  token_policies                   = [vault_policy.datadog_agent.name]
   audience                         = null
 }

@@ -250,3 +250,8 @@ variable "datadog_app_key" {
   type      = string
   sensitive = true
 }
+
+variable "datadog_vault_client_token" {
+  type      = string
+  sensitive = true
+}

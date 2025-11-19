@@ -5,7 +5,7 @@ metadata:
   name: vault
   namespace: vault
 spec:
-  interval: 5m0s
+  interval: 10m0s
   chart:
     spec:
       chart: vault
@@ -19,17 +19,14 @@ spec:
       enabled: true
       namespace: vault
       tlsDisable: true
-
     injector:
       enabled: false
-
     server:
       enabled: true
       image:
         repository: hashicorp/vault
         tag: "1.20.1"
         pullPolicy: IfNotPresent
-
       resources:
         requests:
           memory: 128Mi
@@ -37,8 +34,6 @@ spec:
         limits:
           memory: 256Mi
           cpu: 300m
-
-      # Single node with file storage
       standalone:
         enabled: true
         config: |
@@ -51,18 +46,53 @@ spec:
           storage "file" {
             path = "/vault/data"
           }
-
+          telemetry {
+            disable_hostname = true
+            prometheus_retention_time = "12h"
+          }
       dataStorage:
         enabled: true
         size: 10Gi
         mountPath: /vault/data
         accessMode: ReadWriteOnce
-
+      # Additional volumes for Datadog integration
+      volumes:
+        - name: datadog-vault-config
+          configMap:
+            name: datadog-vault-config
+        - name: datadog-vault-token
+          secret:
+            secretName: datadog-vault-token
+      volumeMounts:
+        - name: datadog-vault-config
+          mountPath: /etc/datadog-agent/conf.d/vault.d
+          readOnly: true
+        - name: datadog-vault-token
+          mountPath: /etc/datadog-agent/vault-token
+          readOnly: true
       ingress:
         enabled: false
-
-    ui:
-      enabled: true
-      serviceType: ClusterIP
-      externalPort: 8200
-      targetPort: 8200
+      annotations:
+        ad.datadoghq.com/vault.checks: |
+          {
+            "vault": {
+              "init_config": {},
+              "instances": [
+                {
+                  "api_url": "http://%%host%%:8200/v1",
+                }
+              ]
+            }
+          }
+        ad.datadoghq.com/vault.logs: |
+          [
+            {
+              "source": "vault",
+              "service": "vault"
+            }
+          ]
+      ui:
+        enabled: true
+        serviceType: ClusterIP
+        externalPort: 8200
+        targetPort: 8200
