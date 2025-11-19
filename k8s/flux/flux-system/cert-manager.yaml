@@ -5,7 +5,7 @@ metadata:
   name: cert-manager
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 10m
   path: ./k8s/cert-manager
   prune: true
   sourceRef:
