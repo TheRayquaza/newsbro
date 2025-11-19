@@ -19,7 +19,7 @@ from abstract.producer import InferenceProducer
 
 class TFIDFFeedbackConsumerConfig(pydantic.BaseModel):
     articles_collection: str = os.getenv("QDRANT_ARTICLES_COLLECTION", "articles")
-    qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
+    qdrant_url: str = os.getenv("QDRANT_URL", "localhost:6333")
     qdrant_api_key: Optional[str] = os.getenv("QDRANT_API_KEY", None)
     feedback_retention_days: int = int(os.getenv("FEEDBACK_RETENTION_DAYS", "30"))
     redis_sentinels: str = os.getenv(

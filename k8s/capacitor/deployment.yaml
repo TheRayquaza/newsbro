@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: capacitor-next
-  namespace: capacitor
+  namespace: flux-system
   labels:
     app: capacitor-next
 spec:
