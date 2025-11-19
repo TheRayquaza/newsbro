@@ -31,9 +31,9 @@ spec:
       imagePullSecrets:
         - name: pull-secret
       volumes:
-        - hostPath:
+        - name: apmsocketpath
+          hostPath:
             path: /var/run/datadog/
-          name: apmsocketpath
       containers:
         - name: repo-feed
           image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.2.0

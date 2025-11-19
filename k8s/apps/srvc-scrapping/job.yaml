@@ -27,9 +27,9 @@ spec:
           imagePullSecrets:
             - name: pull-secret
           volumes:
-            - hostPath:
-              path: /var/run/datadog/
-              name: apmsocketpath
+            - name: apmsocketpath
+              hostPath:
+                path: /var/run/datadog/
           restartPolicy: OnFailure
           containers:
             - name: srvc-scrapping
