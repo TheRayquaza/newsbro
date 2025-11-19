@@ -56,7 +56,7 @@ class TfidfSVDPipelineModel:
     def predict(self, documents):
         """MLflow requires predict() to log pyfunc flavor"""
         return self.transform(documents)
-    
+
     def save_to_mlflow(
         self,
         experiment_name="tfidf_pipeline_experiment",
