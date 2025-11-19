@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: capacitor
-  namespace: capacitor
+  namespace: flux-system
   labels:
     app: capacitor
   annotations:
