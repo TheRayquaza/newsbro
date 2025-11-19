@@ -7,7 +7,7 @@ toolchain go1.24.7
 require (
 	github.com/DataDog/dd-trace-go/orchestrion/all/v2 v2.3.1
 	github.com/DataDog/orchestrion v1.6.1
-	github.com/TheRayquaza/newsbro/apps/libs v0.4.9
+	github.com/TheRayquaza/newsbro/apps/libs v0.5.4
 	github.com/coreos/go-oidc/v3 v3.6.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
@@ -17,7 +17,7 @@ require (
 	github.com/swaggo/swag v1.16.6
 	golang.org/x/crypto v0.43.0
 	golang.org/x/oauth2 v0.31.0
-	gorm.io/driver/postgres v1.5.7
+	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.25.12
 )
 
@@ -206,9 +206,9 @@ require (
 	github.com/hashicorp/vault/api v1.9.2 // indirect
 	github.com/hashicorp/vault/sdk v0.9.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.6.0 // indirect
-	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.7.6 // indirect

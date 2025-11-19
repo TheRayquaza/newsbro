@@ -1,11 +1,12 @@
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
+RUN go install github.com/DataDog/orchestrion@v1.6.1
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main src/cmd/main.go
+RUN GOOS=linux GOARCH=amd64 orchestrion go build -ldflags="-w -s" -o main src/cmd/main.go
 
 FROM debian:bookworm-slim
 
