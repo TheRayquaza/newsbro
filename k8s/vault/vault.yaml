@@ -55,21 +55,6 @@ spec:
         size: 10Gi
         mountPath: /vault/data
         accessMode: ReadWriteOnce
-      # Additional volumes for Datadog integration
-      volumes:
-        - name: datadog-vault-config
-          configMap:
-            name: datadog-vault-config
-        - name: datadog-vault-token
-          secret:
-            secretName: datadog-vault-token
-      volumeMounts:
-        - name: datadog-vault-config
-          mountPath: /etc/datadog-agent/conf.d/vault.d
-          readOnly: true
-        - name: datadog-vault-token
-          mountPath: /etc/datadog-agent/vault-token
-          readOnly: true
       ingress:
         enabled: false
       annotations:
