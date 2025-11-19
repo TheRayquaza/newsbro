@@ -22,12 +22,12 @@ if __name__ == "__main__":
     df = df[df["content"].str.len() > 0].reset_index(drop=True)
     print(f"📊 Loaded {len(df)} documents")
 
-    model = TfidfSVDPipelineModel(svd_components=100)
+    model = TfidfSVDPipelineModel(svd_components=76)
     model.fit(df["content"].progress_apply(str))
 
     model.save_to_mlflow(
         experiment_name="tfidf_experiment_4",
-        tracking_uri="http://mlflow.localhost:8084",
+        tracking_uri="https://mlflow.internal.newsbro.cc",
     )
 
     print("✅ TF-IDF + SVD pipeline trained and saved to MLflow successfully.")
