@@ -158,7 +158,6 @@ resource "vault_kv_secret_v2" "datadog" {
   data_json = jsonencode({
     api_key = var.datadog_api_key
     app_key = var.datadog_app_key
-    vault_client_token = var.datadog_vault_client_token
   })
 }
 
