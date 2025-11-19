@@ -1,3 +1,26 @@
+[project]
+name = "newsbro"
+version = "0.0.0"
+dependencies = [
+    "boto3>=1.40.76",
+    "fastapi>=0.121.2",
+    "kafka-python>=2.2.16",
+    "mlflow>=3.6.0",
+    "numpy>=2.3.5",
+    "pandas>=2.3.3",
+    "pyarrow>=22.0.0",
+    "pydantic>=2.12.4",
+    "python-dotenv>=1.2.1",
+    "qdrant-client>=1.16.0",
+    "redis>=7.0.1",
+    "scikit-learn>=1.7.2",
+    "sentence-transformers>=5.1.2",
+    "torch>=2.9.1",
+    "tqdm>=4.67.1",
+    "transformers>=4.57.1",
+    "uvicorn[standard]>=0.38.0",
+]
+
 [tool.ruff]
 lint.select = ["E", "F", "I", "B"]
 lint.ignore = ["E501"]
@@ -9,8 +32,6 @@ exclude = [
     "build",
     "dist",
     "tests",
-    "apps/srvc-inference/tf_idf/legacy",
-    "apps/srvc-inference/sbert/legacy"
 ]
 
 [tool.black]
@@ -28,11 +49,6 @@ ignore_missing_imports = true
 namespace_packages = true
 explicit_package_bases = true
 exclude = '(venv|\.venv|build|dist|tests|__pycache__)'
-
-[[tool.mypy.overrides]]
-module = "apps.srvc_inference.sbert.*"
-disallow_untyped_defs = true
-strict_optional = true
 
 [tool.bandit]
 skips = ["B101"]

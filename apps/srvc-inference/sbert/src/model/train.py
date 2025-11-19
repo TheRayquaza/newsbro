@@ -34,7 +34,6 @@ if __name__ == "__main__":
     
     print(f"📐 Embedding dimension: {model.get_embedding_dimension()}")
     
-    # Generate embeddings for a sample to verify the model works
     print("🔍 Testing model with sample data...")
     sample_size = min(10, len(df))
     sample_embeddings = model.encode(
@@ -43,10 +42,9 @@ if __name__ == "__main__":
     )
     print(f"✅ Generated {len(sample_embeddings)} sample embeddings of shape {sample_embeddings[0].shape}")
 
-    # Save to MLflow
     print("💾 Saving model to MLflow...")
     model.save_to_mlflow(
-        experiment_name="sbert_experiment",
+        experiment_name="sbert_experiment_2",
         tracking_uri="https://mlflow.internal.newsbro.cc",
     )
 
