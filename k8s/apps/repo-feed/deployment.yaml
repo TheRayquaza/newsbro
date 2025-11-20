@@ -6,6 +6,9 @@ metadata:
   labels:
     app: repo-feed
     type: backends
+    tags.datadoghq.com/env: prod
+    tags.datadoghq.com/service: repo-feed
+    tags.datadoghq.com/version: v1.2.0
 spec:
   # replicas: 1 # managed by hpa
   strategy:
@@ -21,21 +24,26 @@ spec:
       labels:
         app: repo-feed
         monitoring: "enabled"
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9090" 
+        tags.datadoghq.com/env: prod
+        tags.datadoghq.com/service: repo-feed
+        tags.datadoghq.com/version: v1.2.0
     spec:
       imagePullSecrets:
         - name: pull-secret
+      volumes:
+        - name: apmsocketpath
+          hostPath:
+            path: /var/run/datadog/
       containers:
         - name: repo-feed
-          image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.1.2
+          image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.2.0
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: apmsocketpath
+              mountPath: /var/run/datadog
           ports:
             - containerPort: 8080
               name: http
-            - containerPort: 9090
-              name: metrics
           envFrom:
             - configMapRef:
                 name: repo-feed-config
@@ -49,6 +57,27 @@ spec:
                 name: repo-feed-secrets # Redis creds
             - secretRef:
                 name: oidc-secrets # JWT
+          env:
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_DATA_STREAMS_ENABLED
+              value: "true"
+            - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+              value: "true"
+            - name: DD_APPSEC_ENABLED
+              value: "true"
           resources:
             requests:
               memory: "256Mi"
