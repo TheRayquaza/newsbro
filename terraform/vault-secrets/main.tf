@@ -84,7 +84,7 @@ resource "vault_kv_secret_v2" "cloudflare" {
   name  = "cloudflare"
 
   data_json = jsonencode({
-    api_token = var.cloudflare_api_token
+    CLOUDFLARE_API_TOKEN = var.cloudflare_api_token
     email     = var.cloudflare_email
   })
 }
@@ -171,9 +171,9 @@ resource "vault_kv_secret_v2" "oidc" {
 
   data_json = jsonencode({
     JWT_SECRET    = var.oidc_jwt_secret
-    client_id     = var.oidc_client_id
-    client_secret = var.oidc_client_secret
-    issuer_url    = var.oidc_issuer_url
+    OIDC_CLIENT_ID     = var.oidc_client_id
+    OIDC_CLIENT_SECRET = var.oidc_client_secret
+    OIDC_ISSUER_URL    = var.oidc_issuer_url
   })
 }
 
