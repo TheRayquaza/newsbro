@@ -22,6 +22,8 @@
             nodejs
             go
             gopls
+            uv
+            python313
           ];
         };
       }

@@ -13,7 +13,7 @@ export const Footer = () => {
           <div style={{ color: 'var(--nav-text-muted)' }} className="flex items-center gap-2">
             <FileText style={{ color: 'var(--nav-active-text)' }} className="w-5 h-5" />
             <span className="text-sm">
-              © 2025 NewsBro. All rights reserved.
+              © 2025 NewsBro. All rights reserved. version: {__APP_VERSION__}
             </span>
           </div>
           
