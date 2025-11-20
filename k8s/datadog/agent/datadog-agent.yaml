@@ -70,4 +70,7 @@ spec:
       enabled: true
     liveProcessCollection:
       enabled: true
-
+    liveContainerCollection:
+      enabled: true
+    orchestratorExplorer:
+      enabled: true

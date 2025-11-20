@@ -10,9 +10,9 @@ data:
   API_PORT: "8080"
   ENVIRONMENT: production
   # Model
-  MODEL_NAME: tf_idf
+  MODEL_NAME: tfidf
   MODEL_URI: s3://mlflow/11/models/m-d8a417b8607340ccaee01853145f9231/artifacts
-  MODEL_SIMILARITY_THRESHOLD: "0.5"
+  MODEL_SIMILARITY_THRESHOLD: "0.3"
   ARTICLE_VECTOR_FEATURES: "100" # check the model URI
   TOP_K_ARTICLES: "10"
   MLFLOW_S3_ENDPOINT_URL: http://minio-new.minio.svc.cluster.local:9000

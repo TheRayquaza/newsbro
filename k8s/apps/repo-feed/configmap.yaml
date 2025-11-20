@@ -9,7 +9,7 @@ data:
   PORT: "8080"
   ENVIRONMENT: prod
   # Feed configuration
-  DEFAULT_MODEL: tf_idf
+  DEFAULT_MODEL: tfidf
   AVAILABLE_MODELS: tfidf,sbert
   FEEDBACK_EXPIRATION_SECONDS: "604800" # (7 days)
   FEED_RESCORING_ENABLED: "true"

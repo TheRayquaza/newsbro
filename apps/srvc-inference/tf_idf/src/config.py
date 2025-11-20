@@ -31,12 +31,14 @@ class Config(pydantic.BaseModel):
     )
 
     # Qdrant
-    qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
+    qdrant_url: str = os.getenv("QDRANT_URL", "localhost:6333")
 
     # Model
     model_uri: str = os.getenv("MODEL_URI", "")
     model_name: str = os.getenv("MODEL_NAME", "tfidf")
-    tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+    tracking_uri: str = os.getenv(
+        "MLFLOW_TRACKING_URI", "https://mlflow.internal.newsbro.cc"
+    )
 
     # API
     api_port: int = int(os.getenv("API_PORT", "8000"))

@@ -7,6 +7,8 @@ metadata:
     app: mlflow
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
+    nginx.ingress.kubernetes.io/proxy-body-size: "1G"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
 spec:
   ingressClassName: private
   
