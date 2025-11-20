@@ -2,11 +2,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: apps
-  namespace: apps
+  name: postgres
+  namespace: postgres
 spec:
-  interval: 1m
-  path: ./k8s/apps
+  interval: 10m
+  path: ./k8s/postgres
   prune: true
   sourceRef:
     kind: GitRepository

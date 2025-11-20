@@ -2,13 +2,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: capacitor-next
+  name: cert-manager
   namespace: flux-system
 spec:
-  interval: 1m
-  path: "./self-host/yaml"
+  interval: 10m
+  path: ./k8s/cert-manager
   prune: true
   sourceRef:
     kind: GitRepository
-    name: capacitor-next
-  targetNamespace: flux-system
+    name: flux-system
+    namespace: flux-system
