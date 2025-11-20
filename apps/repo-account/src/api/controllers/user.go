@@ -175,3 +175,43 @@ func (uc *UserController) GetUsers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+// @Summary Delete user profile
+// @Description Delete the profile of the authenticated user
+// @Tags User
+// @Produce json
+// @Success 204 "No Content"
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Router /users/profile [delete]
+func (uc *UserController) DeleteProfile(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: "User not found in context",
+		})
+		return
+	}
+
+	usr, ok := user.(*entities.JWTClaims)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Invalid user type in context",
+		})
+		return
+	}
+
+	err := uc.userService.DeleteUser(usr.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
