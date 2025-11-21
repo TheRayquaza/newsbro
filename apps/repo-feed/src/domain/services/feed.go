@@ -36,11 +36,13 @@ type FeedService struct {
 	feedKey            string
 	articleKey         string
 	feedbackExpiration time.Duration
+	articleExpiration  time.Duration
+	scoreExpiration    time.Duration
 	decayHalfLife      time.Duration
 	models             []string
 }
 
-func NewFeedService(rdb *redis.Client, defaultModel string, scoreKey string, feedbackKey string, feedKey string, articleKey string, feedbackExpiration time.Duration, decayHalfLife time.Duration, models []string) *FeedService {
+func NewFeedService(rdb *redis.Client, defaultModel string, scoreKey string, feedbackKey string, feedKey string, articleKey string, feedbackExpiration time.Duration, articleExpiration time.Duration, scoreExpiration time.Duration, decayHalfLife time.Duration, models []string) *FeedService {
 	return &FeedService{
 		RDB:                rdb,
 		defaultModel:       defaultModel,
@@ -49,6 +51,8 @@ func NewFeedService(rdb *redis.Client, defaultModel string, scoreKey string, fee
 		feedKey:            feedKey,
 		articleKey:         articleKey,
 		feedbackExpiration: feedbackExpiration,
+		articleExpiration:  articleExpiration,
+		scoreExpiration:    scoreExpiration,
 		decayHalfLife:      decayHalfLife,
 		models:             models,
 	}
@@ -68,54 +72,35 @@ func (s *FeedService) RemoveArticleFromFeed(userID, articleID uint, model string
 
 	data, err := s.RDB.Get(ctx, fmt.Sprintf("%s:%d", s.articleKey, articleID)).Result()
 	if err == redis.Nil {
-		log.Printf("Article %d not found in Redis, but continuing with feed removal", articleID)
+		log.Printf("article %d not found in Redis, but continuing with feed removal for user %d and model %s", articleID, userID, model)
 	} else if err != nil {
-		return fmt.Errorf("failed to fetch article %d: %w", articleID, err)
+		return fmt.Errorf("failed to fetch article %d when removing from feed model %s with user %d: %w", articleID, model, userID, err)
 	}
 
 	if err == nil && data != "" {
 		var article models.ArticleModel
 		if err := json.Unmarshal([]byte(data), &article); err != nil {
-			log.Printf("Failed to unmarshal article data for ID %d: %v", articleID, err)
+			log.Printf("failed to unmarshal article data for ID %d: %v", articleID, err)
 		} else {
 			scoreKey := fmt.Sprintf("%s:%d:%d:%s", s.scoreKey, userID, articleID, model)
 			score := 0.0
 			if scoreStr, err := s.RDB.Get(ctx, scoreKey).Result(); err == nil {
 				if err := json.Unmarshal([]byte(scoreStr), &score); err != nil {
-					log.Printf("Failed to unmarshal score: %v", err)
+					log.Printf("failed to unmarshal score: %v", err)
 				}
 			}
 
 			member := encodeZSetMember(article.ID, score, article.PublishedAt)
 			if err := s.RDB.ZRem(ctx, key, member).Err(); err != nil {
-				log.Printf("Failed to remove article ID %d from ZSET %s: %v", articleID, key, err)
+				log.Printf("failed to remove article ID %d from ZSET %s: %v", articleID, key, err)
 			} else {
-				log.Printf("Successfully removed article ID %d from feed %s", articleID, key)
+				log.Printf("successfully removed article ID %d from feed %s", articleID, key)
 				return nil
 			}
 		}
 	}
 
-	members, err := s.RDB.ZRange(ctx, key, 0, -1).Result()
-	if err != nil {
-		return fmt.Errorf("failed to scan ZSET %s: %w", key, err)
-	}
-
-	for _, member := range members {
-		id, _, _, err := decodeZSetMember(member)
-		if err != nil {
-			continue
-		}
-		if id == articleID {
-			if err := s.RDB.ZRem(ctx, key, member).Err(); err != nil {
-				return fmt.Errorf("failed to remove article ID %d from ZSET %s: %w", articleID, key, err)
-			}
-			log.Printf("Successfully removed article ID %d from feed %s via scan", articleID, key)
-			return nil
-		}
-	}
-
-	log.Printf("Article ID %d not found in feed %s", articleID, key)
+	log.Printf("article ID %d not found in feed %s when trying to remove", articleID, key)
 	return nil
 }
 
@@ -128,8 +113,7 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 
 	zItems, err := s.RDB.ZRevRangeWithScores(ctx, key, 0, limit-1).Result()
 	if err != nil {
-		log.Printf("Error retrieving feed ZSET %s: %v", key, err)
-		return nil, fmt.Errorf("failed to retrieve feed ZSET: %w", err)
+		return nil, fmt.Errorf("failed to retrieve feed ZSET for user %d and model %s: %w", userID, model, err)
 	}
 
 	if len(zItems) == 0 {
@@ -144,13 +128,13 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 	for _, item := range zItems {
 		memberStr, ok := item.Member.(string)
 		if !ok {
-			log.Printf("Non-string member found in ZSET %s: %v. Skipping.", key, item.Member)
+			log.Printf("non-string member found in ZSET %s: %v. Skipping.", key, item.Member)
 			continue
 		}
 
 		articleID, _, _, err := decodeZSetMember(memberStr)
 		if err != nil {
-			log.Printf("Failed to decode article ID from ZSET member '%s': %v", memberStr, err)
+			log.Printf("failed to decode article ID from ZSET member '%s': %v", memberStr, err)
 			continue
 		}
 
@@ -163,36 +147,30 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 	// Fetch article contents
 	contents, err := s.RDB.MGet(ctx, contentKeys...).Result()
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve article contents: %w", err)
+		return nil, fmt.Errorf("failed to retrieve article contents for user %d and model %s: %w", userID, model, err)
 	}
 
 	// Fetch user-specific scores
 	scores, err := s.RDB.MGet(ctx, scoreKeys...).Result()
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve scores: %w", err)
+		return nil, fmt.Errorf("failed to retrieve scores for user %d and model %s: %w", userID, model, err)
 	}
 
 	articles := make([]models.ArticleModel, 0, len(contents))
 	for i, content := range contents {
 		if content == nil {
-			log.Printf("Article content not found for key: %s", contentKeys[i])
+			log.Printf("article content not found for key: %s", contentKeys[i])
 			continue
 		}
 
 		var article models.ArticleModel
 		jsonStr := content.(string)
 		if err := json.Unmarshal([]byte(jsonStr), &article); err != nil {
-			log.Printf("Failed to unmarshal article JSON from key %s: %v", contentKeys[i], err)
+			log.Printf("skipping after unmarshal article JSON from key %s: %v", contentKeys[i], err)
 			continue
 		}
 
-		// Attach user-specific score
-		if scores[i] != nil {
-			var score float64
-			if err := json.Unmarshal([]byte(scores[i].(string)), &score); err == nil {
-				article.Score = score
-			}
-		}
+		article.Score = scores[i].(float64)
 
 		article.DecayScore = articleDecayScores[articleIDs[i]]
 		articles = append(articles, article)
@@ -212,11 +190,11 @@ func (s *FeedService) UpdateFeedZSET(req *dto.UpdateFeedRequest) error {
 	scoreKey := fmt.Sprintf("%s:%d:%d:%s", s.scoreKey, req.UserID, req.Article.ID, model)
 
 	if s.hasFeedback(ctx, req.UserID, req.Article.ID) {
-		log.Printf("Skipping article ID %d for user ID %d due to negative feedback", req.Article.ID, req.UserID)
+		log.Printf("skipping article ID %d for user ID %d due to feedback", req.Article.ID, req.UserID)
 		return nil
 	}
 
-	articleModel := converters.ArticleToArticleModel(req.Article, 0) // Pass 0 as score won't be stored in article
+	articleModel := converters.ArticleToArticleModel(req.Article)
 
 	decayScore := calculateDecayedScore(req.Score, req.Article.PublishedAt, time.Now(), s.decayHalfLife)
 
@@ -232,8 +210,8 @@ func (s *FeedService) UpdateFeedZSET(req *dto.UpdateFeedRequest) error {
 
 	pipe := s.RDB.Pipeline()
 
-	pipe.Set(ctx, articleContentKey, data, 0)
-	pipe.Set(ctx, scoreKey, scoreData, 0)
+	pipe.Set(ctx, articleContentKey, data, s.articleExpiration)
+	pipe.Set(ctx, scoreKey, scoreData, s.scoreExpiration)
 
 	memberStr := encodeZSetMember(articleModel.ID, req.Score, articleModel.PublishedAt)
 	pipe.ZAdd(ctx, feedKey, redis.Z{
@@ -273,7 +251,7 @@ func (s *FeedService) AddNewFeedback(userID uint, articleID uint, model string) 
 	log.Printf("Successfully saved feedback for user %d on article %d", userID, articleID)
 
 	if err := s.RemoveArticleFromFeed(userID, articleID, model); err != nil {
-		log.Printf("Warning: Failed to remove article %d from feed for user %d: %v", articleID, userID, err)
+		log.Printf("Failed to remove article %d from feed for user %d: %v", articleID, userID, err)
 	}
 
 	return nil
@@ -283,6 +261,12 @@ func (s *FeedService) AddNewFeedbackAllModels(userID uint, articleID uint) error
 	ctx := context.Background()
 	feedbackKey := fmt.Sprintf("%s:%d", s.feedbackKey, userID)
 	log.Printf("Adding feedback for user %d on article %d (all models)", userID, articleID)
+
+	for _, model := range s.models {
+		if err := s.RemoveArticleFromFeed(userID, articleID, model); err != nil {
+			log.Printf("Failed to remove article %d from feed %s for user %d: %v", articleID, model, userID, err)
+		}
+	}
 
 	pipe := s.RDB.Pipeline()
 
@@ -295,7 +279,7 @@ func (s *FeedService) AddNewFeedbackAllModels(userID uint, articleID uint) error
 
 	// Remove user score
 	for _, model := range s.models {
-		scoreKey := fmt.Sprintf("score:%d:%d:%s", userID, articleID, model)
+		scoreKey := fmt.Sprintf("%s:%d:%d:%s", s.scoreKey, userID, articleID, model)
 		pipe.Del(ctx, scoreKey)
 	}
 
@@ -304,13 +288,7 @@ func (s *FeedService) AddNewFeedbackAllModels(userID uint, articleID uint) error
 		return fmt.Errorf("failed to save feedback: %w", err)
 	}
 
-	log.Printf("Successfully saved feedback for user %d on article %d", userID, articleID)
-
-	for _, model := range s.models {
-		if err := s.RemoveArticleFromFeed(userID, articleID, model); err != nil {
-			log.Printf("Warning: Failed to remove article %d from feed %s for user %d: %v", articleID, model, userID, err)
-		}
-	}
+	log.Printf("Successfully saved feedback and removed score for user %d on article %d", userID, articleID)
 
 	return nil
 }

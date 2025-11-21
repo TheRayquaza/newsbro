@@ -35,7 +35,7 @@ func main() {
 	}
 
 	// Initialize feed service
-	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.RedisScoreKey, cfg.RedisFeedbackKey, cfg.RedisFeedKey, cfg.RedisArticleKey, cfg.FeedbackExpiration, cfg.FeedRescoring.DecayHalfLife, cfg.Models)
+	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.RedisScoreKey, cfg.RedisFeedbackKey, cfg.RedisFeedKey, cfg.RedisArticleKey, cfg.FeedbackExpiration, cfg.ArticleExpiration, cfg.ScoreExpiration, cfg.FeedRescoring.DecayHalfLife, cfg.Models)
 
 	// Initialize and start rescoring job
 	rescoringConfig := services.RescoringConfig{

@@ -38,6 +38,8 @@ type Config struct {
 	DefaultModel       string
 	Models             []string
 	FeedbackExpiration time.Duration
+	ArticleExpiration  time.Duration
+	ScoreExpiration    time.Duration
 
 	// Feed Rescoring
 	FeedRescoring struct {
@@ -73,6 +75,26 @@ func Load() *Config {
 		if err != nil {
 			fmt.Printf("Invalid FEEDBACK_EXPIRATION_SECONDS='%s', using 604800\n", expStr)
 			seconds = 604800
+		}
+		return time.Duration(seconds) * time.Second
+	}()
+
+	articleExpiration := func() time.Duration {
+		expStr := getEnv("ARTICLE_EXPIRATION_SECONDS", "2592000") // Default 30 days
+		seconds, err := strconv.Atoi(expStr)
+		if err != nil {
+			fmt.Printf("Invalid ARTICLE_EXPIRATION_SECONDS='%s', using 2592000\n", expStr)
+			seconds = 2592000
+		}
+		return time.Duration(seconds) * time.Second
+	}()
+
+	scoreExpiration := func() time.Duration {
+		expStr := getEnv("SCORE_EXPIRATION_SECONDS", "2592000") // Default 30 days
+		seconds, err := strconv.Atoi(expStr)
+		if err != nil {
+			fmt.Printf("Invalid SCORE_EXPIRATION_SECONDS='%s', using 2592000\n", expStr)
+			seconds = 2592000
 		}
 		return time.Duration(seconds) * time.Second
 	}()
@@ -121,6 +143,8 @@ func Load() *Config {
 		DefaultModel:       getEnv("DEFAULT_MODEL", "tfidf"),
 		Models:             splitAndTrim(getEnv("AVAILABLE_MODELS", "tfidf,sbert"), ","),
 		FeedbackExpiration: feedbackExpiration,
+		ArticleExpiration:  articleExpiration,
+		ScoreExpiration:    scoreExpiration,
 
 		FeedRescoring: feedRescoring,
 
