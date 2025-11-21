@@ -297,42 +297,42 @@ services:
           cpus: '0.25'
           memory: 128M
 
-  # repo-feed:
-  #   image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.1.0
-  #   container_name: repo-feed
-  #   env_file:
-  #     - repo-feed/.env
-  #   environment:
-  #     PORT: 8083
-  #     JWT_SECRET: "your-secret-key"
-  #     KAFKA_GROUP_ID: "repo-feed-group"
-  #     ENVIRONMENT: "dev"
-  #     REDIS_SENTINELS: "redis-sentinel:26379"
-  #     REDIS_MASTER_NAME: "mymaster"
-  #     REDIS_PASSWORD: ""
-  #     REDIS_DB: "0"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "curl -f http://localhost:8083/health || exit 1"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #   restart: always
-  #   ports:
-  #     - "8083:8083"
-  #   depends_on:
-  #     - redis-master
-  #     - redpanda
-  #   networks:
-  #     - data-net
-  #     - redis-net
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.5'
-  #         memory: 256M
-  #       reservations:
-  #         cpus: '0.25'
-  #         memory: 128M
+  repo-feed:
+    image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.1.0
+    container_name: repo-feed
+    env_file:
+      - repo-feed/.env
+    environment:
+      PORT: 8083
+      JWT_SECRET: "your-secret-key"
+      KAFKA_GROUP_ID: "repo-feed-group"
+      ENVIRONMENT: "dev"
+      REDIS_SENTINELS: "redis-sentinel:26379"
+      REDIS_MASTER_NAME: "mymaster"
+      REDIS_PASSWORD: ""
+      REDIS_DB: "0"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+    ports:
+      - "8083:8083"
+    depends_on:
+      - redis-master
+      - redpanda
+    networks:
+      - data-net
+      - redis-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 
 volumes:
   redpanda:
