@@ -170,8 +170,16 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 			continue
 		}
 
-		article.Score = scores[i].(float64)
-
+		// Safe score handling
+		var scoreValue float64
+		if scores[i] != nil {
+			if scoreStr, ok := scores[i].(string); ok {
+				if err := json.Unmarshal([]byte(scoreStr), &scoreValue); err != nil {
+					log.Printf("failed to unmarshal score for article %d: %v", articleIDs[i], err)
+				}
+			}
+		}
+		article.Score = scoreValue
 		article.DecayScore = articleDecayScores[articleIDs[i]]
 		articles = append(articles, article)
 	}

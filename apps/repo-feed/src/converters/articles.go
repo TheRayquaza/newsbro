@@ -14,6 +14,8 @@ func ArticleModelToArticle(article *models.ArticleModel) dto.Article {
 		Abstract:    article.Abstract,
 		Link:        article.Link,
 		RSSLink:     article.RSSLink,
+		PublishedAt: article.PublishedAt,
+		Score:       article.DecayScore,
 	}
 }
 
