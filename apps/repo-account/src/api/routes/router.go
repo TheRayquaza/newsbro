@@ -2,6 +2,7 @@ package routes
 
 import (
 	"repo_account/src/api/controllers"
+	customMiddleware "repo_account/src/api/middleware"
 	"repo_account/src/config"
 	"repo_account/src/domain/services"
 
@@ -70,13 +71,14 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 		// Protected routes
 		protected := v1.Group("/")
 		protected.Use(authMiddleware.AuthMiddleware(cfg.JWTSecret, cfg.LoginRedirectURL))
+		protected.Use(customMiddleware.UserStatusMiddleware(userService))
 		{
 			// User routes
 			users := protected.Group("/users")
 			{
 				users.GET("/profile", userController.GetProfile)
 				users.PUT("/profile", userController.UpdateProfile)
-				//users.DELETE("/profile", userController.DeleteProfile)
+				users.DELETE("/profile", userController.DeleteProfile)
 				users.GET("", userController.GetUsers) // Admin only in production
 			}
 		}

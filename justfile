@@ -6,7 +6,7 @@ help:
 init-db:
     #!/bin/sh
     cd apps
-    docker compose up --wait -d postgres
+    docker compose up -d postgres
     docker compose exec postgres bash -c "
         psql -U username -d postgres -c 'CREATE DATABASE account;';
         psql -U username -d postgres -c 'CREATE DATABASE article;';
