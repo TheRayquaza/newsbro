@@ -12,6 +12,13 @@ data:
   DEFAULT_MODEL: tfidf
   AVAILABLE_MODELS: tfidf,sbert
   FEEDBACK_EXPIRATION_SECONDS: "604800" # (7 days)
+  ARTICLE_EXPIRATION_SECONDS: "2592000" # (30 days)
+  SCORE_EXPIRATION_SECONDS: "604800" # (7 days)
+  REDIS_SCORE_KEY: score
+  REDIS_FEEDBACK_KEY: feedback
+  REDIS_FEED_KEY: feed
+  REDIS_ARTICLE_KEY: article
+  # Feed rescoring configuration
   FEED_RESCORING_ENABLED: "true"
   FEED_RESCORING_INTERVAL: "12h"
   FEED_RESCORING_BATCH_SIZE: "4096" # number of feed to rescore per batch
