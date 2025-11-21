@@ -18,10 +18,14 @@ type Config struct {
 	LoginRedirectURL string
 
 	// Redis
-	RedisSentinels  []string
-	RedisMasterName string
-	RedisPassword   string
-	RedisDB         int
+	RedisSentinels   []string
+	RedisMasterName  string
+	RedisPassword    string
+	RedisDB          int
+	RedisScoreKey    string
+	RedisFeedbackKey string
+	RedisFeedKey     string
+	RedisArticleKey  string
 
 	// Kafka
 	KafkaBrokers               []string
@@ -99,10 +103,14 @@ func Load() *Config {
 		FrontendOrigin:   getEnv("FRONTEND_ORIGIN", "https://app.newsbro.cc"),
 		LoginRedirectURL: getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000/auth/callback"),
 
-		RedisSentinels:  redisSentinels,
-		RedisMasterName: getEnv("REDIS_MASTER_NAME", "mymaster"),
-		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
-		RedisDB:         redisDB,
+		RedisSentinels:   redisSentinels,
+		RedisMasterName:  getEnv("REDIS_MASTER_NAME", "mymaster"),
+		RedisPassword:    getEnv("REDIS_PASSWORD", ""),
+		RedisDB:          redisDB,
+		RedisScoreKey:    getEnv("REDIS_SCORE_KEY", "score"),
+		RedisFeedbackKey: getEnv("REDIS_FEEDBACK_KEY", "feedback"),
+		RedisFeedKey:     getEnv("REDIS_FEED_KEY", "feed"),
+		RedisArticleKey:  getEnv("REDIS_ARTICLE_KEY", "article"),
 
 		KafkaBrokers:               kafkaBrokers,
 		KafkaInferenceCommandTopic: getEnv("KAFKA_INFERENCE_COMMAND_TOPIC", "inference-commands"),

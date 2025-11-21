@@ -17,8 +17,8 @@ import (
 func main() {
 	// Load configuration
 	cfg := config.Load()
-	log.Println(cfg);
-	log.Println(cfg.FrontendOrigin);
+	log.Println(cfg)
+	log.Println(cfg.FrontendOrigin)
 	if cfg.Environment == "dev" {
 		log.Println("Running in development mode")
 	}
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	// Initialize feed service
-	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.FeedbackExpiration, cfg.FeedRescoring.DecayHalfLife, cfg.Models)
+	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.RedisScoreKey, cfg.RedisFeedbackKey, cfg.RedisFeedKey, cfg.RedisArticleKey, cfg.FeedbackExpiration, cfg.FeedRescoring.DecayHalfLife, cfg.Models)
 
 	// Initialize and start rescoring job
 	rescoringConfig := services.RescoringConfig{
