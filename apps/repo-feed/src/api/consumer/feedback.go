@@ -88,7 +88,7 @@ func (h *consumerFeedbackGroupHandler) processMessage(data []byte) {
 
 	log.Printf("Processing new feedback for user %d on article %d", cmd.UserID, cmd.NewsID)
 
-	err := h.feedService.AddNewFeedback(cmd.UserID, cmd.NewsID)
+	err := h.feedService.AddNewFeedbackAllModels(cmd.UserID, cmd.NewsID)
 	if err != nil {
 		log.Printf("Error updating feed: %v", err)
 		return
