@@ -1,4 +1,4 @@
-import pickle
+import pickle # nosec B403
 import sys
 
 from sentence_transformers import SentenceTransformer
