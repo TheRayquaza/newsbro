@@ -20,10 +20,10 @@ data:
   REDIS_ARTICLE_KEY: article
   # Feed rescoring configuration
   FEED_RESCORING_ENABLED: "true"
-  FEED_RESCORING_INTERVAL: "12h"
+  FEED_RESCORING_INTERVAL: "1h"
   FEED_RESCORING_BATCH_SIZE: "4096" # number of feed to rescore per batch
   FEED_RESCORING_WORKERS: "10" # number of concurrent workers for rescoring
-  FEED_RESCORING_THRESHOLD: "0.1"
+  FEED_RESCORING_THRESHOLD: "0.3"
   FEED_RESCORING_DECAY_ENABLED: "true" # enable score decay over time
   FEED_RESCORING_DECAY_HALFLIFE: "60h" # (2.5 days)
   # Kafka
