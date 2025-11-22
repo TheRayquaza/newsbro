@@ -1,18 +1,33 @@
-# Core messaging & vector DB
-kafka-python
+# Core ML dependencies
+sentence-transformers
+torch
+transformers
+
+# MLflow integration
+mlflow
+boto3
+
+# Vector database
 qdrant-client
 
-# ML stack (updated for Python 3.13)
+# Data processing
 scikit-learn
 pandas
+numpy
 pyarrow
 
-# Environment & APIs
+# Message queue
+kafka-python
+
+# Caching
+redis
+
+# API framework
 python-dotenv
 fastapi
 uvicorn[standard]
 pydantic
 
-# Experiment tracking / AWS
-mlflow
-boto3
+# Utilities
+python-dotenv
+tqdm
