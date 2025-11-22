@@ -2,12 +2,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: srvc-inference-tfidf
+  name: srvc-inference-sbert
   namespace: apps
   labels:
-    app: srvc-inference-tfidf
+    app: srvc-inference-sbert
     type: backends
-    model: tfidf
+    model: sbert
 spec:
   # replicas: 1 # managed by hpa
   strategy:
@@ -17,25 +17,25 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: srvc-inference-tfidf
+      app: srvc-inference-sbert
   template:
     metadata:
       labels:
-        app: srvc-inference-tfidf
+        app: srvc-inference-sbert
         monitoring: "enabled"
     spec:
       imagePullSecrets:
         - name: pull-secret
       containers:
-        - name: srvc-inference-tfidf
-          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-tf_idf-v1.0.5
+        - name: srvc-inference-sbert
+          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-sbert-v1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               name: http
           envFrom:
             - configMapRef:
-                name: srvc-inference-tfidf-config
+                name: srvc-inference-sbert-config
             - configMapRef:
                 name: postgres-config
             - configMapRef:
@@ -47,7 +47,7 @@ spec:
             - configMapRef:
                 name: oidc-config
             - secretRef:
-                name: srvc-inference-tfidf-secrets
+                name: srvc-inference-sbert-secrets
           resources:
             requests:
               memory: "256Mi"
@@ -59,15 +59,15 @@ spec:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 180
+            initialDelaySeconds: 300
             periodSeconds: 15
             failureThreshold: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 20
           readinessProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 180
+            initialDelaySeconds: 300
             periodSeconds: 15
             failureThreshold: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 20
