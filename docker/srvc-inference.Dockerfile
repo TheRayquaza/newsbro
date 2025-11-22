@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.13-bookworm-slim
 
 ARG model
 ENV MODEL_NAME=${model}
@@ -7,6 +7,7 @@ ENV PORT=8080
 
 WORKDIR /app
 
+# hadolint ignore=DL3008,DL3015
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash=5.2.15-2+b9 \
     ca-certificates=20230311+deb12u1 \
