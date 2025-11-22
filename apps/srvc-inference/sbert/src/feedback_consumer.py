@@ -27,7 +27,7 @@ class SBERTFeedbackConsumerConfig(pydantic.BaseModel):
     redis_master_name: str = os.getenv("REDIS_MASTER_NAME", "mymaster")
     redis_password: Optional[str] = os.getenv("REDIS_PASSWORD", None)
     redis_db: int = int(os.getenv("REDIS_DB", "0"))
-    redis_user_profile_prefix: str = os.getenv("REDIS_USER_PROFILE_KEY", "user_profile_sbert")
+    redis_user_profile_prefix: str = os.getenv("REDIS_USER_PROFILE_KEY", "user:sbert")
     top_k_articles: int = int(os.getenv("TOP_K_ARTICLES", "10"))
 
 

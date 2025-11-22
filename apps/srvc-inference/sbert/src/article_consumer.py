@@ -31,7 +31,7 @@ class SBERTArticleConsumerConfig(pydantic.BaseModel):
     redis_password: Optional[str] = os.getenv("REDIS_PASSWORD", None)
     redis_db: int = int(os.getenv("REDIS_DB", "0"))
     redis_scan_batch_size: int = int(os.getenv("REDIS_SCAN_BATCH_SIZE", "100"))
-    redis_user_profile_prefix: str = os.getenv("REDIS_USER_PROFILE_KEY", "user_profile_sbert")
+    redis_user_profile_prefix: str = os.getenv("REDIS_USER_PROFILE_KEY", "user:sbert")
 
 
 class SBERTArticleConsumer(InferenceConsumer):
@@ -120,6 +120,7 @@ class SBERTArticleConsumer(InferenceConsumer):
     def process(self, batch: List[ArticleAggregate]) -> None:
         """Process a batch of articles - upsert active ones and delete inactive ones."""
         try:
+            self.logger.info(f"Processing batch of {len(batch)} articles")
             to_upsert = [article for article in batch if article.is_active]
             to_delete = [article for article in batch if not article.is_active]
 
@@ -134,7 +135,7 @@ class SBERTArticleConsumer(InferenceConsumer):
 
     def _upsert_articles(self, articles: List[ArticleAggregate]) -> None:
         texts = [article.title + " " + article.abstract for article in articles]
-        vectors = self.model.encode(texts).tolist()
+        vectors = self.model.predict(texts).tolist()
 
         points = [
             PointStruct(id=article.id, vector=vector, payload=article.dict())

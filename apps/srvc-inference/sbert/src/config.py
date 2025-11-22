@@ -28,14 +28,18 @@ class Config(pydantic.BaseModel):
     kafka_feedback_consumer_group: str = os.getenv(
         "KAFKA_FEEDBACK_CONSUMER_GROUP", "feedback-sbert-group"
     )
+    kafka_batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "50"))
+    kafka_batch_interval: int = int(os.getenv("KAFKA_BATCH_INTERVAL", "2"))
 
     # Qdrant
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
 
     # Model
     model_uri: str = os.getenv("MODEL_URI", "")
-    tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "https://mlflow.internal.newsbro.cc")
+    tracking_uri: str = os.getenv(
+        "MLFLOW_TRACKING_URI", "https://mlflow.internal.newsbro.cc"
+    )
 
     # API
-    api_port: int = int(os.getenv("API_PORT", "8000"))
-    api_host: str = os.getenv("API_HOST", "")
+    api_port: int = int(os.getenv("API_PORT", "8080"))
+    api_host: str = os.getenv("API_HOST", "0.0.0.0")

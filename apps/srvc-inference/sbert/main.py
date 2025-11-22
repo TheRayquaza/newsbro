@@ -25,12 +25,14 @@ if __name__ == "__main__":
         SBERTArticleConsumer,
         SBERTArticleConsumerConfig,
     )
-    from sbert.src.config import Config 
+    from sbert.src.config import Config
+
     # Setup feedback consumer
     from sbert.src.feedback_consumer import (
         SBERTFeedbackConsumer,
         SBERTFeedbackConsumerConfig,
     )
+
     config = Config()
     print(config)
 
@@ -59,7 +61,7 @@ if __name__ == "__main__":
         model = MlflowModel(
             model_uri=sys.argv[2] if len(sys.argv) > 2 else config.model_uri,
             tracking_uri=config.tracking_uri,
-            from_pickle=True,
+            # from_pickle=True,
         )
 
     # Setup producer
@@ -69,7 +71,6 @@ if __name__ == "__main__":
     )
     producer = InferenceProducer(logger, producer_config)
 
-
     c1_consumer_config = InferenceConsumerConfig(
         kafka_bootstrap_servers=config.kafka_bootstrap_servers,
         kafka_consumer_topic=config.kafka_feedback_consumer_topic,
@@ -78,7 +79,6 @@ if __name__ == "__main__":
     )
     c1_config = SBERTFeedbackConsumerConfig()
     c1 = SBERTFeedbackConsumer(model, producer, logger, c1_consumer_config, c1_config)
-
 
     c2_consumer_config = InferenceConsumerConfig(
         kafka_bootstrap_servers=config.kafka_bootstrap_servers,

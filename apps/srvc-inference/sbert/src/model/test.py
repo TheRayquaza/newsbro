@@ -18,8 +18,8 @@ def load_model(model_path: str):
         # If pickle fails, assume it's a model name and load from sentence-transformers
         print(f"Loading pre-trained model: {model_path}")
         model = SentenceTransformer(model_path)
-        print(f"✅ Pre-trained model loaded")
-    
+        print("✅ Pre-trained model loaded")
+
     return model
 
 
@@ -37,12 +37,12 @@ def test_batch_encoding(model, texts: list) -> None:
     print(f"✅ Generated {len(embeddings)} embeddings")
     print(f"   Embedding shape: {embeddings[0].shape}")
     print(f"   Embedding dimension: {embeddings.shape[1]}")
-    
+
     # Compute pairwise similarities
     print("\n🔍 Pairwise similarities:")
     for i in range(len(texts)):
         for j in range(i + 1, len(texts)):
-            sim = cosine_similarity(embeddings[i:i+1], embeddings[j:j+1])[0][0]
+            sim = cosine_similarity(embeddings[i : i + 1], embeddings[j : j + 1])[0][0]
             print(f"   Text {i+1} ↔ Text {j+1}: {sim:.4f}")
 
 
@@ -57,10 +57,10 @@ if __name__ == "__main__":
     model_path = sys.argv[1]
     model = load_model(model_path)
 
-    print(f"\n📊 Model information:")
-    if hasattr(model, 'get_sentence_embedding_dimension'):
+    print("\n📊 Model information:")
+    if hasattr(model, "get_sentence_embedding_dimension"):
         print(f"   Embedding dimension: {model.get_sentence_embedding_dimension()}")
-    if hasattr(model, 'max_seq_length'):
+    if hasattr(model, "max_seq_length"):
         print(f"   Max sequence length: {model.max_seq_length}")
 
     # Interactive similarity test
@@ -71,19 +71,19 @@ if __name__ == "__main__":
     if text_a and text_b:
         sim = compute_similarity(model, text_a, text_b)
         print(f"\n🔍 Cosine similarity: {sim:.4f}")
-    
+
     # Batch test
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("Would you like to test batch encoding? (y/n): ", end="")
-    if input().strip().lower() == 'y':
+    if input().strip().lower() == "y":
         print("\nEnter texts (one per line, empty line to finish):")
-        texts = []
+        texts: list[str] = []
         while True:
             text = input(f"Text {len(texts)+1}: ").strip()
             if not text:
                 break
             texts.append(text)
-        
+
         if len(texts) >= 2:
             test_batch_encoding(model, texts)
         else:
