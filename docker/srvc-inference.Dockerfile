@@ -7,8 +7,12 @@ ENV PORT=8080
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl=8.14.1-2 \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash=5.2.15-2+b9 \
+    ca-certificates=20230311+deb12u1 \
+    curl=7.88.1-10+deb12u14 \
     && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -s /bin/bash nonroot
 
 COPY ${model}/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
