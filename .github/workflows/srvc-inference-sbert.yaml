@@ -1,4 +1,4 @@
-name: srvc-inference (SBERT)
+name: srvc-inference (TF-IDF)
 
 on:
   push:
@@ -12,10 +12,10 @@ permissions:
   write-all
 
 jobs:
-  srvc-inference-sbert:
+  srvc-inference-tfidf:
     uses: ./.github/workflows/python-svc-workflow.yaml
     with:
-      service_name: srvc-inference-sbert
+      service_name: srvc-inference
       dockerfile: ./docker/srvc-inference.Dockerfile
       context_root: apps/srvc-inference
       model_name: sbert
