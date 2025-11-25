@@ -29,13 +29,13 @@ func main() {
 	// Initialize database
 	db, err := database.Initialize(cfg.DatabaseURL)
 	if err != nil {
-		utils.SugarLog.Fatal("Failed to initialize database:", err)
+		utils.SugarLog.Fatalf("Failed to initialize database: %v", err)
 	}
 
 	// Initialize Kafka producer
 	producer, err := initKafkaProducer(cfg)
 	if err != nil {
-		utils.SugarLog.Fatal("Failed to create Kafka producer:", err)
+		utils.SugarLog.Fatalf("Failed to create Kafka producer: %v", err)
 	}
 
 	// Initialize services
@@ -79,7 +79,7 @@ func main() {
 	// Start server
 	utils.SugarLog.Infof("Server starting on port %s", cfg.Port)
 	if err := router.Run(":" + cfg.Port); err != nil {
-		utils.SugarLog.Fatal("Failed to start server:", err)
+		utils.SugarLog.Fatalf("Failed to start server: %v", err)
 	}
 }
 

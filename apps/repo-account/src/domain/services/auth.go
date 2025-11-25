@@ -128,13 +128,13 @@ func (s *AuthService) RefreshToken(user *models.User) (*dto.LoginResponse, error
 func (s *AuthService) generateTokens(user *models.User) (*dto.LoginResponse, error) {
 	accessToken, err := s.GenerateAccessToken(user)
 	if err != nil {
-		utils.SugarLog.Error("Error generating access token for user ID:", user.ID, "Error:", err)
+		utils.SugarLog.Errorf("Error generating access token for user ID: %d, Error: %v", user.ID, err)
 		return nil, err
 	}
 
 	refreshTokenStr, err := s.generateRefreshToken(user)
 	if err != nil {
-		utils.SugarLog.Error("Error generating refresh token for user ID:", user.ID, "Error:", err)
+		utils.SugarLog.Errorf("Error generating refresh token for user ID: %d, Error: %v", user.ID, err)
 		return nil, err
 	}
 
@@ -188,7 +188,7 @@ func (s *AuthService) generateRefreshToken(user *models.User) (string, error) {
 	}
 
 	if err := s.db.Create(&refreshToken).Error; err != nil {
-		utils.SugarLog.Error("Error saving refresh token for user ID:", user.ID, "Error:", err)
+		utils.SugarLog.Errorf("Error saving refresh token for user ID: %d, Error: %v", user.ID, err)
 		return "", err
 	}
 
@@ -259,11 +259,11 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 				IsActive:  true,
 			}
 			if err := s.db.Create(&user).Error; err != nil {
-				utils.SugarLog.Error("Error creating user from OIDC claims:", err)
+				utils.SugarLog.Errorf("Error creating user from OIDC claims: %v", err)
 				return nil, err
 			}
 		} else {
-			utils.SugarLog.Error("Error fetching user by email:", err)
+			utils.SugarLog.Errorf("Error fetching user by email: %v", err)
 			return nil, err
 		}
 	}
