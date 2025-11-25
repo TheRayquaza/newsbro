@@ -7,7 +7,7 @@ toolchain go1.24.7
 require (
 	github.com/DataDog/dd-trace-go/orchestrion/all/v2 v2.3.1
 	github.com/DataDog/orchestrion v1.6.1
-	github.com/TheRayquaza/newsbro/apps/libs v0.5.4
+	github.com/TheRayquaza/newsbro/apps/libs v0.6.1
 	github.com/coreos/go-oidc/v3 v3.6.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
@@ -306,7 +306,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
+	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/arch v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect

@@ -2,8 +2,8 @@ package services
 
 import (
 	"gorm.io/gorm"
-	"log"
 
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 	"repo_account/src/data/models"
 )
 
@@ -19,7 +19,7 @@ func (s *UserService) GetUserByID(id uint) (*models.User, error) {
 	var user models.User
 	err := s.Db.First(&user, id).Error
 	if err != nil {
-		log.Println("Error fetching user by ID:", err)
+		utils.SugarLog.Error("Error fetching user by ID:", err)
 		return nil, err
 	}
 	return &user, err
@@ -33,16 +33,16 @@ func (s *UserService) UpdateUser(id uint, updates map[string]interface{}) (*mode
 
 	if role, ok := updates["role"].(string); ok {
 		if role == "admin" && user.Role != "admin" {
-			log.Println("Attempt to change role to admin without permission")
+			utils.SugarLog.Warn("Attempt to change role to admin without permission")
 			return nil, gorm.ErrInvalidData
 		} else if role != "admin" && role != "user" {
-			log.Println("Invalid role value")
+			utils.SugarLog.Warn("Invalid role value")
 			return nil, gorm.ErrInvalidData
 		}
 	}
 
 	if err := s.Db.Model(&user).Updates(updates).Error; err != nil {
-		log.Println("Error updating user:", err)
+		utils.SugarLog.Error("Error updating user:", err)
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (s *UserService) GetAllUsers(limit, offset int) ([]models.User, error) {
 	var users []models.User
 	err := s.Db.Limit(limit).Offset(offset).Find(&users).Error
 	if err != nil {
-		log.Println("Error fetching users:", err)
+		utils.SugarLog.Error("Error fetching users:", err)
 	}
 	return users, err
 }
