@@ -12,6 +12,8 @@ import (
 	"repo_feed/src/api/dto"
 	"repo_feed/src/converters"
 	"repo_feed/src/data/models"
+
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 )
 
 // newScore = originalScore * (0.5 ^ (age / halfLife))
@@ -72,7 +74,7 @@ func (s *FeedService) RemoveArticleFromFeed(userID, articleID uint, model string
 
 	data, err := s.RDB.Get(ctx, fmt.Sprintf("%s:%d", s.articleKey, articleID)).Result()
 	if err == redis.Nil {
-		log.Printf("article %d not found in Redis, but continuing with feed removal for user %d and model %s", articleID, userID, model)
+		utils.SugarLog.Infof("article %d not found in Redis, but continuing with feed removal for user %d and model %s", articleID, userID, model)
 	} else if err != nil {
 		return fmt.Errorf("failed to fetch article %d when removing from feed model %s with user %d: %w", articleID, model, userID, err)
 	}
@@ -80,27 +82,27 @@ func (s *FeedService) RemoveArticleFromFeed(userID, articleID uint, model string
 	if err == nil && data != "" {
 		var article models.ArticleModel
 		if err := json.Unmarshal([]byte(data), &article); err != nil {
-			log.Printf("failed to unmarshal article data for ID %d: %v", articleID, err)
+			utils.SugarLog.Errorf("failed to unmarshal article data for ID %d: %v", articleID, err)
 		} else {
 			scoreKey := fmt.Sprintf("%s:%d:%d:%s", s.scoreKey, userID, articleID, model)
 			score := 0.0
 			if scoreStr, err := s.RDB.Get(ctx, scoreKey).Result(); err == nil {
 				if err := json.Unmarshal([]byte(scoreStr), &score); err != nil {
-					log.Printf("failed to unmarshal score: %v", err)
+					utils.SugarLog.Errorf("failed to unmarshal score: %v", err)
 				}
 			}
 
 			member := encodeZSetMember(article.ID, score, article.PublishedAt)
 			if err := s.RDB.ZRem(ctx, key, member).Err(); err != nil {
-				log.Printf("failed to remove article ID %d from ZSET %s: %v", articleID, key, err)
+				utils.SugarLog.Errorf("failed to remove article ID %d from ZSET %s: %v", articleID, key, err)
 			} else {
-				log.Printf("successfully removed article ID %d from feed %s", articleID, key)
+				utils.SugarLog.Infof("successfully removed article ID %d from feed %s", articleID, key)
 				return nil
 			}
 		}
 	}
 
-	log.Printf("article ID %d not found in feed %s when trying to remove", articleID, key)
+	utils.SugarLog.Infof("article ID %d not found in feed %s when trying to remove", articleID, key)
 	return nil
 }
 
@@ -113,6 +115,7 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 
 	zItems, err := s.RDB.ZRevRangeWithScores(ctx, key, 0, limit-1).Result()
 	if err != nil {
+		utils.SugarLog.Errorf("failed to retrieve feed ZSET for user %d and model %s: %v", userID, model, err)
 		return nil, fmt.Errorf("failed to retrieve feed ZSET for user %d and model %s: %w", userID, model, err)
 	}
 
@@ -128,13 +131,13 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 	for _, item := range zItems {
 		memberStr, ok := item.Member.(string)
 		if !ok {
-			log.Printf("non-string member found in ZSET %s: %v. Skipping.", key, item.Member)
+			utils.SugarLog.Infof("non-string member found in ZSET %s: %v. Skipping.", key, item.Member)
 			continue
 		}
 
 		articleID, _, _, err := decodeZSetMember(memberStr)
 		if err != nil {
-			log.Printf("failed to decode article ID from ZSET member '%s': %v", memberStr, err)
+			utils.SugarLog.Errorf("failed to decode article ID from ZSET member '%s': %v", memberStr, err)
 			continue
 		}
 
@@ -147,26 +150,28 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 	// Fetch article contents
 	contents, err := s.RDB.MGet(ctx, contentKeys...).Result()
 	if err != nil {
+		utils.SugarLog.Errorf("failed to retrieve article contents for user %d and model %s: %v", userID, model, err)
 		return nil, fmt.Errorf("failed to retrieve article contents for user %d and model %s: %w", userID, model, err)
 	}
 
 	// Fetch user-specific scores
 	scores, err := s.RDB.MGet(ctx, scoreKeys...).Result()
 	if err != nil {
+		utils.SugarLog.Errorf("failed to retrieve scores for user %d and model %s: %v", userID, model, err)
 		return nil, fmt.Errorf("failed to retrieve scores for user %d and model %s: %w", userID, model, err)
 	}
 
 	articles := make([]models.ArticleModel, 0, len(contents))
 	for i, content := range contents {
 		if content == nil {
-			log.Printf("article content not found for key: %s", contentKeys[i])
+			utils.SugarLog.Infof("article content not found for key: %s", contentKeys[i])
 			continue
 		}
 
 		var article models.ArticleModel
 		jsonStr := content.(string)
 		if err := json.Unmarshal([]byte(jsonStr), &article); err != nil {
-			log.Printf("skipping after unmarshal article JSON from key %s: %v", contentKeys[i], err)
+			utils.SugarLog.Errorf("skipping after unmarshal article JSON from key %s: %v", contentKeys[i], err)
 			continue
 		}
 
@@ -175,7 +180,7 @@ func (s *FeedService) GetUserFeed(userID uint, model string, limit int64) ([]mod
 		if scores[i] != nil {
 			if scoreStr, ok := scores[i].(string); ok {
 				if err := json.Unmarshal([]byte(scoreStr), &scoreValue); err != nil {
-					log.Printf("failed to unmarshal score for article %d: %v", articleIDs[i], err)
+					utils.SugarLog.Errorf("failed to unmarshal score for article %d: %v", articleIDs[i], err)
 				}
 			}
 		}
@@ -198,7 +203,7 @@ func (s *FeedService) UpdateFeedZSET(req *dto.UpdateFeedRequest) error {
 	scoreKey := fmt.Sprintf("%s:%d:%d:%s", s.scoreKey, req.UserID, req.Article.ID, model)
 
 	if s.hasFeedback(ctx, req.UserID, req.Article.ID) {
-		log.Printf("skipping article ID %d for user ID %d due to feedback", req.Article.ID, req.UserID)
+		utils.SugarLog.Infof("skipping article ID %d for user ID %d due to feedback", req.Article.ID, req.UserID)
 		return nil
 	}
 
@@ -208,11 +213,13 @@ func (s *FeedService) UpdateFeedZSET(req *dto.UpdateFeedRequest) error {
 
 	data, err := json.Marshal(articleModel)
 	if err != nil {
+		utils.SugarLog.Errorf("failed to marshal article: %w", err)
 		return fmt.Errorf("failed to marshal article: %w", err)
 	}
 
 	scoreData, err := json.Marshal(req.Score)
 	if err != nil {
+		utils.SugarLog.Errorf("failed to marshal score: %w", err)
 		return fmt.Errorf("failed to marshal score: %w", err)
 	}
 
@@ -228,6 +235,7 @@ func (s *FeedService) UpdateFeedZSET(req *dto.UpdateFeedRequest) error {
 	})
 
 	if _, err := pipe.Exec(ctx); err != nil {
+		utils.SugarLog.Errorf("failed to execute Redis pipeline for ZSET update and content storage: %v", err)
 		return fmt.Errorf("failed to execute Redis pipeline for ZSET update and content storage: %w", err)
 	}
 
@@ -252,14 +260,14 @@ func (s *FeedService) AddNewFeedback(userID uint, articleID uint, model string) 
 	}
 
 	if _, err := pipe.Exec(ctx); err != nil {
-		log.Println("Failed to add feedback to Redis:", err)
+		utils.SugarLog.Errorf("Failed to add feedback to Redis: %v", err)
 		return fmt.Errorf("failed to save feedback: %w", err)
 	}
 
-	log.Printf("Successfully saved feedback for user %d on article %d", userID, articleID)
+	utils.SugarLog.Infof("Successfully saved feedback for user %d on article %d", userID, articleID)
 
 	if err := s.RemoveArticleFromFeed(userID, articleID, model); err != nil {
-		log.Printf("Failed to remove article %d from feed for user %d: %v", articleID, userID, err)
+		utils.SugarLog.Errorf("Failed to remove article %d from feed for user %d: %v", articleID, userID, err)
 	}
 
 	return nil
@@ -268,11 +276,11 @@ func (s *FeedService) AddNewFeedback(userID uint, articleID uint, model string) 
 func (s *FeedService) AddNewFeedbackAllModels(userID uint, articleID uint) error {
 	ctx := context.Background()
 	feedbackKey := fmt.Sprintf("%s:%d", s.feedbackKey, userID)
-	log.Printf("Adding feedback for user %d on article %d (all models)", userID, articleID)
+	utils.SugarLog.Infof("Adding feedback for user %d on article %d (all models)", userID, articleID)
 
 	for _, model := range s.models {
 		if err := s.RemoveArticleFromFeed(userID, articleID, model); err != nil {
-			log.Printf("Failed to remove article %d from feed %s for user %d: %v", articleID, model, userID, err)
+			utils.SugarLog.Errorf("Failed to remove article %d from feed %s for user %d: %v", articleID, model, userID, err)
 		}
 	}
 
@@ -292,11 +300,11 @@ func (s *FeedService) AddNewFeedbackAllModels(userID uint, articleID uint) error
 	}
 
 	if _, err := pipe.Exec(ctx); err != nil {
-		log.Println("Failed to add feedback to Redis:", err)
+		utils.SugarLog.Errorf("Failed to add feedback to Redis: %v", err)
 		return fmt.Errorf("failed to save feedback: %w", err)
 	}
 
-	log.Printf("Successfully saved feedback and removed score for user %d on article %d", userID, articleID)
+	utils.SugarLog.Infof("Successfully saved feedback and removed score for user %d on article %d", userID, articleID)
 
 	return nil
 }
@@ -305,7 +313,7 @@ func (s *FeedService) hasFeedback(ctx context.Context, userID uint, articleID ui
 	key := fmt.Sprintf("%s:%d", s.feedbackKey, userID)
 	isMember, err := s.RDB.SIsMember(ctx, key, articleID).Result()
 	if err != nil {
-		log.Printf("Error checking feedback for user %d, article %d: %v", userID, articleID, err)
+		utils.SugarLog.Errorf("Error checking feedback for user %d, article %d: %v", userID, articleID, err)
 		return false
 	}
 	return isMember

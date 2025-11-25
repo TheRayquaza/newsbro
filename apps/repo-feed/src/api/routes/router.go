@@ -12,7 +12,6 @@ import (
 	docs "repo_feed/docs"
 
 	"github.com/gin-gonic/gin"
-	"log"
 )
 
 func SetupRouter(cfg *config.Config, feedService *services.FeedService, rescoringService *services.FeedRescoringService) *gin.Engine {
@@ -35,7 +34,6 @@ func SetupRouter(cfg *config.Config, feedService *services.FeedService, rescorin
 	router.GET("/health", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		if err := feedService.RDB.Ping(ctx).Err(); err != nil {
-			log.Println("Health check failed:", err)
 			c.JSON(500, gin.H{"status": "unhealthy"})
 			return
 		}
@@ -46,7 +44,6 @@ func SetupRouter(cfg *config.Config, feedService *services.FeedService, rescorin
 	router.GET("/ready", func(c *gin.Context) {
 		ctx := c.Request.Context()
 		if err := feedService.RDB.Ping(ctx).Err(); err != nil {
-			log.Println("Readiness check failed:", err)
 			c.JSON(500, gin.H{"status": "unready"})
 			return
 		}

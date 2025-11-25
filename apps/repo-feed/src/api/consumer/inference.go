@@ -3,13 +3,13 @@ package consumer
 import (
 	"context"
 	"encoding/json"
-	"log"
 
 	"repo_feed/src/api/dto"
 	"repo_feed/src/domain/services"
 
 	"github.com/IBM/sarama"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/command"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 )
 
 type InferenceConsumer struct {
@@ -25,6 +25,7 @@ func NewInferenceConsumer(brokers []string, topic string, groupID string, feedSe
 
 	consumerGroup, err := sarama.NewConsumerGroup(brokers, groupID, config)
 	if err != nil {
+		utils.SugarLog.Errorf("failed to create consumer group: %s", err)
 		return nil, err
 	}
 
@@ -36,20 +37,20 @@ func NewInferenceConsumer(brokers []string, topic string, groupID string, feedSe
 }
 
 func (ac *InferenceConsumer) Start(ctx context.Context) {
-	log.Println("Starting Kafka consumer for new recommendation...")
+	utils.SugarLog.Infof("Starting Kafka consumer for new recommendation...")
 	handler := &consumerInferenceGroupHandler{feedService: ac.feedService}
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Shutting down Kafka consumer...")
+			utils.SugarLog.Infof("Shutting down Kafka consumer...")
 			if err := ac.consumerGroup.Close(); err != nil {
-				log.Printf("Error closing consumer group: %v", err)
+				utils.SugarLog.Errorf("Error closing consumer group: %v", err)
 			}
 			return
 		default:
 			if err := ac.consumerGroup.Consume(ctx, []string{ac.topic}, handler); err != nil {
-				log.Printf("Error from consumer: %v", err)
+				utils.SugarLog.Errorf("Error from consumer: %v", err)
 			}
 		}
 	}
@@ -73,7 +74,7 @@ func (h *consumerInferenceGroupHandler) Cleanup(sarama.ConsumerGroupSession) err
 
 func (h *consumerInferenceGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.Printf("Message received: topic=%s, partition=%d, offset=%d", msg.Topic, msg.Partition, msg.Offset)
+		utils.SugarLog.Infof("Message received: topic=%s, partition=%d, offset=%d", msg.Topic, msg.Partition, msg.Offset)
 		h.processMessage(msg.Value)
 		session.MarkMessage(msg, "")
 	}
@@ -83,11 +84,11 @@ func (h *consumerInferenceGroupHandler) ConsumeClaim(session sarama.ConsumerGrou
 func (h *consumerInferenceGroupHandler) processMessage(data []byte) {
 	var cmd command.InferenceCommand
 	if err := json.Unmarshal(data, &cmd); err != nil {
-		log.Printf("Error unmarshaling message: %v", err)
+		utils.SugarLog.Errorf("Error unmarshaling message: %v", err)
 		return
 	}
 
-	log.Printf("Processing new inference command for user ID: %d", cmd.UserID)
+	utils.SugarLog.Infof("Processing new inference command for user ID: %d", cmd.UserID)
 
 	article := dto.Article{
 		ID:          cmd.Article.ID,
@@ -109,7 +110,7 @@ func (h *consumerInferenceGroupHandler) processMessage(data []byte) {
 
 	err := h.feedService.UpdateFeedZSET(req)
 	if err != nil {
-		log.Printf("Error updating feed: %v", err)
+		utils.SugarLog.Errorf("Error updating feed: %v", err)
 		return
 	}
 }
