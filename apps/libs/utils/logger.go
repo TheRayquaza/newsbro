@@ -5,16 +5,21 @@ import (
 )
 
 var Log *zap.Logger
+var SugarLog *zap.SugaredLogger
 
 func Initialize(environment string) error {
 	var err error
-	
+	var logger *zap.Logger
+
 	if environment == "dev" {
-		Log, err = zap.NewDevelopment()
+		logger, err = zap.NewDevelopment()
 	} else {
-		Log, err = zap.NewProduction()
+		logger, err = zap.NewProduction()
 	}
-	
+
+	Log = logger
+	SugarLog = logger.Sugar()
+
 	if err != nil {
 		return err
 	}
@@ -28,14 +33,3 @@ func Sync() {
 	}
 }
 
-func WithContext(fields ...zap.Field) *zap.Logger {
-	return Log.With(fields...)
-}
-
-func WithRequestID(requestID string) *zap.Logger {
-	return Log.With(zap.String("request_id", requestID))
-}
-
-func WithUserID(userID uint) *zap.Logger {
-	return Log.With(zap.Uint("user_id", userID))
-}
