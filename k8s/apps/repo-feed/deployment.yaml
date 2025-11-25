@@ -8,7 +8,7 @@ metadata:
     type: backends
     tags.datadoghq.com/env: prod
     tags.datadoghq.com/service: repo-feed
-    tags.datadoghq.com/version: v1.2.1
+    tags.datadoghq.com/version: v1.2.2
 spec:
   # replicas: 1 # managed by hpa
   strategy:
@@ -26,7 +26,7 @@ spec:
         monitoring: "enabled"
         tags.datadoghq.com/env: prod
         tags.datadoghq.com/service: repo-feed
-        tags.datadoghq.com/version: v1.2.1
+        tags.datadoghq.com/version: v1.2.2
     spec:
       imagePullSecrets:
         - name: pull-secret
@@ -36,7 +36,7 @@ spec:
             path: /var/run/datadog/
       containers:
         - name: repo-feed
-          image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.2.1
+          image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.2.2
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: apmsocketpath
