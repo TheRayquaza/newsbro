@@ -9,7 +9,7 @@ metadata:
     type: backends
     tags.datadoghq.com/env: prod
     tags.datadoghq.com/service: srvc-scrapping
-    tags.datadoghq.com/version: v1.3.0
+    tags.datadoghq.com/version: v1.3.1
 spec:
   # 9 AM and 6 PM every day
   schedule: "0 9,18 * * *"
@@ -22,7 +22,7 @@ spec:
             monitoring: "enabled"
             tags.datadoghq.com/env: prod
             tags.datadoghq.com/service: srvc-scrapping
-            tags.datadoghq.com/version: v1.3.0
+            tags.datadoghq.com/version: v1.3.1
         spec:
           imagePullSecrets:
             - name: pull-secret
@@ -33,7 +33,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: srvc-scrapping
-              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.3.0
+              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.3.1
               imagePullPolicy: IfNotPresent
               volumeMounts:
                 - name: apmsocketpath
