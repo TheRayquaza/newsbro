@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,6 +12,8 @@ import (
 	"repo_article/src/data/database"
 	"repo_article/src/domain/services"
 
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
+
 	"github.com/IBM/sarama"
 )
 
@@ -20,16 +21,21 @@ func main() {
 	// Load configuration
 	cfg := config.Load()
 
+	if err := utils.Initialize(cfg.Environment); err != nil {
+		panic("Failed to initialize logger: " + err.Error())
+	}
+	defer utils.SugarLog.Sync()
+
 	// Initialize database
 	db, err := database.Initialize(cfg.DatabaseURL)
 	if err != nil {
-		log.Fatal("Failed to initialize database:", err)
+		utils.SugarLog.Fatal("Failed to initialize database:", err)
 	}
 
 	// Initialize Kafka producer
 	producer, err := initKafkaProducer(cfg)
 	if err != nil {
-		log.Fatal("Failed to create Kafka producer:", err)
+		utils.SugarLog.Fatal("Failed to create Kafka producer:", err)
 	}
 
 	// Initialize services
@@ -48,10 +54,10 @@ func main() {
 		articleService,
 	)
 	if err != nil {
-		log.Printf("Warning: Failed to initialize Kafka consumer: %v", err)
+		utils.SugarLog.Errorf("Warning: Failed to initialize Kafka consumer: %v", err)
 	} else {
 		go consumer.Start(ctx)
-		log.Println("Kafka consumer initialized successfully")
+		utils.SugarLog.Infof("Kafka consumer initialized successfully")
 	}
 
 	// Setup routes
@@ -62,7 +68,7 @@ func main() {
 		sigterm := make(chan os.Signal, 1)
 		signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
 		<-sigterm
-		log.Println("Shutting down gracefully...")
+		utils.SugarLog.Infof("Shutting down gracefully...")
 		cancel()
 		if consumer != nil {
 			consumer.Close()
@@ -71,9 +77,9 @@ func main() {
 	}()
 
 	// Start server
-	log.Printf("Server starting on port %s", cfg.Port)
+	utils.SugarLog.Infof("Server starting on port %s", cfg.Port)
 	if err := router.Run(":" + cfg.Port); err != nil {
-		log.Fatal("Failed to start server:", err)
+		utils.SugarLog.Fatal("Failed to start server:", err)
 	}
 }
 
