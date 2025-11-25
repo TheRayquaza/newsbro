@@ -210,6 +210,26 @@ variable "srvc_inference_tfidf_redis_db" {
   default = "0"
 }
 
+variable "srvc_inference_sbert_access_key_id" {
+  type      = string
+  sensitive = true
+}
+
+variable "srvc_inference_sbert_secret_access_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "srvc_inference_sbert_redis_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "srvc_inference_sbert_redis_db" {
+  type    = string
+  default = "0"
+}
+
 # Docker variables
 variable "docker_ghcr_auth" {
   type        = string
