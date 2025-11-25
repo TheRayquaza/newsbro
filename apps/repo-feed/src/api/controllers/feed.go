@@ -10,6 +10,7 @@ import (
 	"repo_feed/src/domain/services"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,6 +55,7 @@ func (uc *FeedController) GetModels(c *gin.Context) {
 func (uc *FeedController) GetUserFeed(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Warn("User not found in context")
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 			Code:    http.StatusUnauthorized,
 			Message: "User not found in context",
@@ -63,6 +65,7 @@ func (uc *FeedController) GetUserFeed(c *gin.Context) {
 
 	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
+		utils.SugarLog.Warn("Invalid user type in context")
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Code:    http.StatusInternalServerError,
 			Message: "Invalid user type in context",
@@ -72,15 +75,18 @@ func (uc *FeedController) GetUserFeed(c *gin.Context) {
 
 	model := c.Query("model")
 	if model == "" {
+		utils.SugarLog.Infof("No model specified, using default model: %s", uc.defaultModel)
 		model = uc.defaultModel
 	}
 
 	limit := c.Query("limit")
 	if limit == "" {
+		utils.SugarLog.Infof("No limit specified, using default limit: %d", 20)
 		limit = "20"
 	}
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil || limitInt <= 0 {
+		utils.SugarLog.Warnf("Invalid limit specified: %s, using default limit: %d", limit, 20)
 		limitInt = 20
 	}
 	limitInt64 := int64(limitInt)
@@ -132,6 +138,7 @@ func (uc *FeedController) RemoveArticleFromFeed(c *gin.Context) {
 	articleIDParam := c.Param("id")
 	articleID, err := strconv.Atoi(articleIDParam)
 	if err != nil {
+		utils.SugarLog.Warn("Invalid article ID")
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Code:    http.StatusBadRequest,
 			Message: "Invalid article ID",
@@ -140,11 +147,13 @@ func (uc *FeedController) RemoveArticleFromFeed(c *gin.Context) {
 	}
 	model := c.Query("model")
 	if model == "" {
+		utils.SugarLog.Infof("No model specified, using default model: %s", uc.defaultModel)
 		model = uc.defaultModel
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Warn("User not found in context")
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 			Code:    http.StatusUnauthorized,
 			Message: "User not found in context",
@@ -154,6 +163,7 @@ func (uc *FeedController) RemoveArticleFromFeed(c *gin.Context) {
 
 	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
+		utils.SugarLog.Warn("Invalid user type in context")
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Code:    http.StatusInternalServerError,
 			Message: "Invalid user type in context",
