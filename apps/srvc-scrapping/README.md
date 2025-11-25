@@ -66,6 +66,7 @@ godoc -http=:6060
 | Name                            | Default Value / Example |
 | ------------------------------- | ----------------------- |
 | **PORT**                        | `8080`                  |
+| **ENVIRONMENT**                        | `prod`                  |
 | **DATABASE_USERNAME**           | `username`              |
 | **DATABASE_PASSWORD**           | `password`              |
 | **DATABASE_HOST**               | `localhost:5432`        |

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/command"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 	"github.com/gtuk/discordwebhook"
 	"github.com/mmcdole/gofeed"
 	"github.com/pemistahl/lingua-go"
@@ -61,7 +61,7 @@ func (u *RSSService) ProcessFeed(ctx context.Context) (int, error) {
 
 	RSSFeedURL, err := u.rssRepo.GetAllLinks(ctx)
 	if err != nil {
-		log.Printf("Error retrieving RSS feed URLs: %v", err)
+		utils.SugarLog.Errorf("Error retrieving RSS feed URLs: %v", err)
 		return 0, fmt.Errorf("failed to retrieve RSS feed URLs: %w", err)
 	}
 
@@ -77,7 +77,7 @@ func (u *RSSService) ProcessFeed(ctx context.Context) (int, error) {
 			errMsg := fmt.Sprintf("Failed to parse feed: %v", err)
 			stats.ErrorDetails = append(stats.ErrorDetails, errMsg)
 			globalErrors = append(globalErrors, fmt.Sprintf("[%s] %s", feedURL, errMsg))
-			log.Printf("Error parsing feed %s: %v", feedURL, err)
+			utils.SugarLog.Errorf("Error parsing feed %s: %v", feedURL, err)
 			feedStats = append(feedStats, stats)
 			continue
 		}
@@ -90,7 +90,7 @@ func (u *RSSService) ProcessFeed(ctx context.Context) (int, error) {
 				errMsg := fmt.Sprintf("DB check failed for %s: %v", item.Link, err)
 				stats.ErrorDetails = append(stats.ErrorDetails, errMsg)
 				stats.ErrorCount++
-				log.Printf("Error checking if article exists: %v", err)
+				utils.SugarLog.Errorf("Error checking if article exists: %v", err)
 				continue
 			}
 
@@ -111,7 +111,7 @@ func (u *RSSService) ProcessFeed(ctx context.Context) (int, error) {
 			if language, exists := u.detector.DetectLanguageOf(description + " " + content); exists {
 				if language != lingua.English {
 					stats.LanguageSkipped++
-					log.Printf("Skipping non-English article from feed: %s", feedURL)
+					utils.SugarLog.Infof("Skipping non-English article from feed: %s", feedURL)
 					continue
 				}
 			}
@@ -127,7 +127,7 @@ func (u *RSSService) ProcessFeed(ctx context.Context) (int, error) {
 				errMsg := fmt.Sprintf("Failed to save article %s: %v", item.Link, err)
 				stats.ErrorDetails = append(stats.ErrorDetails, errMsg)
 				stats.ErrorCount++
-				log.Printf("Error saving article: %v", err)
+				utils.SugarLog.Errorf("Error saving article: %v", err)
 				continue
 			}
 
@@ -147,7 +147,7 @@ func (u *RSSService) ProcessFeed(ctx context.Context) (int, error) {
 				errMsg := fmt.Sprintf("Kafka delivery failed for %s: %v", item.Link, err)
 				stats.ErrorDetails = append(stats.ErrorDetails, errMsg)
 				stats.ErrorCount++
-				log.Printf("Error sending to Kafka: %v", err)
+				utils.SugarLog.Errorf("Error sending to Kafka: %v", err)
 				continue
 			}
 
@@ -164,10 +164,10 @@ func (u *RSSService) ProcessFeed(ctx context.Context) (int, error) {
 	// Send detailed Discord message
 	if totalCount > 0 || len(globalErrors) > 0 {
 		if err := u.sendDetailedDiscordMessage(feedStats, totalCount, totalProcessingTime, globalErrors); err != nil {
-			log.Printf("Error sending Discord message: %v", err)
+			utils.SugarLog.Errorf("Error sending Discord message: %v", err)
 		}
 	} else {
-		log.Println("No new articles processed, skipping Discord notification.")
+		utils.SugarLog.Info("No new articles processed, skipping Discord notification.")
 	}
 
 	return totalCount, nil

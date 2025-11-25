@@ -3,12 +3,13 @@ package consumer
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"time"
+
+	"srvc_scrapping/src/domain/service"
 
 	"github.com/IBM/sarama"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/aggregate"
-	"srvc_scrapping/src/domain/service"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 )
 
 type RSSConsumer struct {
@@ -35,20 +36,20 @@ func NewRSSConsumer(brokers []string, topic string, groupID string, rssService *
 }
 
 func (ac *RSSConsumer) Start(ctx context.Context) {
-	log.Println("Starting Kafka consumer for new rsss...")
+	utils.SugarLog.Infof("Starting Kafka consumer for new rsss...")
 	handler := &consumerGroupHandler{rssService: ac.rssService}
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Shutting down Kafka consumer...")
+			utils.SugarLog.Infof("Shutting down Kafka consumer...")
 			if err := ac.consumerGroup.Close(); err != nil {
-				log.Printf("Error closing consumer group: %v", err)
+				utils.SugarLog.Errorf("Error closing consumer group: %v", err)
 			}
 			return
 		default:
 			if err := ac.consumerGroup.Consume(ctx, []string{ac.topic}, handler); err != nil {
-				log.Printf("Error from consumer: %v", err)
+				utils.SugarLog.Errorf("Error from consumer: %v", err)
 			}
 		}
 	}
@@ -92,7 +93,7 @@ func (ac *RSSConsumer) ConsumeUntilEmpty(ctx context.Context, timeout time.Durat
 
 func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.Printf("Message received: topic=%s, partition=%d, offset=%d", msg.Topic, msg.Partition, msg.Offset)
+		utils.SugarLog.Infof("Message received: topic=%s, partition=%d, offset=%d", msg.Topic, msg.Partition, msg.Offset)
 		h.processMessage(msg.Value)
 		session.MarkMessage(msg, "")
 	}
@@ -102,11 +103,11 @@ func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 func (h *consumerGroupHandler) processMessage(data []byte) {
 	var cmd aggregate.RSSAggregate
 	if err := json.Unmarshal(data, &cmd); err != nil {
-		log.Printf("Error unmarshaling message: %v", err)
+		utils.SugarLog.Errorf("Error unmarshaling message: %v", err)
 		return
 	}
 
 	if err := h.rssService.HandleRSSAggregate(&cmd); err != nil {
-		log.Printf("Error processing new rss: %v", err)
+		utils.SugarLog.Errorf("Error processing new rss: %v", err)
 	}
 }
