@@ -23,6 +23,7 @@ configMapGenerator:
   - name: kafka-config
     literals:
       - KAFKA_BROKERS=kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
+      - KAFKA_BOOTSTRAP_SERVERS=kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
 
       - KAFKA_ARTICLE_COMMAND_TOPIC=new-articles-command
       - KAFKA_INFERENCE_COMMAND_TOPIC=inference-command
