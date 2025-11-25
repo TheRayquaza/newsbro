@@ -8,7 +8,8 @@ import (
 
 	"encoding/json"
 	"fmt"
-	"log"
+
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 
 	"github.com/IBM/sarama"
 	"gorm.io/gorm"
@@ -44,20 +45,20 @@ func (as *RSSService) CreateRSS(req *dto.RSSCreateRequest, userID uint) (*dto.RS
 	if req.Parents != nil && len(*req.Parents) > 0 {
 		var parents []models.RSSSource
 		if err := as.Db.Where("name IN ?", *req.Parents).Find(&parents).Error; err != nil {
-			log.Printf("failed to get parent rss: %s", err)
+			utils.SugarLog.Errorf("failed to get parent rss: %s", err)
 			return nil, fmt.Errorf("failed to get parent rss: %w", err)
 		}
 
 		if len(parents) != len(*req.Parents) {
 			return nil, dto.NewBadRequest("some parent rss not found")
 		}
-		log.Printf("Assigning parents: %+v", parents)
+		utils.SugarLog.Debugf("Assigning parents: %+v", parents)
 		rss.Parents = parents
 	}
 
 	// Create the RSS source with associations
 	if err := as.Db.Create(rss).Error; err != nil {
-		log.Printf("failed to create rss: %s", err)
+		utils.SugarLog.Errorf("failed to create rss: %s", err)
 		return nil, fmt.Errorf("failed to create rss: %w", err)
 	}
 
@@ -65,7 +66,7 @@ func (as *RSSService) CreateRSS(req *dto.RSSCreateRequest, userID uint) (*dto.RS
 	rssAggregate := converters.RSSModelToRSSAggregate(rss, true)
 	rssBytes, err := json.Marshal(rssAggregate)
 	if err != nil {
-		log.Printf("failed to marshal rss aggregate: %s", err)
+		utils.SugarLog.Errorf("failed to marshal rss aggregate: %s", err)
 		return nil, err
 	}
 
@@ -77,7 +78,7 @@ func (as *RSSService) CreateRSS(req *dto.RSSCreateRequest, userID uint) (*dto.RS
 
 	_, _, err = as.producer.SendMessage(msg)
 	if err != nil {
-		log.Printf("failed to publish rss to kafka: %s", err)
+		utils.SugarLog.Errorf("failed to publish rss to kafka: %s", err)
 		return nil, fmt.Errorf("failed to publish rss to kafka: %w", err)
 	}
 
@@ -89,10 +90,10 @@ func (as *RSSService) GetRSSByName(name string) (*dto.RSSResponse, error) {
 	var rss models.RSSSource
 
 	if err := as.Db.Where("name = ?", name).Where("active = ?", true).First(&rss).Error; err != nil {
-		log.Printf("failed to get rss: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return nil, dto.NewNotFound(fmt.Sprintf("rss with name %s not found", name))
 		}
+		utils.SugarLog.Errorf("failed to get rss: %s", err)
 		return nil, fmt.Errorf("failed to get rss: %w", err)
 	}
 
@@ -107,14 +108,17 @@ func (as *RSSService) GetRSS(userID uint, filters *dto.RSSFilters) ([]dto.RSSRes
 
 	// Filtering
 	if filters.BeginDate != nil {
+		utils.SugarLog.Debugf("Filtering rss by start date: %s", filters.BeginDate)
 		query = query.Where("created_at >= ?", filters.BeginDate)
 	}
 	if filters.EndDate != nil {
+		utils.SugarLog.Debugf("Filtering rss by end date: %s", filters.EndDate)
 		query = query.Where("created_at <= ?", filters.EndDate)
 	}
 
 	if err := query.Order("name ASC").
 		Find(&rss).Error; err != nil {
+		utils.SugarLog.Errorf("failed to get rss: %s", err)
 		return nil, fmt.Errorf("failed to get rss: %w", err)
 	}
 
@@ -132,14 +136,16 @@ func (as *RSSService) GetTreeRSS(userID uint, filters *dto.RSSFilters) ([]dto.Tr
 	query := as.Db.Model(&models.RSSSource{}).Where("active = ?", true)
 
 	if filters.BeginDate != nil {
+		utils.SugarLog.Debugf("Filtering rss by start date: %s", filters.BeginDate)
 		query = query.Where("created_at >= ?", filters.BeginDate)
 	}
 	if filters.EndDate != nil {
+		utils.SugarLog.Debugf("Filtering rss by end date: %s", filters.EndDate)
 		query = query.Where("created_at <= ?", filters.EndDate)
 	}
 
 	if err := query.Preload("Children.Children").Preload("Parents").Order("link ASC").Find(&allFeeds).Error; err != nil { // TODO: make something smarter
-		log.Printf("failed to get rss tree: %s", err)
+		utils.SugarLog.Errorf("failed to get rss tree: %s", err)
 		return nil, fmt.Errorf("failed to get rss tree: %w", err)
 	}
 
@@ -200,7 +206,7 @@ func (as *RSSService) buildTreeDTO(feed *models.RSSSource, visited map[string]bo
 func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RSSResponse, error) {
 	var rss models.RSSSource
 	if err := as.Db.Where("name = ?", name).First(&rss).Error; err != nil {
-		log.Printf("failed to get rss: %s", err)
+		utils.SugarLog.Errorf("failed to get rss: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return nil, dto.NewNotFound(fmt.Sprintf("rss with name %s not found", name))
 		}
@@ -219,7 +225,7 @@ func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RS
 		var parents []models.RSSSource
 		if len(*req.Parents) > 0 {
 			if err := as.Db.Where("name IN ?", *req.Parents).Find(&parents).Error; err != nil {
-				log.Printf("failed to get parent rss: %s", err)
+				utils.SugarLog.Errorf("failed to get parent rss: %s", err)
 				return nil, fmt.Errorf("failed to get parent rss: %w", err)
 			}
 			if len(parents) != len(*req.Parents) {
@@ -228,19 +234,19 @@ func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RS
 			rss.Parents = parents
 		} else {
 			if err := as.Db.Model(&rss).Association("RSSParents").Clear(); err != nil {
-				log.Printf("failed to clear parent rss: %s", err)
+				utils.SugarLog.Errorf("failed to clear parent rss: %s", err)
 				return nil, fmt.Errorf("failed to clear parent rss: %w", err)
 			}
 		}
 	}
 	if err := as.Db.Save(&rss).Error; err != nil {
-		log.Printf("failed to update rss: %s", err)
+		utils.SugarLog.Errorf("failed to update rss: %s", err)
 		return nil, fmt.Errorf("failed to update rss: %w", err)
 	}
 	rssAggregate := converters.RSSModelToRSSAggregate(&rss, rss.Active)
 	rssBytes, err := json.Marshal(rssAggregate)
 	if err != nil {
-		log.Printf("failed to marshal rss aggregate: %s", err)
+		utils.SugarLog.Errorf("failed to marshal rss aggregate: %s", err)
 		return nil, err
 	}
 	msg := &sarama.ProducerMessage{
@@ -250,7 +256,7 @@ func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RS
 	}
 	_, _, err = as.producer.SendMessage(msg)
 	if err != nil {
-		log.Printf("failed to publish rss update to kafka: %s", err)
+		utils.SugarLog.Errorf("failed to publish rss update to kafka: %s", err)
 		return nil, fmt.Errorf("failed to publish rss update to kafka: %w", err)
 	}
 	rssResponse := converters.RSSModelToRSSResponse(&rss)
@@ -260,7 +266,7 @@ func (as *RSSService) UpdateRSS(name string, req *dto.RSSUpdateRequest) (*dto.RS
 func (as *RSSService) DeleteRSS(name string) error {
 	var rss models.RSSSource
 	if err := as.Db.Where("name = ?", name).First(&rss).Error; err != nil {
-		log.Printf("failed to get rss: %s", err)
+		utils.SugarLog.Errorf("failed to get rss: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return dto.NewNotFound(fmt.Sprintf("rss with name %s not found", name))
 		}
@@ -268,13 +274,13 @@ func (as *RSSService) DeleteRSS(name string) error {
 	}
 	rss.Active = false
 	if err := as.Db.Save(&rss).Error; err != nil {
-		log.Printf("failed to delete rss: %s", err)
+		utils.SugarLog.Errorf("failed to delete rss: %s", err)
 		return fmt.Errorf("failed to delete rss: %w", err)
 	}
 	rssAggregate := converters.RSSModelToRSSAggregate(&rss, false)
 	rssBytes, err := json.Marshal(rssAggregate)
 	if err != nil {
-		log.Printf("failed to marshal rss aggregate: %s", err)
+		utils.SugarLog.Errorf("failed to marshal rss aggregate: %s", err)
 		return err
 	}
 	msg := &sarama.ProducerMessage{
@@ -284,7 +290,7 @@ func (as *RSSService) DeleteRSS(name string) error {
 	}
 	_, _, err = as.producer.SendMessage(msg)
 	if err != nil {
-		log.Printf("failed to publish rss deletion to kafka: %s", err)
+		utils.SugarLog.Errorf("failed to publish rss deletion to kafka: %s", err)
 		return fmt.Errorf("failed to publish rss deletion to kafka: %w", err)
 	}
 	return nil

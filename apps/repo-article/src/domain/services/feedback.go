@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
-	"log"
 	"time"
 
 	"repo_article/src/api/dto"
@@ -13,6 +12,8 @@ import (
 	"repo_article/src/converters"
 	"repo_article/src/data/models"
 	"repo_article/src/domain/entities"
+
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 
 	"github.com/IBM/sarama"
 )
@@ -50,6 +51,7 @@ func (fs *FeedbackService) GetArticleFeedback(newsID uint) (*dto.FeedbackStatsRe
 	`, int(newsID)).Scan(&stats).Error
 
 	if err != nil {
+		utils.SugarLog.Errorf("failed to get feedback statistics: %s", err)
 		return nil, fmt.Errorf("failed to get feedback statistics: %w", err)
 	}
 
@@ -62,6 +64,7 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("article not found")
 		}
+		utils.SugarLog.Errorf("failed to verify article existence: %s", err)
 		return nil, fmt.Errorf("failed to verify article existence: %w", err)
 	}
 
@@ -80,11 +83,13 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 		}
 
 		if err := fs.Db.Create(&feedback).Error; err != nil {
+			utils.SugarLog.Errorf("failed to create feedback: %s", err)
 			return nil, fmt.Errorf("failed to create feedback: %w", err)
 		}
 	} else {
 		feedback.Value = value
 		if err := fs.Db.Save(&feedback).Error; err != nil {
+			utils.SugarLog.Errorf("failed to update feedback: %s", err)
 			return nil, fmt.Errorf("failed to update feedback: %w", err)
 		}
 	}
@@ -92,6 +97,7 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 	feedbackAggregate := converters.FeedbackModelToFeedbackAggregate(&feedback, true)
 	feedbackBytes, err := json.Marshal(feedbackAggregate)
 	if err != nil {
+		utils.SugarLog.Errorf("failed to marshal feedback aggregate: %s", err)
 		return nil, fmt.Errorf("failed to marshal feedback aggregate: %w", err)
 	}
 	msg := &sarama.ProducerMessage{
@@ -101,6 +107,7 @@ func (fs *FeedbackService) CreateOrUpdateFeedback(userID, newsID uint, value int
 	}
 	_, _, err = fs.producer.SendMessage(msg)
 	if err != nil {
+		utils.SugarLog.Errorf("failed to publish feedback to kafka: %s", err)
 		return nil, fmt.Errorf("failed to publish feedback to kafka: %w", err)
 	}
 
@@ -115,16 +122,19 @@ func (fs *FeedbackService) DeleteFeedback(userID, newsID uint) error {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return dto.NewNotFound("feedback not found")
 		}
+		utils.SugarLog.Errorf("failed to find feedback: %s", err)
 		return fmt.Errorf("failed to find feedback: %w", err)
 	}
 
 	if err := fs.Db.Delete(&feedback).Error; err != nil {
+		utils.SugarLog.Errorf("failed to delete feedback: %s", err)
 		return fmt.Errorf("failed to delete feedback: %w", err)
 	}
 
 	feedbackAggregate := converters.FeedbackModelToFeedbackAggregate(&feedback, false)
 	feedbackBytes, err := json.Marshal(feedbackAggregate)
 	if err != nil {
+		utils.SugarLog.Errorf("failed to marshal feedback aggregate: %s", err)
 		return fmt.Errorf("failed to marshal feedback aggregate: %w", err)
 	}
 	msg := &sarama.ProducerMessage{
@@ -134,6 +144,7 @@ func (fs *FeedbackService) DeleteFeedback(userID, newsID uint) error {
 	}
 	_, _, err = fs.producer.SendMessage(msg)
 	if err != nil {
+		utils.SugarLog.Errorf("failed to publish feedback deletion to kafka: %s", err)
 		return fmt.Errorf("failed to publish feedback deletion to kafka: %w", err)
 	}
 
@@ -145,6 +156,7 @@ func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit uint) ([]dto
 	var total int64
 
 	if err := fs.Db.Model(&models.Feedback{}).Where("user_id = ?", userID).Count(&total).Error; err != nil {
+		utils.SugarLog.Errorf("failed to count user feedback: %s", err)
 		return nil, 0, fmt.Errorf("failed to count user feedback: %w", err)
 	}
 
@@ -157,6 +169,7 @@ func (fs *FeedbackService) GetUserFeedback(userID uint, page, limit uint) ([]dto
 		Find(&feedback).Error
 
 	if err != nil {
+		utils.SugarLog.Errorf("failed to get user feedback: %s", err)
 		return nil, 0, fmt.Errorf("failed to get user feedback: %w", err)
 	}
 
@@ -187,9 +200,11 @@ func (fs *FeedbackService) GetAllFeedbackForCSV(startDate, endDate *time.Time) (
 		Where("f.deleted_at IS NULL")
 
 	if startDate != nil {
+		utils.SugarLog.Debugf("Filtering feedback by start date: %s", startDate)
 		query = query.Where("f.created_at >= ?", *startDate)
 	}
 	if endDate != nil {
+		utils.SugarLog.Debugf("Filtering feedback by end date: %s", endDate)
 		endTime := endDate.Add(24*time.Hour - time.Second)
 		query = query.Where("f.created_at <= ?", endTime)
 	}
@@ -211,6 +226,7 @@ func (fs *FeedbackService) GetFeedbackStats(page, limit uint) ([]dto.FeedbackSta
 		FROM feedbacks 
 		WHERE deleted_at IS NULL
 	`).Scan(&total).Error; err != nil {
+		utils.SugarLog.Errorf("failed to count feedback stats: %s", err)
 		return nil, 0, fmt.Errorf("failed to count feedback stats: %w", err)
 	}
 
@@ -235,6 +251,7 @@ func (fs *FeedbackService) GetFeedbackStats(page, limit uint) ([]dto.FeedbackSta
 	`, limit, offset).Scan(&stats).Error
 
 	if err != nil {
+		utils.SugarLog.Errorf("failed to get feedback statistics: %s", err)
 		return nil, 0, fmt.Errorf("failed to get feedback statistics: %w", err)
 	}
 
@@ -246,6 +263,7 @@ func (fs *FeedbackService) GetAllFeedback(page, limit uint) ([]dto.FeedbackRespo
 	var total int64
 
 	if err := fs.Db.Model(&models.Feedback{}).Count(&total).Error; err != nil {
+		utils.SugarLog.Errorf("failed to count all feedback: %s", err)
 		return nil, 0, fmt.Errorf("failed to count all feedback: %w", err)
 	}
 
@@ -257,6 +275,7 @@ func (fs *FeedbackService) GetAllFeedback(page, limit uint) ([]dto.FeedbackRespo
 		Find(&feedback).Error
 
 	if err != nil {
+		utils.SugarLog.Errorf("failed to get all feedback: %s", err)
 		return nil, 0, fmt.Errorf("failed to get all feedback: %w", err)
 	}
 
@@ -275,6 +294,7 @@ func (fs *FeedbackService) GetArticleFeedbackCount(newsID uint) (int64, int64, e
 		Where("news_id = ? AND value = 1", newsID).
 		Count(&likeCount).Error
 	if err != nil {
+		utils.SugarLog.Errorf("failed to count likes: %s", err)
 		return 0, 0, fmt.Errorf("failed to count likes: %w", err)
 	}
 
@@ -282,6 +302,7 @@ func (fs *FeedbackService) GetArticleFeedbackCount(newsID uint) (int64, int64, e
 		Where("news_id = ? AND value = 0", newsID).
 		Count(&dislikeCount).Error
 	if err != nil {
+		utils.SugarLog.Errorf("failed to count dislikes: %s", err)
 		return 0, 0, fmt.Errorf("failed to count dislikes: %w", err)
 	}
 
@@ -296,6 +317,7 @@ func (fs *FeedbackService) HasUserFeedback(userID, newsID uint) (bool, *models.F
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, nil, nil
 		}
+		utils.SugarLog.Errorf("failed to check user feedback: %s", err)
 		return false, nil, fmt.Errorf("failed to check user feedback: %w", err)
 	}
 
@@ -307,13 +329,16 @@ func (fs *FeedbackService) TriggerIngestFeedback(beginDate, endDate *time.Time) 
 
 	query := fs.Db.Model(&models.Feedback{})
 	if beginDate != nil {
+		utils.SugarLog.Debugf("Filtering feedback by start date: %s", beginDate)
 		query = query.Where("created_at >= ?", *beginDate)
 	}
 	if endDate != nil {
+		utils.SugarLog.Debugf("Filtering feedback by end date: %s", endDate)
 		endTime := endDate.Add(24*time.Hour - time.Second)
 		query = query.Where("created_at <= ?", endTime)
 	}
 	if err := query.Find(&feedbacks).Error; err != nil {
+		utils.SugarLog.Errorf("failed to fetch feedbacks for ingestion: %s", err)
 		return 0, fmt.Errorf("failed to fetch feedbacks for ingestion: %w", err)
 	}
 
@@ -328,7 +353,7 @@ func (fs *FeedbackService) TriggerIngestFeedback(beginDate, endDate *time.Time) 
 		feedbackAggregate := converters.FeedbackModelToFeedbackAggregate(&feedback, true)
 		feedbackBytes, err := json.Marshal(feedbackAggregate)
 		if err != nil {
-			log.Printf("failed to marshal feedback aggregate: %s", err)
+			utils.SugarLog.Errorf("failed to marshal feedback aggregate: %s", err)
 			failed = append(failed, feedback.ID)
 			continue
 		}
@@ -339,7 +364,7 @@ func (fs *FeedbackService) TriggerIngestFeedback(beginDate, endDate *time.Time) 
 		}
 		_, _, err = fs.producer.SendMessage(msg)
 		if err != nil {
-			log.Printf("failed to publish feedback to kafka: %s", err)
+			utils.SugarLog.Errorf("failed to publish feedback to kafka: %s", err)
 			failed = append(failed, feedback.ID)
 			continue
 		}
@@ -347,9 +372,9 @@ func (fs *FeedbackService) TriggerIngestFeedback(beginDate, endDate *time.Time) 
 	}
 
 	if len(failed) != 0 {
-		log.Printf("failed for %d news", len(failed))
+		utils.SugarLog.Errorf("failed for %d news", len(failed))
 		for _, id := range failed {
-			log.Printf(" - %d", id)
+			utils.SugarLog.Errorf(" - %d", id)
 		}
 	}
 
