@@ -17,13 +17,13 @@ func Initialize(environment string) error {
 		logger, err = zap.NewProduction()
 	}
 
-	Log = logger
-	SugarLog = logger.Sugar()
-
 	if err != nil {
 		return err
 	}
-	
+
+	Log = logger
+	SugarLog = logger.Sugar()
+
 	return nil
 }
 

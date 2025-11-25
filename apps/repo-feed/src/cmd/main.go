@@ -125,6 +125,6 @@ func main() {
 	// Start server
 	utils.SugarLog.Infof("Server starting on port %s", cfg.Port)
 	if err := router.Run(":" + cfg.Port); err != nil {
-		utils.SugarLog.Fatal("Failed to start server:", err)
+		utils.SugarLog.Fatalf("Failed to start server: %v", err)
 	}
 }

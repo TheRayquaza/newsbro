@@ -19,7 +19,7 @@ func (s *UserService) GetUserByID(id uint) (*models.User, error) {
 	var user models.User
 	err := s.Db.First(&user, id).Error
 	if err != nil {
-		utils.SugarLog.Error("Error fetching user by ID:", err)
+		utils.SugarLog.Errorf("Error fetching user by ID: %v", err)
 		return nil, err
 	}
 	return &user, err
@@ -42,7 +42,7 @@ func (s *UserService) UpdateUser(id uint, updates map[string]interface{}) (*mode
 	}
 
 	if err := s.Db.Model(&user).Updates(updates).Error; err != nil {
-		utils.SugarLog.Error("Error updating user:", err)
+		utils.SugarLog.Errorf("Error updating user: %v", err)
 		return nil, err
 	}
 
@@ -53,7 +53,7 @@ func (s *UserService) GetAllUsers(limit, offset int) ([]models.User, error) {
 	var users []models.User
 	err := s.Db.Limit(limit).Offset(offset).Find(&users).Error
 	if err != nil {
-		utils.SugarLog.Error("Error fetching users:", err)
+		utils.SugarLog.Errorf("Error fetching users: %v", err)
 	}
 	return users, err
 }
