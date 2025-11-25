@@ -12,7 +12,7 @@ import (
 func Initialize(databaseURL string) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(databaseURL), &gorm.Config{})
 	if err != nil {
-		utils.SugarLog.Error("Failed to connect to database:", err)
+		utils.SugarLog.Errorf("Failed to connect to database: %v", err)
 		return nil, err
 	}
 
@@ -22,7 +22,7 @@ func Initialize(databaseURL string) (*gorm.DB, error) {
 		&models.RefreshToken{},
 	)
 	if err != nil {
-		utils.SugarLog.Error("Failed to auto-migrate database:", err)
+		utils.SugarLog.Errorf("Failed to auto-migrate database: %v", err)
 		return nil, err
 	}
 	utils.SugarLog.Info("Database auto-migration completed successfully")

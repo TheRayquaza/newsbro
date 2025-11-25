@@ -24,7 +24,7 @@ func main() {
 	utils.SugarLog.Infof("Connecting to database at %s", cfg.DatabaseURL)
 	db, err := database.Initialize(cfg.DatabaseURL)
 	if err != nil {
-		utils.SugarLog.Fatal("Failed to initialize database:", err)
+		utils.SugarLog.Fatalf("Failed to initialize database: %v", err)
 	}
 
 	utils.SugarLog.Debug("Initializing services")
@@ -36,6 +36,6 @@ func main() {
 
 	utils.SugarLog.Infof("Server starting on port %s", cfg.Port)
 	if err := router.Run(":" + cfg.Port); err != nil {
-		utils.SugarLog.Fatal("Failed to start server:", err)
+		utils.SugarLog.Fatalf("Failed to start server: %v", err)
 	}
 }
