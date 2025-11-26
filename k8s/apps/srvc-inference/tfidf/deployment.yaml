@@ -50,11 +50,11 @@ spec:
                 name: srvc-inference-tfidf-secrets
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "300m"
+              memory: "512Mi"
+              cpu: "500m"
             limits:
               memory: "1Gi"
-              cpu: "500m"
+              cpu: "1"
           livenessProbe:
             httpGet:
               path: /health
