@@ -1,5 +1,5 @@
 import os
-
+from typing import Optional
 import pydantic
 
 
@@ -33,6 +33,7 @@ class Config(pydantic.BaseModel):
 
     # Qdrant
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
+    qdrant_api_key: Optional[str] = os.getenv("QDRANT_API_KEY", None)
 
     # Model
     model_uri: str = os.getenv("MODEL_URI", "")

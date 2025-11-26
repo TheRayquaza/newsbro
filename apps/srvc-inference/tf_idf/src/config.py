@@ -32,6 +32,7 @@ class Config(pydantic.BaseModel):
 
     # Qdrant
     qdrant_url: str = os.getenv("QDRANT_URL", "localhost:6333")
+    qdrant_api_key: str = os.getenv("QDRANT_API_KEY", "")
 
     # Model
     model_uri: str = os.getenv("MODEL_URI", "")

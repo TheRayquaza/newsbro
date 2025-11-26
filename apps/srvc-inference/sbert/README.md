@@ -39,6 +39,7 @@ python3 -m sbert.main
 | `KAFKA_BATCH_SIZE` | `50`  | Number of articles to consumer before releasing for a single evaluation                       |
 | `KAFKA_BATCH_INTERVAL` | `2`  | Time before a starting batch gets release (avoid locking)                 |
 | `QDRANT_URL`                    | `http://localhost:6333` | URL for Qdrant vector database                          |
+| `QDRANT_API_KEY`                    | *(None)* | API key for Qdrant db                          |
 | `MODEL_URI`                     | *(None)*                | URI or path to the ML model                             |
 | `MLFLOW_S3_ENDPOINT_URL`        | `http://minio-svc.localhost:8080` | S3 Endpoint                                   |
 | `AWS_ACCESS_KEY_ID`             | `minio`                 | S3 access key                                           |

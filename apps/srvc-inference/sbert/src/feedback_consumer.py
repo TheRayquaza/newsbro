@@ -20,6 +20,7 @@ from abstract.producer import InferenceProducer
 class SBERTFeedbackConsumerConfig(pydantic.BaseModel):
     articles_collection: str = os.getenv("QDRANT_ARTICLES_COLLECTION", "articles_sbert")
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
+    qdrant_api_key: Optional[str] = os.getenv("QDRANT_API_KEY", None)
     feedback_retention_days: int = int(os.getenv("FEEDBACK_RETENTION_DAYS", "30"))
     redis_sentinels: str = os.getenv(
         "REDIS_SENTINELS", "localhost:26379,localhost:26380,localhost:26381"
@@ -49,6 +50,7 @@ class SBERTFeedbackConsumer(InferenceConsumer):
         self.producer = producer
         self.qdrant = QdrantClient(
             url=config.qdrant_url,
+            api_key=config.qdrant_api_key,
             prefer_grpc=False,
         )
         self.config = config
