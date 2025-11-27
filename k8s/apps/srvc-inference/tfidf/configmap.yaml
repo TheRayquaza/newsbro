@@ -11,7 +11,7 @@ data:
   ENVIRONMENT: production
   # Model
   MODEL_NAME: tfidf
-  MODEL_URI: models://TF-IDF/1
+  MODEL_URI: models:/TF-IDF/1
   MODEL_SIMILARITY_THRESHOLD: "0.3"
   ARTICLE_VECTOR_FEATURES: "100" # check the model URI
   TOP_K_ARTICLES: "10"

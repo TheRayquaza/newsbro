@@ -66,7 +66,7 @@ class InferenceConsumer(abc.ABC):
             if self.consumer._closed:
                 return False
 
-            if self.thread is None or not self.thread.is_alive():
+            if self.thread_pool is None:
                 return False
 
             return True
