@@ -36,9 +36,6 @@ class Config(pydantic.BaseModel):
     qdrant_url: str = os.getenv("QDRANT_URL", "localhost:6333")
     qdrant_api_key: str = os.getenv("QDRANT_API_KEY", "")
     article_vector_features: int = int(os.getenv("ARTICLE_VECTOR_FEATURES", "384"))
-    articles_collection_name: str = os.getenv(
-        "QDRANT_ARTICLES_COLLECTION_NAME", "articles"
-    )
     articles_collection: str = os.getenv("QDRANT_ARTICLES_COLLECTION", "articles")
 
     # Redis

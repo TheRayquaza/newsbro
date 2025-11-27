@@ -1,5 +1,6 @@
 import logging
 import os
+import signal
 import sys
 
 import uvicorn
@@ -55,7 +56,6 @@ if __name__ == "__main__":
             tracking_uri=config.tracking_uri,
         )
     else:
-        print(config.model_uri)
         model = MlflowModel(
             model_uri=sys.argv[2] if len(sys.argv) > 2 else config.model_uri,
             tracking_uri=config.tracking_uri,
@@ -119,6 +119,16 @@ if __name__ == "__main__":
     # Run consumers
     c1.run()
     c2.run()
+
+    def shutdown_handler(signum, frame):
+        logger.info("Shutdown signal received. Shutting down consumers...")
+        c1.shutdown()
+        c2.shutdown()
+        logger.info("Consumers shut down successfully.")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, shutdown_handler)
+    signal.signal(signal.SIGTERM, shutdown_handler)
 
     # Health check endpoint
     @app.get("/health")
