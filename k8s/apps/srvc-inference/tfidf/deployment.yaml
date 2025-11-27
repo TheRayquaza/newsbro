@@ -28,7 +28,7 @@ spec:
         - name: pull-secret
       containers:
         - name: srvc-inference-tfidf
-          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-tf_idf-v1.0.6
+          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-tf_idf-v1.0.7
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
