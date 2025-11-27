@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -18,18 +17,16 @@ from abstract.producer import InferenceProducer
 
 
 class TFIDFFeedbackConsumerConfig(pydantic.BaseModel):
-    articles_collection: str = os.getenv("QDRANT_ARTICLES_COLLECTION", "articles")
-    qdrant_url: str = os.getenv("QDRANT_URL", "localhost:6333")
-    qdrant_api_key: Optional[str] = os.getenv("QDRANT_API_KEY", None)
-    feedback_retention_days: int = int(os.getenv("FEEDBACK_RETENTION_DAYS", "30"))
-    redis_sentinels: str = os.getenv(
-        "REDIS_SENTINELS", "localhost:26379,localhost:26380,localhost:26381"
-    )
-    redis_master_name: str = os.getenv("REDIS_MASTER_NAME", "mymaster")
-    redis_password: Optional[str] = os.getenv("REDIS_PASSWORD", None)
-    redis_db: int = int(os.getenv("REDIS_DB", "0"))
-    redis_user_profile_prefix: str = os.getenv("REDIS_USER_PROFILE_KEY", "user_profile")
-    top_k_articles: int = int(os.getenv("TOP_K_ARTICLES", "10"))
+    articles_collection: str
+    qdrant_url: str
+    qdrant_api_key: Optional[str]
+    feedback_retention_days: int
+    redis_sentinels: str
+    redis_master_name: str
+    redis_password: Optional[str]
+    redis_db: int
+    redis_user_profile_prefix: str
+    top_k_articles: int
 
 
 class TFIDFFeedbackConsumer(InferenceConsumer):

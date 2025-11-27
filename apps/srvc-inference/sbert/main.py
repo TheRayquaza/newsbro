@@ -9,6 +9,14 @@ from fastapi import FastAPI, HTTPException
 from abstract.consumer import InferenceConsumerConfig
 from abstract.mlflow_model import MlflowModel
 from abstract.producer import InferenceProducer, InferenceProducerConfig
+from sbert.src.article_consumer import (
+    SBERTArticleConsumer,
+    SBERTArticleConsumerConfig,
+)
+from sbert.src.feedback_consumer import (
+    SBERTFeedbackConsumer,
+    SBERTFeedbackConsumerConfig,
+)
 
 if __name__ == "__main__":
     # Load .env if not in production
@@ -20,21 +28,10 @@ if __name__ == "__main__":
         elif len(sys.argv) > 1:
             raise FileNotFoundError(f"Environment file {env_file} not found")
 
-    # Setup article consumer
-    from sbert.src.article_consumer import (
-        SBERTArticleConsumer,
-        SBERTArticleConsumerConfig,
-    )
+    # Load configuration from env
     from sbert.src.config import Config
 
-    # Setup feedback consumer
-    from sbert.src.feedback_consumer import (
-        SBERTFeedbackConsumer,
-        SBERTFeedbackConsumerConfig,
-    )
-
     config = Config()
-    print(config)
 
     # Setup logging
     logging.basicConfig(
@@ -58,6 +55,7 @@ if __name__ == "__main__":
             tracking_uri=config.tracking_uri,
         )
     else:
+        print(config.model_uri)
         model = MlflowModel(
             model_uri=sys.argv[2] if len(sys.argv) > 2 else config.model_uri,
             tracking_uri=config.tracking_uri,
@@ -76,8 +74,21 @@ if __name__ == "__main__":
         kafka_consumer_topic=config.kafka_feedback_consumer_topic,
         kafka_consumer_group=config.kafka_feedback_consumer_group,
         batch_size=config.kafka_batch_size,
+        batch_interval=config.kafka_batch_interval,
+        thread_pool_size=config.thread_pool_size,
     )
-    c1_config = SBERTFeedbackConsumerConfig()
+    c1_config = SBERTFeedbackConsumerConfig(
+        articles_collection=config.articles_collection,
+        qdrant_url=config.qdrant_url,
+        qdrant_api_key=config.qdrant_api_key,
+        feedback_retention_days=config.feedback_retention_days,
+        redis_sentinels=config.redis_sentinels,
+        redis_master_name=config.redis_master_name,
+        redis_password=config.redis_password,
+        redis_db=config.redis_db,
+        redis_user_profile_prefix=config.redis_user_profile_prefix,
+        top_k_articles=config.top_k_articles,
+    )
     c1 = SBERTFeedbackConsumer(model, producer, logger, c1_consumer_config, c1_config)
 
     c2_consumer_config = InferenceConsumerConfig(
@@ -85,8 +96,23 @@ if __name__ == "__main__":
         kafka_consumer_topic=config.kafka_article_consumer_topic,
         kafka_consumer_group=config.kafka_article_consumer_group,
         batch_size=config.kafka_batch_size,
+        batch_interval=config.kafka_batch_interval,
+        thread_pool_size=config.thread_pool_size,
     )
-    c2_config = SBERTArticleConsumerConfig()
+    c2_config = SBERTArticleConsumerConfig(
+        model_name=config.model_name,
+        articles_collection=config.articles_collection,
+        article_vector_features=config.article_vector_features,
+        qdrant_url=config.qdrant_url,
+        qdrant_api_key=config.qdrant_api_key,
+        similarity_threshold=config.similarity_threshold,
+        redis_sentinels=config.redis_sentinels,
+        redis_master_name=config.redis_master_name,
+        redis_password=config.redis_password,
+        redis_db=config.redis_db,
+        redis_scan_batch_size=config.redis_scan_batch_size,
+        redis_user_profile_prefix=config.redis_user_profile_prefix,
+    )
     c2 = SBERTArticleConsumer(model, producer, logger, c2_consumer_config, c2_config)
     c2.bootstrap()
 
