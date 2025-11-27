@@ -204,7 +204,7 @@ class TFIDFArticleConsumer(InferenceConsumer):
 
                 for key in keys:
                     try:
-                        user_id = int(key.decode("utf-8").split(":")[1])
+                        user_id = int(key.decode("utf-8").split(":")[-1])
 
                         value = self.redis_client.get(key)
                         if value:
