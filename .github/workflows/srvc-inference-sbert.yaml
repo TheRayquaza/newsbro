@@ -1,4 +1,4 @@
-name: srvc-inference (TF-IDF)
+name: srvc-inference (SBERT)
 
 on:
   push:
