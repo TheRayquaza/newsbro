@@ -50,11 +50,11 @@ spec:
                 name: srvc-inference-sbert-secrets
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "500m"
-            limits:
-              memory: "1Gi"
+              memory: "3Gi"
               cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
           livenessProbe:
             httpGet:
               path: /health
