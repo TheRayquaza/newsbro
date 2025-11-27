@@ -17,6 +17,7 @@ data:
   TOP_K_ARTICLES: "10"
   MLFLOW_S3_ENDPOINT_URL: http://minio-new.minio.svc.cluster.local:9000
   MLFLOW_TRACKING_URI: http://mlflow.mlflow.svc.cluster.local:5000
+  KAFKA_PRODUCER_TOPIC: "inference-command"
   # Misc
   FEEDBACK_RETENTION_DAYS: "30"
   # Kafka

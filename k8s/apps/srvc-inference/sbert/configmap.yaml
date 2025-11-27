@@ -18,6 +18,7 @@ data:
   MLFLOW_TRACKING_URI: http://mlflow.mlflow.svc.cluster.local:5000
   MLFLOW_HTTP_REQUEST_TIMEOUT: "600" # in seconds
   MLFLOW_HTTP_REQUEST_MAX_RETRIES: "3"
+  KAFKA_PRODUCER_TOPIC: "inference-command"
   # Misc
   FEEDBACK_RETENTION_DAYS: "30"
   # Kafka
