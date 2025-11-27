@@ -141,16 +141,14 @@ class InferenceConsumer(abc.ABC):
                     self.logger.info("Processing remaining batch on shutdown")
                     self._process_batch()
 
-    def run(self) -> Thread:
+    def run(self) -> None:
         """Start the consumer thread."""
         self.logger.info("Starting consumer thread")
-        assert self.thread is None, "Consumer is already running"
-        self.thread = Thread(target=self.run_impl, daemon=True)
-        self.thread.start()
-        return self.thread
+        self.thread_pool.submit(self.run_impl)
 
     def shutdown(self) -> None:
         """Gracefully shutdown the consumer."""
         self.logger.info("Shutting down consumer")
         self.shutdown_event.set()
         self.consumer.close()
+        self.thread_pool.shutdown(wait=True)
