@@ -28,7 +28,7 @@ spec:
         - name: pull-secret
       containers:
         - name: srvc-inference-sbert
-          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-sbert-v1.0.1
+          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-sbert-v1.0.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -50,7 +50,7 @@ spec:
                 name: srvc-inference-sbert-secrets
           resources:
             requests:
-              memory: "3Gi"
+              memory: "1Gi"
               cpu: "1"
             limits:
               memory: "4Gi"
