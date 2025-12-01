@@ -22,6 +22,9 @@
             nodejs
             go
             gopls
+            playwright-test
+            go-swag
+            go
           ];
         };
       }
