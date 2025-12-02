@@ -57,3 +57,11 @@ func (s *UserService) GetAllUsers(limit, offset int) ([]models.User, error) {
 	}
 	return users, err
 }
+
+func (s *UserService) DeleteUser(id uint) error {
+	err := s.Db.Delete(&models.User{}, id).Error
+	if err != nil {
+		utils.SugarLog.Errorf("Error deleting user: %v", err)
+	}
+	return err
+}
