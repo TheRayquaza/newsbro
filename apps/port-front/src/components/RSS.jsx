@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, Folder, Rss, } from "lucide-react";
+import { Link, Folder, Rss } from "lucide-react";
 
 const RSS = ({
   item,
