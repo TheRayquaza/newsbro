@@ -337,10 +337,6 @@ const Home = () => {
           setHasMore(true);
           return loadArticlesInFeed(feedName, 1, false);
         }}
-        setBreadcrumb={setBreadcrumb}
-        setCurrentItems={setCurrentItems}
-        setArticles={setArticles}
-        loadArticlesInFeed={loadArticlesInFeed}
       />
 
       {/* Feeds Grid View */}
