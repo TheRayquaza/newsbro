@@ -242,5 +242,18 @@ func (uc *UserController) DeleteProfile(c *gin.Context) {
 		return
 	}
 
+	httpOnly := true
+	secure := true
+	if uc.userService.Config.Environment == "dev" {
+		secure = false
+		httpOnly = false
+		c.SetSameSite(http.SameSiteLaxMode)
+	} else {
+		c.SetSameSite(http.SameSiteNoneMode)
+	}
+
+	c.SetCookie("auth_token", "", -1, "/", uc.userService.Config.CookieDomain, secure, httpOnly)
+	c.SetCookie("refresh_token", "", -1, "/", uc.userService.Config.CookieDomain, secure, httpOnly)
+
 	c.Status(http.StatusNoContent)
 }

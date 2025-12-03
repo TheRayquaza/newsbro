@@ -29,7 +29,7 @@ func main() {
 
 	utils.SugarLog.Debug("Initializing services")
 	authService := services.NewAuthService(cfg, db)
-	userService := services.NewUserService(db)
+	userService := services.NewUserService(cfg, db)
 
 	utils.SugarLog.Debug("Setting up routes")
 	router := routes.SetupRouter(cfg, authService, userService)
