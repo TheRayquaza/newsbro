@@ -37,7 +37,7 @@ const LoginPage = () => {
   };
 
   const handleForgeOAuth = () => {
-    window.open(api.forgeOAuthUrl(), "_blank");
+    window.open(api.forgeOAuthUrl(), "_self");
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, FileText, Folder } from "lucide-react";
+import { Link, Folder, Rss, } from "lucide-react";
 
 const RSS = ({
   item,
@@ -43,7 +43,7 @@ const RSS = ({
       }}
       className="group relative overflow-hidden rounded-2xl p-8 transition-all duration-300 text-left w-full"
     >
-      <div 
+      <div
         className="hover-overlay absolute inset-0 transition-opacity"
         style={{
           background: 'linear-gradient(to bottom right, var(--nav-active-bg), var(--search-button-active-bg))',
@@ -51,29 +51,30 @@ const RSS = ({
         }}
       />
       <div className="relative z-10">
-        <h3 
+        <h3
           style={{ color: 'var(--nav-active-text)' }}
           className="text-2xl font-bold transition mb-2"
         >
           {item.display_name}
         </h3>
-        <p 
+        <p
           style={{ color: 'var(--nav-text-muted)' }}
-          className="transition mb-6 text-sm line-clamp-2"
+          className="transition mb-4 text-sm line-clamp-2"
         >
           {item.description}
         </p>
+
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             {loading ? (
-              <div 
+              <div
                 style={{
                   backgroundColor: 'var(--nav-active-bg)',
                   color: 'var(--nav-active-text)'
                 }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
               >
-                <div 
+                <div
                   style={{ borderTopColor: 'var(--nav-active-text)' }}
                   className="animate-spin rounded-full h-3 w-3 border-t-2"
                 ></div>
@@ -82,7 +83,7 @@ const RSS = ({
             ) : (
               <>
                 {isMetaFeed && (
-                  <div 
+                  <div
                     style={{
                       backgroundColor: 'var(--nav-active-bg)',
                       color: 'var(--nav-active-text)'
@@ -94,7 +95,7 @@ const RSS = ({
                   </div>
                 )}
                 {!isMetaFeed && !isFeed && item.children && (
-                  <div 
+                  <div
                     style={{
                       backgroundColor: 'var(--nav-active-bg)',
                       color: 'var(--nav-active-text)'
@@ -110,20 +111,62 @@ const RSS = ({
           </div>
           <div>
             {isFeed ? (
-              <span 
-                style={{
-                  backgroundColor: 'var(--success)',
-                  color: '#ffffff',
-                  borderColor: 'var(--success-hover)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid'
-                }}
-                className="px-3 py-1 text-xs rounded-full"
-              >
-                RSS
-              </span>
+              <div className="flex items-center gap-2">
+
+                {isFeed && (
+                  <div
+                    role="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(item.link, '_blank');
+                    }}
+                    className="cursor-pointer transition-all hover:opacity-80 hover:scale-105 active:scale-95"
+                    title="Open RSS Link"
+                  >
+                    <div
+                      className="flex items-center justify-center w-6 h-6 rounded-full"
+                      style={{
+                        backgroundColor: 'rgba(34, 197, 94, 0.15)', // Subtle green background
+                        border: '1px solid var(--success)',
+                        color: 'var(--success)'
+                      }}
+                    >
+                      <Rss className="w-3 h-3" />
+                    </div>
+                  </div>
+                )}
+
+                {isFeed ? (
+                  <span
+                    style={{
+                      backgroundColor: 'var(--success)',
+                      color: '#ffffff',
+                      borderColor: 'var(--success-hover)',
+                      borderWidth: '1px',
+                      borderStyle: 'solid'
+                    }}
+                    className="px-3 py-1 text-xs rounded-full"
+                  >
+                    RSS
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      backgroundColor: 'var(--color-purple-500)',
+                      color: '#ffffff',
+                      borderColor: 'var(--nav-border)',
+                      borderWidth: '1px',
+                      borderStyle: 'solid'
+                    }}
+                    className="px-3 py-1 text-xs rounded-full"
+                  >
+                    Group
+                  </span>
+                )}
+
+              </div>
             ) : (
-              <span 
+              <span
                 style={{
                   backgroundColor: 'var(--color-purple-500)',
                   color: '#ffffff',
