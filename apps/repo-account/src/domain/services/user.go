@@ -4,15 +4,17 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/utils"
+	"repo_account/src/config"
 	"repo_account/src/data/models"
 )
 
 type UserService struct {
-	Db *gorm.DB
+	Db     *gorm.DB
+	Config *config.Config
 }
 
-func NewUserService(db *gorm.DB) *UserService {
-	return &UserService{Db: db}
+func NewUserService(config *config.Config, db *gorm.DB) *UserService {
+	return &UserService{Db: db, Config: config}
 }
 
 func (s *UserService) GetUserByID(id uint) (*models.User, error) {

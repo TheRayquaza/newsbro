@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"net/http"
+	"strconv"
 
 	"repo_account/src/api/dto"
 	"repo_account/src/data/models"
@@ -53,6 +54,23 @@ func (ac *AuthController) Register(c *gin.Context) {
 		})
 		return
 	}
+
+	httpOnly := true
+	secure := true
+	if ac.authService.Config.Environment == "dev" {
+		secure = false
+		httpOnly = false
+		c.SetSameSite(http.SameSiteLaxMode)
+	} else {
+		c.SetSameSite(http.SameSiteNoneMode)
+	}
+
+	utils.SugarLog.Debug("Setting cookies for user:", response.User.Email)
+
+	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
+	c.SetCookie("refresh_token", response.RefreshToken, 86400, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
+
+	utils.SugarLog.Info("User registered with ID:", strconv.Itoa(int(response.User.ID)))
 
 	c.JSON(http.StatusCreated, response)
 }
