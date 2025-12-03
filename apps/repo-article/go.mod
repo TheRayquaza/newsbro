@@ -8,7 +8,7 @@ require (
 	github.com/DataDog/dd-trace-go/orchestrion/all/v2 v2.0.0-rc.9
 	github.com/DataDog/orchestrion v1.6.1
 	github.com/IBM/sarama v1.46.1
-	github.com/TheRayquaza/newsbro/apps/libs v0.5.1
+	github.com/TheRayquaza/newsbro/apps/libs v0.6.1
 	github.com/gin-gonic/gin v1.10.1
 	github.com/joho/godotenv v1.4.0
 	github.com/swaggo/files v1.0.1
@@ -304,7 +304,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
+	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.21.0 // indirect
 	golang.org/x/crypto v0.43.0 // indirect

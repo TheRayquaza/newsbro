@@ -76,8 +76,13 @@ func SetupRouter(cfg *config.Config, authService *services.AuthService, userServ
 			{
 				users.GET("/profile", userController.GetProfile)
 				users.PUT("/profile", userController.UpdateProfile)
-				//users.DELETE("/profile", userController.DeleteProfile)
-				users.GET("", userController.GetUsers) // Admin only in production
+				users.DELETE("/profile", userController.DeleteProfile)
+				admin := users.Group("/").Use(authMiddleware.AdminMiddleware())
+				{
+					// Info: Admin-only routes
+					admin.GET("", userController.GetUsers)
+					admin.DELETE("/:id", userController.DeleteUser)
+				}
 			}
 		}
 	}

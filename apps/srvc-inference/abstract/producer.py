@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import List
 
 import pydantic
@@ -9,10 +8,8 @@ from abstract.message import InferenceCommand
 
 
 class InferenceProducerConfig(pydantic.BaseModel):
-    kafka_bootstrap_servers: str = os.getenv(
-        "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
-    )
-    kafka_producer_topic: str = os.getenv("KAFKA_PRODUCER_TOPIC", "")
+    kafka_bootstrap_servers: str
+    kafka_producer_topic: str
 
 
 class InferenceProducer:

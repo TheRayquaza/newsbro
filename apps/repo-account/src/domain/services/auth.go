@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"repo_account/src/api/dto"
@@ -14,6 +13,7 @@ import (
 	"repo_account/src/data/models"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v5"
@@ -45,7 +45,7 @@ func (s *AuthService) initOIDC() {
 	ctx := context.Background()
 	provider, err := oidc.NewProvider(ctx, s.Config.OIDCIssuerURL)
 	if err != nil {
-		log.Printf("Failed to initialize OIDC provider: %v\n", err)
+		utils.SugarLog.Errorf("Failed to initialize OIDC provider: %v\n", err)
 		return
 	}
 
@@ -63,10 +63,9 @@ func (s *AuthService) initOIDC() {
 }
 
 func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.LoginResponse, error) {
-	// Check if user already exists
 	var existingUser models.User
 	if err := s.db.Where("email = ? OR username = ?", req.Email, req.Username).First(&existingUser).Error; err == nil {
-		log.Println("Attempt to register with existing email or username:", req.Email, req.Username)
+		utils.SugarLog.Warn("Attempt to register with existing email or username:", req.Email, req.Username)
 		return nil, errors.New("user already exists")
 	}
 
@@ -79,10 +78,12 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.LoginResponse, er
 		Role:      "user",
 	}
 
+	utils.SugarLog.Debug("Registering new user:", req.Email, req.Username)
 	if err := user.SetPassword(req.Password); err != nil {
 		return nil, err
 	}
 
+	utils.SugarLog.Info("Creating user record in database for:", req.Email)
 	if err := s.db.Create(&user).Error; err != nil {
 		return nil, err
 	}
@@ -93,17 +94,17 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.LoginResponse, er
 func (s *AuthService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 	var user models.User
 	if err := s.db.Where("email = ?", req.Email).First(&user).Error; err != nil {
-		log.Println("Login attempt with non-existent email:", req.Email)
+		utils.SugarLog.Warn("Login attempt with non-existent email:", req.Email)
 		return nil, errors.New("invalid credentials")
 	}
 
 	if !user.CheckPassword(req.Password) {
-		log.Println("Invalid password attempt for email:", req.Email)
+		utils.SugarLog.Warn("Invalid password attempt for email:", req.Email)
 		return nil, errors.New("invalid credentials")
 	}
 
 	if !user.IsActive {
-		log.Println("Attempt to login to inactive account:", user.Email)
+		utils.SugarLog.Warn("Attempt to login to inactive account:", user.Email)
 		return nil, errors.New("account is inactive")
 	}
 
@@ -113,11 +114,11 @@ func (s *AuthService) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 func (s *AuthService) RefreshToken(user *models.User) (*dto.LoginResponse, error) {
 	var token *models.RefreshToken
 	if err := s.db.Preload("User").Where("user_id = ? AND expires_at > ?", user.ID, time.Now()).First(&token).Error; err != nil {
-		log.Println("Invalid or expired refresh token for user ID:", user.ID)
+		utils.SugarLog.Warn("Invalid or expired refresh token for user ID:", user.ID)
 		return nil, errors.New("invalid refresh token")
 	}
 
-	// Delete old refresh token
+	utils.SugarLog.Info("Refreshing tokens for user ID:", user.ID)
 	s.db.Delete(&token)
 
 	return s.generateTokens(&token.User)
@@ -125,17 +126,15 @@ func (s *AuthService) RefreshToken(user *models.User) (*dto.LoginResponse, error
 }
 
 func (s *AuthService) generateTokens(user *models.User) (*dto.LoginResponse, error) {
-	// Generate access token
 	accessToken, err := s.GenerateAccessToken(user)
 	if err != nil {
-		log.Println("Error generating access token for user ID:", user.ID, "Error:", err)
+		utils.SugarLog.Errorf("Error generating access token for user ID: %d, Error: %v", user.ID, err)
 		return nil, err
 	}
 
-	// Generate refresh token
 	refreshTokenStr, err := s.generateRefreshToken(user)
 	if err != nil {
-		log.Println("Error generating refresh token for user ID:", user.ID, "Error:", err)
+		utils.SugarLog.Errorf("Error generating refresh token for user ID: %d, Error: %v", user.ID, err)
 		return nil, err
 	}
 
@@ -189,7 +188,7 @@ func (s *AuthService) generateRefreshToken(user *models.User) (string, error) {
 	}
 
 	if err := s.db.Create(&refreshToken).Error; err != nil {
-		log.Println("Error saving refresh token for user ID:", user.ID, "Error:", err)
+		utils.SugarLog.Errorf("Error saving refresh token for user ID: %d, Error: %v", user.ID, err)
 		return "", err
 	}
 
@@ -205,24 +204,25 @@ func (s *AuthService) GetOAuthURL(state string) string {
 
 func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, error) {
 	if s.oidcVerifier == nil {
-		log.Println("OIDC not configured")
+		utils.SugarLog.Warn("OIDC not configured")
 		return nil, errors.New("OIDC not configured")
 	}
 
 	ctx := context.Background()
 
-	// Exchange code for token
+	utils.SugarLog.Debug("Exchanging code for token with OIDC provider")
 	oauth2Token, err := s.oauth2Config.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
 	}
 
-	// Verify ID token
+	utils.SugarLog.Debug("Verifying ID token")
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
 		return nil, errors.New("no id_token in response")
 	}
 
+	utils.SugarLog.Debug("Parsing ID token claims")
 	idToken, err := s.oidcVerifier.Verify(ctx, rawIDToken)
 	if err != nil {
 		return nil, err
@@ -242,12 +242,13 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 		return nil, err
 	}
 
-	// Find or create user
+	utils.SugarLog.Info("OIDC login for email:", claims.Email)
+
 	var user models.User
 	err = s.db.Where("email = ?", claims.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Create new user
+			utils.SugarLog.Info("Creating new user from OIDC claims for email:", claims.Email)
 			user = models.User{
 				Email:     claims.Email,
 				Username:  claims.Subject,
@@ -258,10 +259,11 @@ func (s *AuthService) HandleOAuthCallback(code string) (*dto.LoginResponse, erro
 				IsActive:  true,
 			}
 			if err := s.db.Create(&user).Error; err != nil {
-				log.Println("Error creating user from OIDC claims:", err)
+				utils.SugarLog.Errorf("Error creating user from OIDC claims: %v", err)
 				return nil, err
 			}
 		} else {
+			utils.SugarLog.Errorf("Error fetching user by email: %v", err)
 			return nil, err
 		}
 	}

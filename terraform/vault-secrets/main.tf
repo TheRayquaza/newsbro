@@ -210,6 +210,35 @@ resource "vault_kv_secret_v2" "srvc_inference_tfidf_redis" {
   })
 }
 
+resource "vault_kv_secret_v2" "srvc_inference_sbert_s3" {
+  mount = vault_mount.kv.path
+  name  = "srvc-inference/sbert/s3"
+
+  data_json = jsonencode({
+    access_key_id     = var.srvc_inference_sbert_access_key_id
+    secret_access_key = var.srvc_inference_sbert_secret_access_key
+  })
+}
+
+resource "vault_kv_secret_v2" "srvc_inference_sbert_qdrant" {
+  mount = vault_mount.kv.path
+  name  = "srvc-inference/sbert/qdrant"
+
+  data_json = jsonencode({
+    qdrant_api_key = var.qdrant_api_key
+  })
+}
+
+resource "vault_kv_secret_v2" "srvc_inference_sbert_redis" {
+  mount = vault_mount.kv.path
+  name  = "srvc-inference/sbert/redis"
+
+  data_json = jsonencode({
+    password = var.srvc_inference_sbert_redis_password
+    db       = var.srvc_inference_sbert_redis_db
+  })
+}
+
 # ==========================================
 # Docker Registry Secrets
 # ==========================================

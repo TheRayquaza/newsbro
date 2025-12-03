@@ -7,7 +7,7 @@ import (
 type RefreshToken struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
 	Token     string    `json:"-" gorm:"uniqueIndex;not null"`
-	UserID    uint      `json:"user_id" gorm:"not null"`
+	UserID    uint      `json:"user_id" gorm:"not null;constraint:OnDelete:CASCADE"`
 	User      User      `json:"-" gorm:"foreignKey:UserID"`
 	ExpiresAt time.Time `json:"expires_at"`
 	CreatedAt time.Time `json:"created_at"`

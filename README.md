@@ -5,21 +5,24 @@ Distributed resilient architecture for news recommendation
 Feel free to have a look at our [website](https://app.newsbro.cc) to create your account
 and interact with 100k+ articles.
 
-![login page](./assets/login.png)
+![login page](./assets/login.png) ![home page](./assets/home.png)
 
-We provide automatic update everyday (9am / 6pm UTC), 10k articles ingested
+We provide automatic update everyday (9am / 6pm UTC), 1k articles ingested
 from various sources. We also provide new recommendation based on your liked articles.
 
 Feel free to open issues if you see anything relevant that could be added.
 
-⚠ App will be down at the end of our project (~ Jan. 2026)
+⚠ App will be down at the end of our project (~ January 2026)
 
 ## Table of Contents
 - [Project Structure](#project-structure)
 - [Architecture](#architecture)
-    - [User Feed](#handling-user-feeds)
+    - [Light Speed Recommendation](#light-speed-recommendation)
+    - [North-South Traffic](#nort-south-traffic)
+    - [Secrets Rollout](#secrets-rollout)
 - Models
     - [TF-IDF / SVD](docs/model/tf_idf.md#tf-idf)
+    - [SBERT](docs/model/sbert.md#sbert)
 - [Development](#dev)
     - [CI/CD](#cicd)
     - [Commits](#commits)
@@ -63,7 +66,9 @@ All internal data will be securely erased once the project concludes.
 │   ├── cert-manager             # Manager TLS certificate
 │   ├── external-secrets         # ESO to communicate with vault
 │   ├── flux/flux-system         # deployment of flux repo (gitops tools)
+│   ├── ingress-nginx            # Ingress nginx
 │   ├── kafka                    # Kafka brokers, controllers, redpanda console and topic definition
+│   ├── metallb                  # Metal LB
 │   ├── minio                    # Minio cluster storage (datalake + store for mlflow artifacts)
 │   ├── mlflow
 │   ├── postgres                 # CNPG CRD, database definition, user definition
@@ -88,9 +93,33 @@ The project is built with a microservices architecture including the following c
 
 ![Architecture Diagram](docs/archi/archi_v1.2.png)
 
-### Handling user feeds
+### Light Speed Recommendation
+
+We want light speed recommendation and scalable infrastructure. Behind the scene:
+- Kafka consumers consuming articles, processing articles by batch and creating new recommendations.
+- Qdrant storing vector embeddings to pre compute recommendation as they come. These representation are then used in various way.
+- Redis Sentinels with [zsets](https://redis.io/docs/latest/develop/data-types/sorted-sets/) to create efficient feed queue.
+- Repo Feed, a dedicated service managing feed, storing feedbacks / articles for short periods?
 
 ![User Feed](docs/misc/user_feed_2.png)
+
+### Nort-South Traffic
+
+North-South traffic is handled by two separate ingress controllers.
+- Public Ingress: on a dedicated ip behind a NAT, exposing public services including frontend and backend services.
+- Private Ingress: using VPN ip handled by [wireguard](https://www.wireguard.com/), exposing critical and back office services.
+
+We use also a dedicated load balancer called [Metal LB](https://metallb.io/) to expose ip pools for the two ingresses.
+
+![North-South](docs/misc/north-south.png)
+
+### Secrets Rollout
+
+We use [external-secret](https://external-secrets.io/latest/) to create our secrets
+
+Secrets are centralized within a [vault](https://developer.hashicorp.com/vault), provisioned by Terraform.
+
+![External Secrets](https://external-secrets.io/v0.5.8/pictures/diagrams-high-level-ns-detail.png)
 
 ## Dev
 
@@ -124,4 +153,3 @@ kubectl apply -k k8s/flux/flux-system
 ### Deployment Specifications
 
 TODO
-

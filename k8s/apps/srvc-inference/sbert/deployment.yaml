@@ -1,0 +1,73 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: srvc-inference-sbert
+  namespace: apps
+  labels:
+    app: srvc-inference-sbert
+    type: backends
+    model: sbert
+spec:
+  # replicas: 1 # managed by hpa
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: srvc-inference-sbert
+  template:
+    metadata:
+      labels:
+        app: srvc-inference-sbert
+        monitoring: "enabled"
+    spec:
+      imagePullSecrets:
+        - name: pull-secret
+      containers:
+        - name: srvc-inference-sbert
+          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-sbert-v1.0.4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: srvc-inference-sbert-config
+            - configMapRef:
+                name: postgres-config
+            - configMapRef:
+                name: kafka-config
+            - configMapRef:
+                name: redis-config
+            - configMapRef:
+                name: qdrant-config
+            - configMapRef:
+                name: oidc-config
+            - secretRef:
+                name: srvc-inference-sbert-secrets
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 300
+            periodSeconds: 15
+            failureThreshold: 10
+            timeoutSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 300
+            periodSeconds: 15
+            failureThreshold: 10
+            timeoutSeconds: 20

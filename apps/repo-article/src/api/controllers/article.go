@@ -8,6 +8,7 @@ import (
 	"repo_article/src/domain/services"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,12 +39,14 @@ func NewArticleController(articleService *services.ArticleService) *ArticleContr
 func (ac *ArticleController) CreateArticle(c *gin.Context) {
 	var req dto.ArticleCreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.SugarLog.Errorf("Error binding JSON: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -82,12 +85,14 @@ func (ac *ArticleController) GetArticle(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
+		utils.SugarLog.Errorf("Error parsing article ID: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid article ID"})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -96,11 +101,14 @@ func (ac *ArticleController) GetArticle(c *gin.Context) {
 
 	article, err := ac.articleService.GetArticleByID(userID, uint(id))
 	if err != nil {
-		if err.Error() == "article with id "+idParam+" not found" {
+		switch err.(type) {
+		case *dto.ErrBadRequest:
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		case *dto.ErrNotFound:
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -125,12 +133,14 @@ func (ac *ArticleController) GetArticle(c *gin.Context) {
 func (ac *ArticleController) GetArticles(c *gin.Context) {
 	var filters dto.ArticleFilters
 	if err := c.ShouldBindQuery(&filters); err != nil {
+		utils.SugarLog.Errorf("Error binding query parameters: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -145,10 +155,12 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 	}
 
 	if filters.Limit < 0 {
+		utils.SugarLog.Errorf("Invalid limit: %d", filters.Limit)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "limit must be >= 0"})
 		return
 	}
 	if filters.Offset < 0 {
+		utils.SugarLog.Errorf("Invalid offset: %d", filters.Offset)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "offset must be >= 0"})
 		return
 	}
@@ -202,12 +214,14 @@ func (ac *ArticleController) GetArticles(c *gin.Context) {
 func (ac *ArticleController) GetArticleHistory(c *gin.Context) {
 	var filters dto.ArticleHistoryFilters
 	if err := c.ShouldBindQuery(&filters); err != nil {
+		utils.SugarLog.Errorf("Error binding query parameters: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -215,17 +229,21 @@ func (ac *ArticleController) GetArticleHistory(c *gin.Context) {
 	userID := user.(*entities.JWTClaims).UserID
 
 	if filters.Limit <= 0 {
+		utils.SugarLog.Warnf("Invalid limit: %d", filters.Limit)
 		filters.Limit = 10
 	}
 	if filters.Limit > 100 {
+		utils.SugarLog.Warnf("Invalid limit: %d", filters.Limit)
 		filters.Limit = 100
 	}
 
 	if filters.Limit < 0 {
+		utils.SugarLog.Errorf("Invalid limit: %d", filters.Limit)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "limit must be >= 0"})
 		return
 	}
 	if filters.Offset < 0 {
+		utils.SugarLog.Errorf("Invalid offset: %d", filters.Offset)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "offset must be >= 0"})
 		return
 	}
@@ -268,18 +286,21 @@ func (ac *ArticleController) UpdateArticle(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
+		utils.SugarLog.Errorf("Error parsing article ID: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid article ID"})
 		return
 	}
 
 	var req dto.ArticleUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.SugarLog.Errorf("Error binding JSON: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -318,12 +339,14 @@ func (ac *ArticleController) DeleteArticle(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
+		utils.SugarLog.Errorf("Error parsing article ID: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid article ID"})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -356,6 +379,7 @@ func (ac *ArticleController) DeleteArticle(c *gin.Context) {
 func (ac *ArticleController) GetCategories(c *gin.Context) {
 	categories, err := ac.articleService.GetCategories()
 	if err != nil {
+		utils.SugarLog.Errorf("Error getting article categories: %v", err)
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}
@@ -404,12 +428,14 @@ func (ac *ArticleController) GetSubcategories(c *gin.Context) {
 func (ac *ArticleController) TriggerArticleIngestion(c *gin.Context) {
 	var req dto.ArticleTriggerIngestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.SugarLog.Errorf("Error binding JSON: %v", err)
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: err.Error(), Code: http.StatusBadRequest})
 		return
 	}
 
 	count, err := ac.articleService.TriggerArticleIngestion(req.BeginDate, req.EndDate)
 	if err != nil {
+		utils.SugarLog.Errorf("Error triggering article ingestion: %v", err)
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: err.Error(), Code: http.StatusInternalServerError})
 		return
 	}

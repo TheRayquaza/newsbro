@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	Port                     string
+	Environment              string
 	DatabaseURL              string
 	KafkaBrokers             []string
 	KafkaRSSAggregateTopic   string
@@ -33,7 +34,8 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Port: getEnv("PORT", "8080"),
+		Port:        getEnv("PORT", "8080"),
+		Environment: getEnv("ENVIRONMENT", "prod"),
 		DatabaseURL: fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
 			getEnv("DATABASE_USERNAME", "username"),
 			getEnv("DATABASE_PASSWORD", "password"),

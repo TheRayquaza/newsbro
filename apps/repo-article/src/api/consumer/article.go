@@ -3,13 +3,13 @@ package consumer
 import (
 	"context"
 	"encoding/json"
-	"log"
 
 	"repo_article/src/api/dto"
 	"repo_article/src/domain/services"
 
 	"github.com/IBM/sarama"
 	"github.com/TheRayquaza/newsbro/apps/libs/kafka/command"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 )
 
 type ArticleConsumer struct {
@@ -25,6 +25,7 @@ func NewArticleConsumer(brokers []string, topic string, groupID string, articleS
 
 	consumerGroup, err := sarama.NewConsumerGroup(brokers, groupID, config)
 	if err != nil {
+		utils.SugarLog.Errorf("failed to create consumer group: %s", err)
 		return nil, err
 	}
 
@@ -36,20 +37,20 @@ func NewArticleConsumer(brokers []string, topic string, groupID string, articleS
 }
 
 func (ac *ArticleConsumer) Start(ctx context.Context) {
-	log.Println("Starting Kafka consumer for new articles...")
+	utils.SugarLog.Infof("Starting Kafka consumer for new articles...")
 	handler := &consumerGroupHandler{articleService: ac.articleService}
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Shutting down Kafka consumer...")
+			utils.SugarLog.Infof("Shutting down Kafka consumer...")
 			if err := ac.consumerGroup.Close(); err != nil {
-				log.Printf("Error closing consumer group: %v", err)
+				utils.SugarLog.Errorf("Error closing consumer group: %v", err)
 			}
 			return
 		default:
 			if err := ac.consumerGroup.Consume(ctx, []string{ac.topic}, handler); err != nil {
-				log.Printf("Error from consumer: %v", err)
+				utils.SugarLog.Errorf("Error from consumer: %v", err)
 			}
 		}
 	}
@@ -73,7 +74,7 @@ func (h *consumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error {
 
 func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.Printf("Message received: topic=%s, partition=%d, offset=%d", msg.Topic, msg.Partition, msg.Offset)
+		utils.SugarLog.Infof("Message received: topic=%s, partition=%d, offset=%d", msg.Topic, msg.Partition, msg.Offset)
 		h.processMessage(msg.Value)
 		session.MarkMessage(msg, "")
 	}
@@ -83,11 +84,11 @@ func (h *consumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 func (h *consumerGroupHandler) processMessage(data []byte) {
 	var cmd command.NewArticleCommand
 	if err := json.Unmarshal(data, &cmd); err != nil {
-		log.Printf("Error unmarshaling message: %v", err)
+		utils.SugarLog.Errorf("Error unmarshaling message: %v", err)
 		return
 	}
 
-	log.Printf("Processing new article: %s", cmd.Title)
+	utils.SugarLog.Infof("Processing new article: %s", cmd.Title)
 
 	req := &dto.ArticleCreateRequest{
 		Title:       cmd.Title,
@@ -101,9 +102,9 @@ func (h *consumerGroupHandler) processMessage(data []byte) {
 
 	article, err := h.articleService.CreateArticle(req, 0)
 	if err != nil {
-		log.Printf("Error creating article: %v", err)
+		utils.SugarLog.Errorf("Error creating article: %v", err)
 		return
 	}
 
-	log.Printf("Successfully created article with ID: %d", article.ID)
+	utils.SugarLog.Infof("Successfully created article with ID: %d", article.ID)
 }

@@ -13,6 +13,6 @@ type ArticleModel struct {
 	Link        string    `json:"link"`
 	RSSLink     string    `json:"rss_link"`
 	PublishedAt time.Time `json:"published_at"`
-	Score       float64   `json:"score"`
-	DecayScore  float64   `json:"decay_score"`
+	Score       float64   `json:"-"`
+	DecayScore  float64   `json:"-"`
 }

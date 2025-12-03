@@ -7,8 +7,13 @@ ENV PORT=8080
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl=8.14.1-2 \
+# hadolint ignore=DL3008,DL3015
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -s /bin/bash nonroot
 
 COPY ${model}/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

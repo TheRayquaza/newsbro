@@ -19,7 +19,7 @@ func ArticleModelToArticle(article *models.ArticleModel) dto.Article {
 	}
 }
 
-func ArticleToArticleModel(article *dto.Article, score float64) models.ArticleModel {
+func ArticleToArticleModel(article *dto.Article) models.ArticleModel {
 	return models.ArticleModel{
 		ID:          article.ID,
 		Category:    article.Category,
@@ -29,7 +29,5 @@ func ArticleToArticleModel(article *dto.Article, score float64) models.ArticleMo
 		Link:        article.Link,
 		RSSLink:     article.RSSLink,
 		PublishedAt: article.PublishedAt,
-		Score:       score,
-		DecayScore:  score,
 	}
 }

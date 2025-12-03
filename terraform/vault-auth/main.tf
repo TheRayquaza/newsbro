@@ -102,6 +102,18 @@ path "kv/data/srvc-inference/tfidf/redis" {
   capabilities = ["read", "list"]
 }
 
+path "kv/data/srvc-inference/sbert/s3" {
+  capabilities = ["read", "list"]
+}
+
+path "kv/data/srvc-inference/sbert/qdrant" {
+  capabilities = ["read", "list"]
+}
+
+path "kv/data/srvc-inference/sbert/redis" {
+  capabilities = ["read", "list"]
+}
+
 # Docker registry secrets
 path "kv/data/docker/ghcr" {
   capabilities = ["read", "list"]

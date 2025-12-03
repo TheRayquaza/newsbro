@@ -7,6 +7,7 @@ import (
 	"repo_article/src/domain/services"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,12 +38,14 @@ func NewRSSController(rssService *services.RSSService) *RSSController {
 func (rc *RSSController) CreateRSS(c *gin.Context) {
 	var req dto.RSSCreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.SugarLog.Errorf("Error binding JSON: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -111,12 +114,14 @@ func (rc *RSSController) GetRSSByName(c *gin.Context) {
 func (rc *RSSController) GetRSS(c *gin.Context) {
 	var filters dto.RSSFilters
 	if err := c.ShouldBindQuery(&filters); err != nil {
+		utils.SugarLog.Errorf("Error binding query parameters: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -152,12 +157,14 @@ func (rc *RSSController) GetRSS(c *gin.Context) {
 func (rc *RSSController) GetTreeRSS(c *gin.Context) {
 	var filters dto.RSSFilters
 	if err := c.ShouldBindQuery(&filters); err != nil {
+		utils.SugarLog.Errorf("Error binding query parameters: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
@@ -198,6 +205,7 @@ func (rc *RSSController) UpdateRSS(c *gin.Context) {
 
 	var req dto.RSSUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.SugarLog.Errorf("Error binding JSON: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

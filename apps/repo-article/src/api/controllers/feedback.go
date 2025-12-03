@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/csv"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"repo_article/src/domain/services"
 
 	"github.com/TheRayquaza/newsbro/apps/libs/auth/entities"
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,6 +41,7 @@ func NewFeedbackController(feedbackService *services.FeedbackService) *FeedbackC
 func (fc *FeedbackController) GetArticleFeedback(c *gin.Context) {
 	newsID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
+		utils.SugarLog.Errorf("Error parsing article ID: %v", err)
 		c.JSON(http.StatusBadRequest, "Invalid article ID")
 		return
 	}
@@ -71,26 +72,27 @@ func (fc *FeedbackController) GetArticleFeedback(c *gin.Context) {
 func (fc *FeedbackController) CreateFeedback(c *gin.Context) {
 	newsID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
+		utils.SugarLog.Errorf("Error parsing article ID: %v", err)
 		c.JSON(http.StatusBadRequest, "Invalid article ID")
 		return
 	}
 
 	var req dto.FeedbackRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Println("Error binding JSON:", err)
+		utils.SugarLog.Errorf("Error binding JSON: %v", err)
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
-		log.Println("User not found in context")
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
 	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
-		log.Println("Invalid user type in context")
+		utils.SugarLog.Errorf("Invalid user type in context")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
@@ -126,17 +128,20 @@ func (fc *FeedbackController) CreateFeedback(c *gin.Context) {
 func (fc *FeedbackController) DeleteFeedback(c *gin.Context) {
 	newsID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
+		utils.SugarLog.Errorf("Error parsing article ID: %v", err)
 		c.JSON(http.StatusBadRequest, "Invalid article ID")
 		return
 	}
 
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
 	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
+		utils.SugarLog.Errorf("Invalid user type in context")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
@@ -172,12 +177,14 @@ func (fc *FeedbackController) DeleteFeedback(c *gin.Context) {
 func (fc *FeedbackController) GetUserFeedback(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Errorf("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
 
 	usr, ok := user.(*entities.JWTClaims)
 	if !ok {
+		utils.SugarLog.Errorf("Invalid user type in context")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
@@ -186,10 +193,12 @@ func (fc *FeedbackController) GetUserFeedback(c *gin.Context) {
 	limit, _ := strconv.ParseUint(c.DefaultQuery("limit", "10"), 10, 32)
 
 	if page < 1 {
+		utils.SugarLog.Errorf("Invalid page number: %d", page)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be greater than 0"})
 		return
 	}
 	if limit < 1 || limit > 100 {
+		utils.SugarLog.Errorf("Invalid limit: %d", limit)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit must be between 1 and 100"})
 		return
 	}
@@ -231,12 +240,16 @@ func (fc *FeedbackController) ExportFeedbackCSV(c *gin.Context) {
 	if start := c.Query("start_date"); start != "" {
 		if t, err := time.Parse("2006-01-02", start); err == nil {
 			startDate = &t
+		} else {
+			utils.SugarLog.Errorf("Error parsing start date: %v", err)
 		}
 	}
 
 	if end := c.Query("end_date"); end != "" {
 		if t, err := time.Parse("2006-01-02", end); err == nil {
 			endDate = &t
+		} else {
+			utils.SugarLog.Errorf("Error parsing end date: %v", err)
 		}
 	}
 
@@ -246,20 +259,16 @@ func (fc *FeedbackController) ExportFeedbackCSV(c *gin.Context) {
 		return
 	}
 
-	// Set CSV headers
 	filename := fmt.Sprintf("feedback_export_%s.csv", time.Now().Format("2006-01-02"))
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	c.Header("Content-Type", "text/csv")
 
-	// Write CSV
 	writer := csv.NewWriter(c.Writer)
 	defer writer.Flush()
 
-	// Write header
 	header := []string{"feedback_id", "user_id", "username", "news_id", "article_title", "value", "value_text", "created_at", "updated_at"}
 	writer.Write(header)
 
-	// Write data
 	for _, fb := range feedback {
 		record := []string{
 			strconv.Itoa(int(fb.FeedbackID)),
@@ -290,10 +299,12 @@ func (fc *FeedbackController) GetFeedbackStats(c *gin.Context) {
 	limit, _ := strconv.ParseUint(c.DefaultQuery("limit", "10"), 10, 32)
 
 	if page < 1 {
+		utils.SugarLog.Errorf("Invalid page number: %d", page)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be greater than 0"})
 		return
 	}
 	if limit < 1 || limit > 100 {
+		utils.SugarLog.Errorf("Invalid limit: %d", limit)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit must be between 1 and 100"})
 		return
 	}
@@ -331,10 +342,12 @@ func (fc *FeedbackController) GetAllFeedback(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
 	if page < 1 {
+		utils.SugarLog.Errorf("Invalid page number: %d", page)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be greater than 0"})
 		return
 	}
 	if limit < 1 || limit > 100 {
+		utils.SugarLog.Errorf("Invalid limit: %d", limit)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Limit must be between 1 and 100"})
 		return
 	}
@@ -372,6 +385,7 @@ func (fc *FeedbackController) GetAllFeedback(c *gin.Context) {
 func (fc *FeedbackController) TriggerIngestFeedback(c *gin.Context) {
 	var req dto.FeedbackTriggerIngestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.SugarLog.Errorf("Error binding JSON: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

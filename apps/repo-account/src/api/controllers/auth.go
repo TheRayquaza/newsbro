@@ -9,6 +9,8 @@ import (
 	"repo_account/src/data/models"
 	"repo_account/src/domain/services"
 
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,6 +36,7 @@ func NewAuthController(authService *services.AuthService) *AuthController {
 func (ac *AuthController) Register(c *gin.Context) {
 	var req dto.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.SugarLog.Warn("Invalid register request:", err)
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
@@ -43,6 +46,7 @@ func (ac *AuthController) Register(c *gin.Context) {
 
 	response, err := ac.authService.Register(&req)
 	if err != nil {
+		utils.SugarLog.Error("Error registering user:", err)
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
@@ -66,6 +70,7 @@ func (ac *AuthController) Register(c *gin.Context) {
 func (ac *AuthController) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.SugarLog.Warn("Invalid login request:", err)
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),
@@ -75,6 +80,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 	response, err := ac.authService.Login(&req)
 	if err != nil {
+		utils.SugarLog.Warn("Login failed for email:", req.Email, "Error:", err)
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 			Code:    http.StatusUnauthorized,
 			Message: err.Error(),
@@ -91,6 +97,8 @@ func (ac *AuthController) Login(c *gin.Context) {
 	} else {
 		c.SetSameSite(http.SameSiteNoneMode)
 	}
+
+	utils.SugarLog.Debug("Setting cookies for user:", response.User.Email)
 
 	c.SetCookie("auth_token", response.AccessToken, 3600, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
 	c.SetCookie("refresh_token", response.RefreshToken, 86400, "/", ac.authService.Config.CookieDomain, secure, httpOnly)
@@ -111,18 +119,21 @@ func (ac *AuthController) Login(c *gin.Context) {
 func (ac *AuthController) RefreshToken(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
+		utils.SugarLog.Warn("User not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
 		return
 	}
 
 	usr, ok := user.(*models.User)
 	if !ok {
+		utils.SugarLog.Error("Invalid user type in context")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user type in context"})
 		return
 	}
 
 	response, err := ac.authService.RefreshToken(usr)
 	if err != nil {
+		utils.SugarLog.Warn("Failed to refresh token for user ID:", usr.ID, "Error:", err)
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 			Code:    http.StatusUnauthorized,
 			Message: err.Error(),
@@ -175,6 +186,7 @@ func (ac *AuthController) OAuthCallback(c *gin.Context) {
 
 	storedState, err := c.Cookie("oauth_state")
 	if err != nil || storedState != state {
+		utils.SugarLog.Warn("Invalid OAuth state parameter")
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Code:    http.StatusBadRequest,
 			Message: "Invalid state parameter",
@@ -186,6 +198,7 @@ func (ac *AuthController) OAuthCallback(c *gin.Context) {
 
 	response, err := ac.authService.HandleOAuthCallback(code)
 	if err != nil {
+		utils.SugarLog.Error("Error handling OAuth callback:", err)
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Code:    http.StatusBadRequest,
 			Message: err.Error(),

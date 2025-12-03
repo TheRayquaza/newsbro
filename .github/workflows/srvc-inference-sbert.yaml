@@ -15,7 +15,7 @@ jobs:
   srvc-inference-sbert:
     uses: ./.github/workflows/python-svc-workflow.yaml
     with:
-      service_name: srvc-inference-sbert
+      service_name: srvc-inference
       dockerfile: ./docker/srvc-inference.Dockerfile
       context_root: apps/srvc-inference
       model_name: sbert
