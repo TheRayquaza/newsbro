@@ -4,6 +4,12 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import { defineConfig, globalIgnores } from "eslint/config";
 
+
+const my_globals = {
+	process: "readonly",
+	__APP_VERSION__: "readonly",
+};
+
 export default defineConfig([
   globalIgnores(["dist"]),
   {
@@ -15,7 +21,7 @@ export default defineConfig([
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {... globals.browser, ...my_globals},
       parserOptions: {
         ecmaVersion: "latest",
         ecmaFeatures: { jsx: true },

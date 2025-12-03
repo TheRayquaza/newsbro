@@ -8,6 +8,9 @@ export default defineConfig({
   optimizeDeps: {
     include: ['superagent'],
   },
+  define: {
+    '__APP_VERSION__': JSON.stringify(process.env.npm_package_version),
+  },
   server: {
     proxy: {
       '/api/v1/users': {
