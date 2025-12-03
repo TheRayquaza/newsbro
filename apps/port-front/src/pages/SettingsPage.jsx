@@ -10,6 +10,7 @@ import {
   Shield,
   Bell,
   Palette,
+  Trash2,
 } from "lucide-react";
 import { AuthContext } from "../contexts/Auth";
 import api from "../api/api";
@@ -19,6 +20,7 @@ const SettingsPage = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
@@ -53,6 +55,24 @@ const SettingsPage = () => {
       setError(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      return;
+    }
+
+    setDeleting(true);
+    setError("");
+
+    try {
+      await api.deleteProfile();
+      window.location.href = "/login";
+    } catch (err) {
+      setError(err.message || "Failed to delete account");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -259,7 +279,7 @@ const SettingsPage = () => {
                 </div>
 
                 <div
-                  className="flex justify-end border-t pt-4"
+                  className="flex justify-between border-t pt-4"
                   style={{ borderColor: "var(--divider-line)" }}
                 >
                   <button
@@ -273,6 +293,21 @@ const SettingsPage = () => {
                     ) : (
                       <>
                         <Save size={16} /> Save Changes
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deleting}
+                    onClick={handleDelete}
+                    className="btn-danger flex items-center gap-2"
+                    style={{ width: "fit-content" }}
+                  >
+                    {deleting ? (
+                      "Deleting..."
+                    ) : (
+                      <>
+                        <Trash2 size={16} /> Delete Account
                       </>
                     )}
                   </button>

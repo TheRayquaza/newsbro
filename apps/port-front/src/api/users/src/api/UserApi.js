@@ -19,7 +19,7 @@ import RepoAccountSrcApiDtoUserResponse from '../model/RepoAccountSrcApiDtoUserR
 /**
 * User service.
 * @module api/UserApi
-* @version 1.3.2
+* @version 1.4.0
 */
 export default class UserApi {
 
@@ -157,5 +157,40 @@ export default class UserApi {
       );
     }
 
+    /**
+     * Callback function to receive the result of the usersProfileDelete operation.
+     * @callback module:api/UserApi~usersProfileDeleteCallback
+     * @param {String} error Error message, if any.
+     * @param {Object} data The data returned by the service call.
+     * @param {String} response The complete HTTP response.
+     */
 
+    /**
+     * Delete user profile
+     * Delete the profile of the authenticated user
+     * @param {module:api/UserApi~usersProfileDeleteCallback} callback The callback function, accepting three arguments: error, data, response
+     * data is of type: {@link Object}
+     */
+    usersProfileDelete(callback) {
+      let postBody = null;
+
+      let pathParams = {
+      };
+      let queryParams = {
+      };
+      let headerParams = {
+      };
+      let formParams = {
+      };
+
+      let authNames = [];
+      let contentTypes = [];
+      let accepts = ['application/json'];
+      let returnType = RepoAccountSrcApiDtoUserResponse;
+      return this.apiClient.callApi(
+        '/api/v1/users/profile', 'DELETE',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, null, callback
+      );
+    }
 }
