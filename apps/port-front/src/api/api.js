@@ -165,6 +165,15 @@ class ApiService {
     });
   }
 
+  async deleteProfile() {
+    return new Promise((resolve, reject) => {
+      this.userApi.usersProfileDelete((error, data) => {
+        if (error) return reject(error);
+        resolve(data);
+      });
+    });
+  }
+
   // -------------------- ARTICLES --------------------
   async getCategories() {
     return new Promise((resolve, reject) => {
