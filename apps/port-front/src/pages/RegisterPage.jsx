@@ -165,10 +165,10 @@ const RegisterPage = () => {
 
         <div className="back-link">
           <a
-            href="/"
+            href="/login"
             onClick={(e) => {
               e.preventDefault();
-              navigate("/");
+              navigate("/login");
             }}
           >
             ↩ Back to Login

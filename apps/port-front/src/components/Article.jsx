@@ -3,7 +3,7 @@ import { Calendar, ThumbsUp, ThumbsDown, ExternalLink, Link } from "lucide-react
 import api from "../api/api";
 import { AuthContext } from "../contexts/Auth";
 
-const Article = ({ article, onSelect, isAdmin }) => {
+const Article = ({ article, onView, isAdmin }) => {
     const [userFeedback, setUserFeedback] = useState(null);
     const { token } = useContext(AuthContext);
 
@@ -35,10 +35,13 @@ const Article = ({ article, onSelect, isAdmin }) => {
                 backgroundColor: 'var(--nav-bg)',
                 borderColor: 'var(--nav-border)',
                 borderWidth: '1px',
-                borderStyle: 'solid'
+                borderStyle: 'solid',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
             }}
             className="backdrop-blur-xl rounded-xl transition-all p-6 cursor-pointer"
-            onClick={onSelect}
+            onClick={onView}
             onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--nav-active-text)'}
             onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--nav-border)'}
         >

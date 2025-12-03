@@ -74,7 +74,6 @@ export default function App() {
 
           <Route element={<AuthRoute />}>
             <Route element={<Layout />}>
-              <Route path="/" element={<HomePage />} />
               <Route path="/settings" element={<SettingsPage />} />
 
               <Route element={<AuthRoute />}>
@@ -88,6 +87,10 @@ export default function App() {
               <Route element={<AuthRoute />}>
                 <Route path="/feeds" element={<FeedPage />} />
               </Route>
+
+              {/* Home route with wildcard to capture RSS path */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/*" element={<HomePage />} />
 
               <Route path="*" element={<NotFoundPage />} />
             </Route>
