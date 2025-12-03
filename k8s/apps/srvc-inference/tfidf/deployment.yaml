@@ -23,21 +23,16 @@ spec:
       labels:
         app: srvc-inference-tfidf
         monitoring: "enabled"
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9090" 
     spec:
       imagePullSecrets:
         - name: pull-secret
       containers:
         - name: srvc-inference-tfidf
-          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-tf_idf-v1.0.4
+          image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-tf_idf-v1.0.8
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               name: http
-            - containerPort: 9090
-              name: metrics
           envFrom:
             - configMapRef:
                 name: srvc-inference-tfidf-config
@@ -55,22 +50,24 @@ spec:
                 name: srvc-inference-tfidf-secrets
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "125m"
+              memory: "512Mi"
+              cpu: "500m"
             limits:
               memory: "1Gi"
-              cpu: "250m"
+              cpu: "1"
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 120
-            periodSeconds: 10
-            failureThreshold: 6
+            initialDelaySeconds: 180
+            periodSeconds: 15
+            failureThreshold: 10
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 120
-            periodSeconds: 10
-            failureThreshold: 6
+            initialDelaySeconds: 180
+            periodSeconds: 15
+            failureThreshold: 10
+            timeoutSeconds: 5

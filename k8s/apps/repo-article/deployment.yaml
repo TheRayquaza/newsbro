@@ -7,6 +7,9 @@ metadata:
   labels:
     app: repo-article
     type: backends
+    tags.datadoghq.com/env: prod
+    tags.datadoghq.com/service: repo-article
+    tags.datadoghq.com/version: v1.5.1
 spec:
   # replicas: 1 # managed by hpa
   strategy:
@@ -22,21 +25,26 @@ spec:
       labels:
         app: repo-article
         monitoring: "enabled"
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9090" 
+        tags.datadoghq.com/env: prod
+        tags.datadoghq.com/service: repo-article
+        tags.datadoghq.com/version: v1.5.1
     spec:
       imagePullSecrets:
         - name: pull-secret
+      volumes:
+        - name: apmsocketpath
+          hostPath:
+            path: /var/run/datadog/
       containers:
         - name: repo-article
-          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.4.3
+          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.5.1
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: apmsocketpath
+              mountPath: /var/run/datadog
           ports:
             - containerPort: 8080
               name: http
-            - containerPort: 9090
-              name: metrics
           envFrom:
             - configMapRef:
                 name: repo-article-config
@@ -48,6 +56,27 @@ spec:
                 name: oidc-config
             - secretRef:
                 name: repo-article-secrets
+          env:
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_DATA_STREAMS_ENABLED
+              value: "true"
+            - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+              value: "true"
+            - name: DD_APPSEC_ENABLED
+              value: "true"
           resources:
             requests:
               memory: "256Mi"

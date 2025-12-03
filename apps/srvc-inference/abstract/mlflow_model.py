@@ -22,6 +22,9 @@ class MlflowModel:
             tracking_uri: MLflow tracking server URI
             flavor: Optional specific flavor to use (pyfunc, sklearn, pytorch, tensorflow, etc.)
         """
+        assert model_uri, "model_uri must be provided"
+        assert tracking_uri, "tracking_uri must be provided"
+
         print(f"Loading model from URI: {model_uri} with tracking URI: {tracking_uri}")
         mlflow.set_tracking_uri(tracking_uri)
 

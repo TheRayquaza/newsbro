@@ -53,14 +53,18 @@ class TfidfSVDPipelineModel:
             raise RuntimeError("Pipeline is not trained or built yet.")
         return self.pipeline.transform(documents)
 
+    def predict(self, documents):
+        """MLflow requires predict() to log pyfunc flavor"""
+        return self.transform(documents)
+
     def save_to_mlflow(
         self,
         experiment_name="tfidf_pipeline_experiment",
         run_name="TFIDF_Pipeline_Training",
-        tracking_uri="http://mlflow.localhost:8084",
+        tracking_uri="https://mlflow.internal.newsbro.cc",
     ):
         """Logs the pipeline to MLflow"""
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment_name)
         with mlflow.start_run(run_name=run_name):
-            mlflow.sklearn.log_model(self.pipeline, "tfidf_full_pipeline")
+            mlflow.sklearn.log_model(self, "tfidf_full_pipeline")

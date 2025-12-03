@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,15 +11,21 @@ import (
 	"repo_feed/src/config"
 	"repo_feed/src/data/redis"
 	"repo_feed/src/domain/services"
+
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 )
 
 func main() {
 	// Load configuration
 	cfg := config.Load()
-	log.Println(cfg);
-	log.Println(cfg.FrontendOrigin);
+
+	if err := utils.Initialize(cfg.Environment); err != nil {
+		panic("Failed to initialize logger: " + err.Error())
+	}
+	defer utils.SugarLog.Sync()
+
 	if cfg.Environment == "dev" {
-		log.Println("Running in development mode")
+		utils.SugarLog.Infof("Running in development mode")
 	}
 
 	// Initialize Redis pool
@@ -31,11 +36,11 @@ func main() {
 		DB:         cfg.RedisDB,
 	})
 	if err != nil {
-		log.Fatal("Failed to initialize Redis:", err)
+		utils.SugarLog.Fatalf("Failed to initialize Redis: %v", err)
 	}
 
 	// Initialize feed service
-	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.FeedbackExpiration, cfg.FeedRescoring.DecayHalfLife, cfg.Models)
+	feedService := services.NewFeedService(rdb, cfg.DefaultModel, cfg.RedisScoreKey, cfg.RedisFeedbackKey, cfg.RedisFeedKey, cfg.RedisArticleKey, cfg.FeedbackExpiration, cfg.ArticleExpiration, cfg.ScoreExpiration, cfg.FeedRescoring.DecayHalfLife, cfg.Models)
 
 	// Initialize and start rescoring job
 	rescoringConfig := services.RescoringConfig{
@@ -50,7 +55,7 @@ func main() {
 
 	rescoringService := services.NewFeedRescoringService(feedService, rescoringConfig)
 	rescoringService.Start()
-	log.Println("Feed rescoring service started")
+	utils.SugarLog.Infof("Feed rescoring service started")
 
 	// Setup context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
@@ -64,10 +69,10 @@ func main() {
 		feedService,
 	)
 	if err != nil {
-		log.Printf("Warning: Failed to initialize Kafka inference consumer: %v", err)
+		utils.SugarLog.Errorf("Warning: Failed to initialize Kafka inference consumer: %v", err)
 	} else {
 		go inferenceConsumer.Start(ctx)
-		log.Println("Kafka inference consumer initialized successfully")
+		utils.SugarLog.Infof("Kafka inference consumer initialized successfully")
 	}
 
 	// Setup Kafka feedback consumer
@@ -78,10 +83,10 @@ func main() {
 		feedService,
 	)
 	if err != nil {
-		log.Printf("Warning: Failed to initialize Kafka feedback consumer: %v", err)
+		utils.SugarLog.Errorf("Warning: Failed to initialize Kafka feedback consumer: %v", err)
 	} else {
 		go feedbackConsumer.Start(ctx)
-		log.Println("Kafka feedback consumer initialized successfully")
+		utils.SugarLog.Infof("Kafka feedback consumer initialized successfully")
 	}
 
 	// Setup routes
@@ -94,7 +99,7 @@ func main() {
 		signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
 		<-sigterm
 
-		log.Println("Shutting down gracefully...")
+		utils.SugarLog.Infof("Shutting down gracefully...")
 		cancel()
 
 		// Stop rescoring service
@@ -103,14 +108,14 @@ func main() {
 		// Close inference consumer
 		if inferenceConsumer != nil {
 			if err := inferenceConsumer.Close(); err != nil {
-				log.Printf("Error closing inference consumer: %v", err)
+				utils.SugarLog.Errorf("Error closing inference consumer: %v", err)
 			}
 		}
 
 		// Close feedback consumer
 		if feedbackConsumer != nil {
 			if err := feedbackConsumer.Close(); err != nil {
-				log.Printf("Error closing feedback consumer: %v", err)
+				utils.SugarLog.Errorf("Error closing feedback consumer: %v", err)
 			}
 		}
 
@@ -118,8 +123,8 @@ func main() {
 	}()
 
 	// Start server
-	log.Printf("Server starting on port %s", cfg.Port)
+	utils.SugarLog.Infof("Server starting on port %s", cfg.Port)
 	if err := router.Run(":" + cfg.Port); err != nil {
-		log.Fatal("Failed to start server:", err)
+		utils.SugarLog.Fatalf("Failed to start server: %v", err)
 	}
 }

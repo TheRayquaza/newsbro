@@ -29,15 +29,13 @@ spec:
         default: true
       service:
         type: LoadBalancer
-        externalTrafficPolicy: Local
-        loadBalancerIP: 192.168.0.10
+        externalTrafficPolicy: Cluster
+        loadBalancerIP: 192.168.0.18
         annotations:
           metallb.io/address-pool: public-pool
         ports:
           http: 80
           https: 443
       hostNetwork: false
-      hostPort:
-        enabled: false
       replicaCount: 2
       logLevel: info

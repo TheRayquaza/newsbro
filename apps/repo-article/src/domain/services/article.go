@@ -8,9 +8,10 @@ import (
 
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
+
+	"github.com/TheRayquaza/newsbro/apps/libs/utils"
 
 	"github.com/IBM/sarama"
 	"gorm.io/gorm"
@@ -45,10 +46,10 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 	if req.ID != 0 {
 		var existing models.Article
 		if err := as.Db.First(&existing, "id = ?", req.ID).Error; err == nil {
-			log.Printf("article with id %d already exists", req.ID)
+			utils.SugarLog.Warnf("article with id %d already exists", req.ID)
 			return nil, dto.NewConflict(fmt.Sprintf("article with id %d already exists", req.ID))
 		} else if err != gorm.ErrRecordNotFound {
-			log.Printf("failed to check existing article: %s", err)
+			utils.SugarLog.Errorf("failed to check existing article: %s", err)
 			return nil, dto.NewNotFound(fmt.Sprintf("failed to check existing article: %s", err))
 		}
 		article.ID = req.ID
@@ -59,16 +60,16 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 	err := as.Db.First(&rss, "link = ?", req.RSSLink).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			log.Printf("RSS source with link %s not found", req.RSSLink)
+			utils.SugarLog.Warnf("RSS source with link %s not found", req.RSSLink)
 			return nil, dto.NewBadRequest(fmt.Sprintf("RSS source with link %s not found", req.RSSLink))
 		}
-		log.Printf("failed to fetch RSS source: %s", err)
+		utils.SugarLog.Errorf("failed to fetch RSS source: %s", err)
 		return nil, fmt.Errorf("failed to fetch RSS source: %w", err)
 	}
 	article.RSSName = &rss.Name
 
 	if err := as.Db.Create(article).Error; err != nil {
-		log.Printf("failed to create article: %s", err)
+		utils.SugarLog.Errorf("failed to create article: %s", err)
 		return nil, fmt.Errorf("failed to create article: %w", err)
 	}
 
@@ -76,7 +77,7 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 
 	articleBytes, err := json.Marshal(articleAggregate)
 	if err != nil {
-		log.Printf("failed to marshal article aggregate: %s", err)
+		utils.SugarLog.Errorf("failed to marshal article aggregate: %s", err)
 		return nil, err
 	}
 
@@ -89,7 +90,7 @@ func (as *ArticleService) CreateArticle(req *dto.ArticleCreateRequest, userID ui
 	_, _, err = as.producer.SendMessage(msg)
 
 	if err != nil {
-		log.Printf("failed to publish article to kafka: %s", err)
+		utils.SugarLog.Errorf("failed to publish article to kafka: %s", err)
 		return nil, fmt.Errorf("failed to publish article to kafka: %w", err)
 	}
 
@@ -101,7 +102,7 @@ func (as *ArticleService) GetArticleByID(userID, id uint) (*dto.ArticleResponse,
 	var article models.Article
 
 	if err := as.Db.Preload("RSS").First(&article, id).Error; err != nil {
-		log.Printf("failed to get article: %s", err)
+		utils.SugarLog.Errorf("failed to get article: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return nil, dto.NewNotFound(fmt.Sprintf("article with id %d not found", id))
 		}
@@ -115,7 +116,7 @@ func (as *ArticleService) GetArticleByID(userID, id uint) (*dto.ArticleResponse,
 	if err == nil {
 		articleResponse.Value = feedback.Value
 	} else if err != gorm.ErrRecordNotFound {
-		log.Printf("failed to get feedback for article id %d: %s", article.ID, err)
+		utils.SugarLog.Errorf("failed to get feedback for article id %d: %s", article.ID, err)
 		return nil, fmt.Errorf("failed to get feedback for article id %d: %w", article.ID, err)
 	} else {
 		articleResponse.Value = -1
@@ -135,6 +136,7 @@ func (as *ArticleService) GetArticleHistory(userID uint, filters *dto.ArticleHis
 		Preload("Feedbacks", "user_id = ?", userID)
 
 	if err := query.Count(&total).Error; err != nil {
+		utils.SugarLog.Errorf("failed to count articles: %s", err)
 		return nil, 0, fmt.Errorf("failed to count articles: %w", err)
 	}
 
@@ -216,6 +218,7 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 
 	// Count total results
 	if err := query.Count(&total).Error; err != nil {
+		utils.SugarLog.Errorf("failed to count articles: %s", err)
 		return nil, 0, fmt.Errorf("failed to count articles: %w", err)
 	}
 
@@ -224,6 +227,7 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 		Limit(int(filters.Limit)).
 		Offset(int(filters.Offset)).
 		Find(&articles).Error; err != nil {
+		utils.SugarLog.Errorf("failed to get articles: %s", err)
 		return nil, 0, fmt.Errorf("failed to get articles: %w", err)
 	}
 
@@ -244,6 +248,7 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 		if err := as.Db.Model(&models.Feedback{}).
 			Where("user_id = ? AND news_id IN ?", userID, articleIDs).
 			Find(&feedbacks).Error; err != nil {
+			utils.SugarLog.Errorf("failed to fetch feedbacks: %s", err)
 			return nil, 0, fmt.Errorf("failed to fetch feedbacks: %w", err)
 		}
 
@@ -303,6 +308,7 @@ func (as *ArticleService) GetCountArticles(filters *dto.ArticleFilters) (int64, 
 
 	// Count total results
 	if err := query.Count(&total).Error; err != nil {
+		utils.SugarLog.Errorf("failed to count articles: %s", err)
 		return 0, fmt.Errorf("failed to count articles: %w", err)
 	}
 
@@ -312,10 +318,10 @@ func (as *ArticleService) GetCountArticles(filters *dto.ArticleFilters) (int64, 
 func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, userID uint) (*dto.ArticleResponse, error) {
 	var article models.Article
 	if err := as.Db.First(&article, id).Error; err != nil {
-		log.Printf("failed to get article: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return nil, dto.NewNotFound(fmt.Sprintf("article with id %d not found", id))
 		}
+		utils.SugarLog.Errorf("failed to get article: %s", err)
 		return nil, fmt.Errorf("failed to get article: %w", err)
 	}
 
@@ -337,12 +343,12 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 	}
 
 	if err := as.Db.Model(&article).Updates(updates).Error; err != nil {
-		log.Printf("failed to update article: %s", err)
+		utils.SugarLog.Errorf("failed to update article: %s", err)
 		return nil, fmt.Errorf("failed to update article: %w", err)
 	}
 
 	if err := as.Db.First(&article, id).Error; err != nil {
-		log.Printf("failed to reload updated article: %s", err)
+		utils.SugarLog.Errorf("failed to reload updated article: %s", err)
 		return nil, fmt.Errorf("failed to reload updated article: %w", err)
 	}
 
@@ -350,7 +356,7 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 
 	articleBytes, err := json.Marshal(articleAggregate)
 	if err != nil {
-		log.Printf("failed to marshal article aggregate: %s", err)
+		utils.SugarLog.Errorf("failed to marshal article aggregate: %s", err)
 		return nil, err
 	}
 
@@ -363,7 +369,7 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 	_, _, err = as.producer.SendMessage(msg)
 
 	if err != nil {
-		log.Printf("failed to publish article to kafka: %s", err)
+		utils.SugarLog.Errorf("failed to publish article to kafka: %s", err)
 		return nil, fmt.Errorf("failed to publish article to kafka: %w", err)
 	}
 
@@ -374,7 +380,7 @@ func (as *ArticleService) UpdateArticle(id uint, req *dto.ArticleUpdateRequest, 
 func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
 	var article models.Article
 	if err := as.Db.First(&article, id).Error; err != nil {
-		log.Printf("failed to get article: %s", err)
+		utils.SugarLog.Errorf("failed to get article: %s", err)
 		if err == gorm.ErrRecordNotFound {
 			return dto.NewNotFound(fmt.Sprintf("article with id %d not found", id))
 		}
@@ -382,7 +388,7 @@ func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
 	}
 
 	if err := as.Db.Delete(&article).Error; err != nil {
-		log.Printf("failed to delete article: %s", err)
+		utils.SugarLog.Errorf("failed to delete article: %s", err)
 		return fmt.Errorf("failed to delete article: %w", err)
 	}
 
@@ -390,7 +396,7 @@ func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
 
 	articleBytes, err := json.Marshal(articleAggregate)
 	if err != nil {
-		log.Printf("failed to marshal article aggregate: %s", err)
+		utils.SugarLog.Errorf("failed to marshal article aggregate: %s", err)
 		return err
 	}
 
@@ -403,7 +409,7 @@ func (as *ArticleService) DeleteArticle(id uint, userID uint) error {
 	_, _, err = as.producer.SendMessage(msg)
 
 	if err != nil {
-		log.Printf("failed to publish article to kafka: %s", err)
+		utils.SugarLog.Errorf("failed to publish article to kafka: %s", err)
 		return fmt.Errorf("failed to publish article to kafka: %w", err)
 	}
 
@@ -415,7 +421,7 @@ func (as *ArticleService) GetCategories() ([]string, error) {
 	if err := as.Db.Model(&models.Article{}).
 		Distinct("category").
 		Pluck("category", &categories).Error; err != nil {
-		log.Printf("failed to get categories: %s", err)
+		utils.SugarLog.Errorf("failed to get categories: %s", err)
 		return nil, fmt.Errorf("failed to get categories: %w", err)
 	}
 	return categories, nil
@@ -430,7 +436,7 @@ func (as *ArticleService) GetSubcategories(category string) ([]string, error) {
 	}
 
 	if err := query.Pluck("subcategory", &subcategories).Error; err != nil {
-		log.Printf("failed to get subcategories: %s", err)
+		utils.SugarLog.Errorf("failed to get subcategories: %s", err)
 		return nil, fmt.Errorf("failed to get subcategories: %w", err)
 	}
 
@@ -444,11 +450,11 @@ func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) 
 
 	var articles []models.Article
 	if err := as.Db.Where("published_at BETWEEN ? AND ?", beginDate, endDate).Find(&articles).Error; err != nil {
-		log.Printf("failed to get articles for ingestion: %s", err)
+		utils.SugarLog.Errorf("failed to get articles for ingestion: %s", err)
 		return 0, fmt.Errorf("failed to get articles for ingestion: %w", err)
 	}
 	if len(articles) == 0 {
-		log.Printf("no articles found for ingestion between %s and %s", beginDate, endDate)
+		utils.SugarLog.Infof("no articles found for ingestion between %s and %s", beginDate, endDate)
 		return 0, nil
 	}
 
@@ -459,7 +465,7 @@ func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) 
 		articleAggregate := converters.ArticleModelToArticleAggregate(&article, true)
 		articleBytes, err := json.Marshal(articleAggregate)
 		if err != nil {
-			log.Printf("failed to marshal article aggregate: %s", err)
+			utils.SugarLog.Errorf("failed to marshal article aggregate: %s", err)
 			failed = append(failed, article.ID)
 			continue
 		}
@@ -470,7 +476,7 @@ func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) 
 		}
 		_, _, err = as.producer.SendMessage(msg)
 		if err != nil {
-			log.Printf("failed to publish article to kafka: %s", err)
+			utils.SugarLog.Errorf("failed to publish article to kafka: %s", err)
 			failed = append(failed, article.ID)
 			continue
 		}
@@ -478,9 +484,9 @@ func (as *ArticleService) TriggerArticleIngestion(beginDate, endDate time.Time) 
 	}
 
 	if len(failed) > 0 {
-		log.Printf("failed to ingest articles with IDs: %v", failed)
+		utils.SugarLog.Errorf("failed to ingest articles with IDs: %v", failed)
 		for _, id := range failed {
-			log.Printf(" - %d", id)
+			utils.SugarLog.Errorf(" - %d", id)
 		}
 	}
 

@@ -22,6 +22,7 @@ Feel free to open issues if you see anything relevant that could be added.
     - [Secrets Rollout](#secrets-rollout)
 - Models
     - [TF-IDF / SVD](docs/model/tf_idf.md#tf-idf)
+    - [SBERT](docs/model/sbert.md#sbert)
 - [Development](#dev)
     - [CI/CD](#cicd)
     - [Commits](#commits)

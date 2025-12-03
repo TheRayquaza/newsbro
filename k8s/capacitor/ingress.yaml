@@ -13,7 +13,7 @@ spec:
   tls:
     - hosts:
         - capacitor.internal.newsbro.cc
-      secretName: capacitor-tls
+      secretName: newsbro-wildcard-tls
 
   rules:
     - host: capacitor.internal.newsbro.cc
@@ -23,6 +23,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: capacitor-service
+                name: capacitor-next
                 port:
                   number: 80

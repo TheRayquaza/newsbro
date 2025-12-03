@@ -1,5 +1,3 @@
-# NGINX Ingress resource for the 'repo-feed' service, 
-# consolidating all path-based routing and applying rate limiting.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

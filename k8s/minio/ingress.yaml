@@ -7,13 +7,14 @@ metadata:
     app: minio
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
+    nginx.ingress.kubernetes.io/proxy-body-size: "5G"
 spec:
   ingressClassName: private
 
   tls:
     - hosts:
         - minio.internal.newsbro.cc
-      secretName: minio-tls
+      secretName: newsbro-wildcard-tls
 
   rules:
     - host: minio.internal.newsbro.cc
@@ -23,6 +24,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: minio
+                name: minio-new-console
                 port:
                   number: 9001

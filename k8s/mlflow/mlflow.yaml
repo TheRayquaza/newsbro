@@ -16,7 +16,7 @@ spec:
   values:
     log:
       level: info
-      enabled: true
+      enabled: false
 
     ingress:
       enabled: false
@@ -29,6 +29,9 @@ spec:
     extraVolumeMounts:
       - name: mlflow-volume
         mountPath: /tmp
+      - name: mlflow-volume
+        mountPath: /mlflow/mlruns
+        subPath: mlruns
 
     service:
       name: http
@@ -42,14 +45,15 @@ spec:
       type: RollingUpdate
 
     extraArgs:
-      workers: "4"
+      workers: "6"
+      gunicorn-opts: "--timeout 300 --graceful-timeout 300 --log-level info"
 
     resources:
       limits:
-        cpu: 500m
+        cpu: "1"
         memory: 2Gi
       requests:
-        cpu: 200m
+        cpu: 500m
         memory: 1Gi
 
     telemetry:
@@ -65,7 +69,7 @@ spec:
             name: cpu
             target:
               type: Utilization
-              averageUtilization: 70
+              averageUtilization: 90
 
     artifactRoot:
       proxiedArtifactStorage: true
@@ -107,6 +111,9 @@ spec:
       MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: "true"  # Enable system metrics logging
       MLFLOW_SYSTEM_METRICS_SAMPLING_INTERVAL: "1.0"  # System metrics sampling interval
 
+    extraFlags:
+      - serveArtifacts
+
     replicaCount: 1
 
     livenessProbe:
@@ -126,16 +133,6 @@ spec:
       create: true
       automount: true
 
-    serviceMonitor:
-      labels:
-        release: prometheus
-      enabled: false
-      timeout: 10s
-      interval: 30s
-      namespace: monitoring
-      telemetryPath: /metrics
-      useServicePort: false
-
     securityContext:
       runAsUser: 1000
       runAsNonRoot: true
@@ -147,16 +144,3 @@ spec:
       runAsUser: 1000
       runAsGroup: 3000
       fsGroupChangePolicy: OnRootMismatch
-
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: Deployment
-              version: v1
-              name: mlflow
-            patch: |
-              - op: replace
-                path: /spec/template/spec/containers/0/command
-                value:
-                  - /mlflow/.venv/bin/mlflow

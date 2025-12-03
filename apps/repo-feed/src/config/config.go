@@ -18,10 +18,14 @@ type Config struct {
 	LoginRedirectURL string
 
 	// Redis
-	RedisSentinels  []string
-	RedisMasterName string
-	RedisPassword   string
-	RedisDB         int
+	RedisSentinels   []string
+	RedisMasterName  string
+	RedisPassword    string
+	RedisDB          int
+	RedisScoreKey    string
+	RedisFeedbackKey string
+	RedisFeedKey     string
+	RedisArticleKey  string
 
 	// Kafka
 	KafkaBrokers               []string
@@ -34,6 +38,8 @@ type Config struct {
 	DefaultModel       string
 	Models             []string
 	FeedbackExpiration time.Duration
+	ArticleExpiration  time.Duration
+	ScoreExpiration    time.Duration
 
 	// Feed Rescoring
 	FeedRescoring struct {
@@ -73,6 +79,26 @@ func Load() *Config {
 		return time.Duration(seconds) * time.Second
 	}()
 
+	articleExpiration := func() time.Duration {
+		expStr := getEnv("ARTICLE_EXPIRATION_SECONDS", "2592000") // Default 30 days
+		seconds, err := strconv.Atoi(expStr)
+		if err != nil {
+			fmt.Printf("Invalid ARTICLE_EXPIRATION_SECONDS='%s', using 2592000\n", expStr)
+			seconds = 2592000
+		}
+		return time.Duration(seconds) * time.Second
+	}()
+
+	scoreExpiration := func() time.Duration {
+		expStr := getEnv("SCORE_EXPIRATION_SECONDS", "2592000") // Default 30 days
+		seconds, err := strconv.Atoi(expStr)
+		if err != nil {
+			fmt.Printf("Invalid SCORE_EXPIRATION_SECONDS='%s', using 2592000\n", expStr)
+			seconds = 2592000
+		}
+		return time.Duration(seconds) * time.Second
+	}()
+
 	// --- Feed Rescoring ---
 	feedRescoring := struct {
 		Enabled           bool
@@ -99,10 +125,14 @@ func Load() *Config {
 		FrontendOrigin:   getEnv("FRONTEND_ORIGIN", "https://app.newsbro.cc"),
 		LoginRedirectURL: getEnv("LOGIN_REDIRECT_URL", "http://localhost:3000/auth/callback"),
 
-		RedisSentinels:  redisSentinels,
-		RedisMasterName: getEnv("REDIS_MASTER_NAME", "mymaster"),
-		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
-		RedisDB:         redisDB,
+		RedisSentinels:   redisSentinels,
+		RedisMasterName:  getEnv("REDIS_MASTER_NAME", "mymaster"),
+		RedisPassword:    getEnv("REDIS_PASSWORD", ""),
+		RedisDB:          redisDB,
+		RedisScoreKey:    getEnv("REDIS_SCORE_KEY", "score"),
+		RedisFeedbackKey: getEnv("REDIS_FEEDBACK_KEY", "feedback"),
+		RedisFeedKey:     getEnv("REDIS_FEED_KEY", "feed"),
+		RedisArticleKey:  getEnv("REDIS_ARTICLE_KEY", "article"),
 
 		KafkaBrokers:               kafkaBrokers,
 		KafkaInferenceCommandTopic: getEnv("KAFKA_INFERENCE_COMMAND_TOPIC", "inference-commands"),
@@ -113,6 +143,8 @@ func Load() *Config {
 		DefaultModel:       getEnv("DEFAULT_MODEL", "tfidf"),
 		Models:             splitAndTrim(getEnv("AVAILABLE_MODELS", "tfidf,sbert"), ","),
 		FeedbackExpiration: feedbackExpiration,
+		ArticleExpiration:  articleExpiration,
+		ScoreExpiration:    scoreExpiration,
 
 		FeedRescoring: feedRescoring,
 

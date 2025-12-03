@@ -1,8 +1,8 @@
 import abc
 import json
 import logging
-import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 from threading import Event, Lock, Thread
 from typing import Any, List
 
@@ -11,17 +11,17 @@ from kafka import KafkaConsumer
 
 
 class InferenceConsumerConfig(pydantic.BaseModel):
-    kafka_bootstrap_servers: str = os.getenv(
-        "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
-    )
-    kafka_consumer_topic: str = os.getenv("KAFKA_CONSUMER_TOPIC", "")
+    kafka_bootstrap_servers: str
+    kafka_consumer_topic: str
     auto_offset_reset: str = "earliest"
-    kafka_consumer_group: str = os.getenv(
-        "KAFKA_CONSUMER_GROUP", "inference-consumer-group"
-    )
+    kafka_consumer_group: str
     auto_commit: bool = True
-    batch_size: int = int(os.getenv("KAFKA_BATCH_SIZE", "50"))
-    batch_interval: int = int(os.getenv("KAFKA_BATCH_INTERVAL", "10"))
+    batch_size: int
+    batch_interval: int
+    session_timeout_ms: int = 60000
+    heartbeat_interval_ms: int = 10000
+    max_poll_interval_ms: int = 300000
+    thread_pool_size: int
 
 
 class InferenceConsumer(abc.ABC):
@@ -34,6 +34,7 @@ class InferenceConsumer(abc.ABC):
         **kwargs,
     ):
         self.logger = logger
+        self.thread: None | Thread = None
         self.dict_to_msg = dict_to_msg
         self.consumer = KafkaConsumer(
             consumer_config.kafka_consumer_topic,
@@ -43,10 +44,14 @@ class InferenceConsumer(abc.ABC):
             group_id=consumer_config.kafka_consumer_group,
             value_deserializer=lambda x: json.loads(x.decode("utf-8")),
             auto_commit_interval_ms=5000,
-            session_timeout_ms=30000,
-            heartbeat_interval_ms=10000,
+            session_timeout_ms=consumer_config.session_timeout_ms,
+            heartbeat_interval_ms=consumer_config.heartbeat_interval_ms,
+            max_poll_interval_ms=consumer_config.max_poll_interval_ms,
         )
         self.consumer_config = consumer_config
+        self.thread_pool = ThreadPoolExecutor(
+            max_workers=consumer_config.thread_pool_size
+        )
         self.batch: List[Any] = []
         self.batch_lock = Lock()
         self.last_process_time = time.time()
@@ -54,7 +59,18 @@ class InferenceConsumer(abc.ABC):
 
     def health(self) -> bool:
         try:
-            return self.consumer._client.ready()
+
+            if self.consumer is None:
+                return False
+
+            if self.consumer._closed:
+                return False
+
+            if self.thread_pool is None:
+                return False
+
+            return True
+
         except Exception:
             return False
 
@@ -84,7 +100,7 @@ class InferenceConsumer(abc.ABC):
 
         try:
             self.logger.info(f"Processing batch of {len(batch_to_process)} messages")
-            Thread(target=self.process, args=(batch_to_process,), daemon=True).start()
+            self.thread_pool.submit(self.process, batch_to_process)
         except Exception as e:
             self.logger.error(f"Error launching process thread: {e}", exc_info=True)
 
@@ -125,15 +141,14 @@ class InferenceConsumer(abc.ABC):
                     self.logger.info("Processing remaining batch on shutdown")
                     self._process_batch()
 
-    def run(self) -> Thread:
+    def run(self) -> None:
         """Start the consumer thread."""
         self.logger.info("Starting consumer thread")
-        thread = Thread(target=self.run_impl, daemon=True)
-        thread.start()
-        return thread
+        self.thread_pool.submit(self.run_impl)
 
     def shutdown(self) -> None:
         """Gracefully shutdown the consumer."""
         self.logger.info("Shutting down consumer")
         self.shutdown_event.set()
         self.consumer.close()
+        self.thread_pool.shutdown(wait=True)

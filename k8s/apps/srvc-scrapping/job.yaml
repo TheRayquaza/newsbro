@@ -7,6 +7,9 @@ metadata:
   labels:
     app: srvc-scrapping
     type: backends
+    tags.datadoghq.com/env: prod
+    tags.datadoghq.com/service: srvc-scrapping
+    tags.datadoghq.com/version: v1.3.1
 spec:
   # 9 AM and 6 PM every day
   schedule: "0 9,18 * * *"
@@ -16,14 +19,25 @@ spec:
         metadata:
           labels:
             app: srvc-scrapping
+            monitoring: "enabled"
+            tags.datadoghq.com/env: prod
+            tags.datadoghq.com/service: srvc-scrapping
+            tags.datadoghq.com/version: v1.3.1
         spec:
           imagePullSecrets:
             - name: pull-secret
+          volumes:
+            - name: apmsocketpath
+              hostPath:
+                path: /var/run/datadog/
           restartPolicy: OnFailure
           containers:
             - name: srvc-scrapping
-              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.2.3
+              image: ghcr.io/therayquaza/newsbro/srvc-scrapping:srvc-scrapping-v1.3.1
               imagePullPolicy: IfNotPresent
+              volumeMounts:
+                - name: apmsocketpath
+                  mountPath: /var/run/datadog
               envFrom:
                 - configMapRef:
                     name: srvc-scrapping-config
@@ -33,6 +47,27 @@ spec:
                     name: postgres-config
                 - secretRef:
                     name: srvc-scrapping-secrets
+              env:
+                - name: DD_ENV
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.labels['tags.datadoghq.com/env']
+                - name: DD_SERVICE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.labels['tags.datadoghq.com/service']
+                - name: DD_VERSION
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.labels['tags.datadoghq.com/version']
+                - name: DD_PROFILING_ENABLED
+                  value: "true"
+                - name: DD_DATA_STREAMS_ENABLED
+                  value: "true"
+                - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+                  value: "true"
+                - name: DD_APPSEC_ENABLED
+                  value: "true"
               resources:
                 requests:
                   memory: "512Mi"
