@@ -26,6 +26,14 @@ spec:
     spec:
       imagePullSecrets:
         - name: pull-secret
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1013
+        runAsGroup: 2013
+        fsGroup: 3013
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: srvc-inference-sbert
           image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-sbert-v1.0.4
@@ -33,6 +41,11 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           envFrom:
             - configMapRef:
                 name: srvc-inference-sbert-config

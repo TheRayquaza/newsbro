@@ -1,0 +1,31 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: discord
+  namespace: flux-system
+spec:
+  type: discord
+  secretRef:
+    name: discord-webhook-alert
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: discord-webhook-alert
+  namespace: flux-system
+spec:
+  refreshInterval: 10m
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault-backend
+  target:
+    name: discord-webhook-alert
+    creationPolicy: Owner
+    template:
+      type: Opaque
+      data:
+        address: "{{ .webhook_url }}"
+  dataFrom:
+    - extract:
+        key: discord/flux

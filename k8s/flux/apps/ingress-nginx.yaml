@@ -14,3 +14,13 @@ spec:
     namespace: flux-system
   dependsOn:
   - name: metallb
+  - name: cert-manager
+  healthChecks:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: ingress-nginx-private-controller
+    namespace: ingress-nginx
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: ingress-nginx-public-controller
+    namespace: ingress-nginx

@@ -11,15 +11,24 @@ spec:
   chart:
     spec:
       chart: strimzi-kafka-operator
-      version: 0.43.0
+      version: 0.49.0
       sourceRef:
         kind: HelmRepository
         name: strimzi
         namespace: kafka
+  driftDetection:
+    mode: enabled
   install:
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
     remediation:
       retries: 3
   upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
     remediation:
       retries: 3
   values:
@@ -32,6 +41,21 @@ spec:
       requests:
         memory: 384Mi
         cpu: 200m
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1006
+      fsGroup: 2006
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
+    podSecurityContext:
+      fsGroup: 2006
+      runAsUser: 1006
+      runAsGroup: 3006
+      fsGroupChangePolicy: OnRootMismatch
     podAnnotations:
       ad.datadoghq.com/strimzi-cluster-operator.checks: |
         {

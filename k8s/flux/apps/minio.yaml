@@ -3,7 +3,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: minio
-  namespace: minio
+  namespace: minio # should be moved to flux-system
 spec:
   interval: 10m
   path: ./k8s/minio
@@ -12,3 +12,18 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  dependsOn:
+  - name: external-secrets
+  healthChecks:
+  - apiVersion: apps/v1
+    kind: StatefulSet
+    name: minio-new
+    namespace: minio
+  - apiVersion: v1
+    kind: Service
+    name: minio-new
+    namespace: minio
+  - apiVersion: v1
+    kind: Service
+    name: minio-new-console
+    namespace: minio

@@ -10,7 +10,6 @@ metadata:
     tags.datadoghq.com/service: repo-account
     tags.datadoghq.com/version: v1.4.1
 spec:
-  # replicas: 1 # managed by hpa
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -28,22 +27,42 @@ spec:
         tags.datadoghq.com/service: repo-account
         tags.datadoghq.com/version: v1.4.1
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1010
+        runAsGroup: 2010
+        fsGroup: 3010
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+
       imagePullSecrets:
         - name: pull-secret
+
       volumes:
         - hostPath:
             path: /var/run/datadog/
           name: apmsocketpath
+
       containers:
         - name: repo-account
           image: ghcr.io/therayquaza/newsbro/repo-account:repo-account-v1.4.1
           imagePullPolicy: IfNotPresent
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
           volumeMounts:
             - name: apmsocketpath
               mountPath: /var/run/datadog
+
           ports:
             - containerPort: 8080
               name: http
+
           envFrom:
             - configMapRef:
                 name: repo-account-config
@@ -55,6 +74,7 @@ spec:
                 name: repo-account-secrets
             - secretRef:
                 name: oidc-secrets
+
           env:
             - name: DD_ENV
               valueFrom:
@@ -76,6 +96,7 @@ spec:
               value: "true"
             - name: DD_APPSEC_ENABLED
               value: "true"
+
           resources:
             requests:
               memory: "256Mi"
@@ -83,12 +104,14 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "250m"
+
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10
+
           readinessProbe:
             httpGet:
               path: /ready

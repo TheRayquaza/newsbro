@@ -12,3 +12,10 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  dependsOn:
+  - name: external-secrets
+  healthChecks:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: postgres-cloudnative-pg
+    namespace: postgres

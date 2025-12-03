@@ -13,6 +13,17 @@ spec:
         kind: HelmRepository
         name: helm-repo
         namespace: ingress-nginx
+  driftDetection:
+    mode: enabled
+  install:
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
+  upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
   values:
     controller:
       watchIngressWithoutClass: true
@@ -39,3 +50,42 @@ spec:
       hostNetwork: false
       replicaCount: 2
       logLevel: info
+
+      podSecurityContext:
+        fsGroup: 1004
+        seccompProfile:
+          type: RuntimeDefault
+        fsGroupChangePolicy: Always
+
+      containerSecurityContext:
+        runAsUser: 1004
+        runAsGroup: 1004
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        privileged: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+        seccompProfile:
+          type: RuntimeDefault
+
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+              app.kubernetes.io/instance: ingress-nginx-public
+              app.kubernetes.io/component: controller
+      podLabels:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/instance: ingress-nginx-public
+        app.kubernetes.io/component: controller
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 100m
+        limits:
+          memory: 512Mi
+          cpu: 500m
