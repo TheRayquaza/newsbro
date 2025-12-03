@@ -27,6 +27,7 @@ const FeedPage = () => {
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
+
     }, []);
 
     useEffect(() => {
@@ -35,7 +36,7 @@ const FeedPage = () => {
         const loadFeed = async () => {
             setLoading(true);
             try {
-                const feedData = await api.getFeed({ model: selectedModel });
+                const feedData = await api.getFeed({ model: selectedModel, limit: 20 });
                 setArticles(feedData.articles || []);
                 setCurrentIndex(0);
             } catch (error) {
@@ -45,7 +46,7 @@ const FeedPage = () => {
             }
         };
 
-        loadFeed();
+        loadFeed()
     }, [selectedModel]);
 
     useEffect(() => {
@@ -53,7 +54,6 @@ const FeedPage = () => {
             try {
                 const modelsData = await api.getFeedModels();
                 setModels(modelsData || []);
-                // Set first model as default if available
                 if (modelsData && modelsData.length > 0) {
                     setSelectedModel(modelsData[0]);
                 }
@@ -66,7 +66,6 @@ const FeedPage = () => {
     }, []);
 
 
-    // Keyboard navigation for desktop
     useEffect(() => {
         if (isMobile) return;
 
@@ -123,6 +122,11 @@ const FeedPage = () => {
             console.error('Error processing swipe:', error);
             setRemoving(false);
         }
+
+        if (articles.length == 1 && !removing) {
+            setLoading(true);
+            loadMoreArticles().then(() => setLoading(false));
+        }
     };
 
     const handlePrevious = () => {
@@ -131,13 +135,6 @@ const FeedPage = () => {
         }
     };
 
-    const handleNext = () => {
-        if (currentIndex < articles.length - 1 && !removing) {
-            setCurrentIndex(currentIndex + 1);
-        }
-    };
-
-    // Touch/Mouse handlers for mobile
     const handleStart = (clientX, clientY) => {
         if (removing || !isMobile) return;
         setIsDragging(true);
@@ -174,6 +171,29 @@ const FeedPage = () => {
     const handleModelChange = (e) => {
         const newModel = e.target.value;
         setSelectedModel(newModel);
+    };
+
+    const handleNext = async () => {
+        if (currentIndex < articles.length - 1 && !removing) {
+            setCurrentIndex(currentIndex + 1);
+        } else if (currentIndex >= articles.length - 1 && !removing) {
+            console.log('Loading more articles...');
+            await loadMoreArticles();
+        }
+    };
+
+    const loadMoreArticles = async () => {
+        if (removing || isLoading) return;
+
+        setLoading(true);
+        try {
+            const feedData = await api.getFeed({ model: selectedModel, limit: 20, offset: articles.length });
+            setArticles((prev) => [...prev, ...(feedData.articles || [])]);
+        } catch (error) {
+            console.error('Error loading more articles:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const rotation = isDragging && isMobile ? dragOffset.x / 20 : 0;
@@ -326,27 +346,6 @@ const FeedPage = () => {
                 {/* Desktop Carousel View */}
                 {!isMobile && (
                     <div className="relative">
-                        {/* Header */}
-                        <div className="mb-8 text-center">
-                            <div
-                                style={{
-                                    backgroundColor: 'var(--nav-hover-bg)',
-                                    backdropFilter: 'blur(16px)',
-                                    borderColor: 'var(--nav-border)',
-                                    borderWidth: '1px',
-                                    borderStyle: 'solid'
-                                }}
-                                className="inline-flex items-center gap-4 px-6 py-3 rounded-full"
-                            >
-                                <span
-                                    style={{ color: 'var(--nav-text)' }}
-                                    className="font-medium"
-                                >
-                                    {currentIndex + 1} / {articles.length}
-                                </span>
-                            </div>
-                        </div>
-
                         {/* Carousel Container */}
                         <div className="relative flex items-center gap-6">
                             {/* Left Arrow */}
