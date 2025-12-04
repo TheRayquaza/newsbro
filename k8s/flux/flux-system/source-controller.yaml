@@ -138,7 +138,6 @@ spec:
           name: tmp
       nodeSelector:
         kubernetes.io/os: linux
-      priorityClassName: system-cluster-critical
       securityContext:
         fsGroup: 1337
       serviceAccountName: source-controller

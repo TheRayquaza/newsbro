@@ -19,7 +19,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./k8s/flux
+  path: ./k8s/flux/flux-system
   prune: true
   sourceRef:
     kind: GitRepository

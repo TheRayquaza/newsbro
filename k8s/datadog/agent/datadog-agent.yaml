@@ -74,5 +74,3 @@ spec:
       enabled: true
     orchestratorExplorer:
       enabled: true
-  override:
-    priorityClassName: "critical-monitoring"

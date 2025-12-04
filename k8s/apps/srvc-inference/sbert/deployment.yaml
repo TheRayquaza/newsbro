@@ -43,7 +43,7 @@ spec:
               name: http
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false # for /tmp usage
             capabilities:
               drop: ["ALL"]
           envFrom:

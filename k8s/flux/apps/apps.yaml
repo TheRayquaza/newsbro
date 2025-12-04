@@ -14,11 +14,17 @@ spec:
     namespace: flux-system
   dependsOn:
   - name: ingress-nginx
+    namespace: flux-system
   - name: minio
+    namespace: minio
   - name: redis
+    namespace: flux-system
   - name: qdrant
+    namespace: flux-system
   - name: kafka
+    namespace: flux-system
   - name: mlflow
+    namespace: mlflow
   healthChecks:
   - apiVersion: apps/v1
     kind: Deployment

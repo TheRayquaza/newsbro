@@ -17,15 +17,6 @@ spec:
         namespace: metallb-system
   driftDetection:
     mode: enabled
-  install:
-    strategy:
-      name: RetryOnFailure
-      retryInterval: 5m0s
-  upgrade:
-    crds: CreateReplace
-    strategy:
-      name: RetryOnFailure
-      retryInterval: 5m0s
   values:
     controller:
       enabled: true
@@ -67,15 +58,6 @@ spec:
   interval: 10m0s
   driftDetection:
     mode: enabled
-  install:
-    strategy:
-      name: RetryOnFailure
-      retryInterval: 5m0s
-  upgrade:
-    crds: CreateReplace
-    strategy:
-      name: RetryOnFailure
-      retryInterval: 5m0s
   chart:
     spec:
       chart: crds

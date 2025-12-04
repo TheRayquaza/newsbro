@@ -18,15 +18,13 @@ spec:
   providerRef:
     name: datadog
   eventMetadata:
-    - key: summary
-      value: "FluxCD Info: {{ .Reason }} on {{ .Kind }}/{{ .Name }}"
-    - key: description
-      value: |
-        Resource: {{ .Kind }}/{{ .Name }}
-        Namespace: {{ .Namespace }}
-        Reason: {{ .Reason }}
-        Message: {{ .Message }}
-        Time: {{ .Timestamp }}
+    summary: "FluxCD Info: {{ .Reason }} on {{ .Kind }}/{{ .Name }}"
+    description: |
+      Resource: {{ .Kind }}/{{ .Name }}
+      Namespace: {{ .Namespace }}
+      Reason: {{ .Reason }}
+      Message: {{ .Message }}
+      Time: {{ .Timestamp }}
 ---
 apiVersion: notification.toolkit.fluxcd.io/v1beta3
 kind: Provider

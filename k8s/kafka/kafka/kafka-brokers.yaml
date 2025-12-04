@@ -29,14 +29,9 @@ spec:
       priorityClassName: critical-resilient
       securityContext:
         fsGroup: 3017
+        fsGroupChangePolicy: OnRootMismatch
         runAsUser: 1017
         runAsGroup: 2017
-        privileged: false
-        readOnlyRootFilesystem: false
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
         seccompProfile:
           type: RuntimeDefault
       topologySpreadConstraints:

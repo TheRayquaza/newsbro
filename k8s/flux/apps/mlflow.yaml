@@ -23,4 +23,6 @@ spec:
     namespace: mlflow
   dependsOn:
   - name: minio
+    namespace: minio
   - name: postgres
+    namespace: postgres

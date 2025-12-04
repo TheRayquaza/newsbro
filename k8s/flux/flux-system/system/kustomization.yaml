@@ -1,6 +1,4 @@
----
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
-- datadog-agent.yaml
-- vault-integration.yaml
+- priority-classes.yaml

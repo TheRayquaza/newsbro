@@ -20,14 +20,14 @@ spec:
       labels:
         app: port-front
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1009
-        runAsGroup: 2009
-        fsGroup: 3009
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
+      # securityContext:
+      #   runAsNonRoot: true
+      #   runAsUser: 1009
+      #   runAsGroup: 2009
+      #   fsGroup: 3009
+      #   fsGroupChangePolicy: OnRootMismatch
+      #   seccompProfile:
+      #     type: RuntimeDefault
 
       imagePullSecrets:
         - name: pull-secret
@@ -43,11 +43,11 @@ spec:
             - configMapRef:
                 name: port-front-config
 
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop: ["ALL"]
+          # securityContext:
+          #   allowPrivilegeEscalation: false
+          #   readOnlyRootFilesystem: false # for /var/cache/nginx/client_temp usage
+          #   capabilities:
+          #     drop: ["ALL"]
 
           resources:
             requests:
@@ -60,6 +60,6 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: 80
             initialDelaySeconds: 20
             periodSeconds: 10
