@@ -139,6 +139,11 @@ path "kv/data/datadog" {
   capabilities = ["read", "list"]
 }
 
+# Discord Flux secrets
+path "kv/data/discord/flux" {
+  capabilities = ["read", "list"]
+}
+
 # List capability for the secret mount
 path "secret/metadata/*" {
   capabilities = ["list"]

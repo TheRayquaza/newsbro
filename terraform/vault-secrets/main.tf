@@ -90,6 +90,19 @@ resource "vault_kv_secret_v2" "cloudflare" {
 }
 
 # ==========================================
+# Discord Flux Secrets
+# ==========================================
+
+resource "vault_kv_secret_v2" "discord_flux" {
+  mount = vault_mount.kv.path
+  name  = "discord/flux"
+
+  data_json = jsonencode({
+    webhook_url = var.discord_flux_webhook_url
+  })  
+}
+
+# ==========================================
 # MinIO Secrets
 # ==========================================
 
