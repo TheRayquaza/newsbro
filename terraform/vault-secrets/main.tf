@@ -151,12 +151,7 @@ resource "vault_kv_secret_v2" "capacitor" {
   name  = "capacitor"
 
   data_json = jsonencode({
-    token = var.capacitor_token
-    auth  = var.capacitor_auth
-    impersonate_sa_rules  = var.capacitor_impersonate_sa_rules
-    session_hash_key      = var.capacitor_session_hash_key
-    session_block_key     = var.capacitor_session_block_key
-    "registry.yaml"        = var.capacitor_registry_yaml
+    LICENSE_KEY = var.capacitor_token
   })
 }
 

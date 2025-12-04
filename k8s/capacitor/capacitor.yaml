@@ -1,14 +1,38 @@
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
 metadata:
   name: capacitor-next
   namespace: flux-system
 spec:
-  interval: 10m0s
-  path: "./self-host/yaml"
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: capacitor-next
-  targetNamespace: flux-system
+  interval: 10m
+  chart:
+    spec:
+      chart: capacitor-next
+      version: 2025-11.2
+      sourceRef:
+        kind: HelmRepository
+        name: capacitor-next
+        namespace: flux-system
+  install:
+    createNamespace: true
+  values:
+    # licenseKey: "{{ .Values.capacitor_token }}" from environment variable via vault
+    session:
+      hashKey: "base64:E3umY2bA87DmllnagrtcT6Uv2Ll6w1oQAY9DUgyUHCE="
+      blockKey: "base64:E3umY2bA87DmllnagrtcT6Uv2Ll6w1oQAY9DUgyUHCE="
+
+    auth:
+      method: noauth
+
+    authorization:
+      impersonateSaRules: "noauth=flux-system:capacitor-next-builtin-editor"
+    
+    clusters:
+    - id: in-cluster
+      name: In-cluster
+      apiServerURL: https://kubernetes.default.svc
+      certificateAuthorityFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      serviceAccount:
+        tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    existingSecrets:
+      - name: capacitor-next

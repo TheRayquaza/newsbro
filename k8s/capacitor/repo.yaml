@@ -1,11 +1,9 @@
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
+kind: HelmRepository
 metadata:
   name: capacitor-next
   namespace: flux-system
 spec:
   interval: 10m0s
-  url: https://github.com/gimlet-io/capacitor
-  ref:
-    branch: main
+  url: https://ghcr.io/gimlet-io/charts
