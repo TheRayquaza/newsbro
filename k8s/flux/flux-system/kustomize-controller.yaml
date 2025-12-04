@@ -34,7 +34,6 @@ spec:
       labels:
         app: kustomize-controller
     spec:
-      priorityClassName: system-cluster-critical
       containers:
       - args:
         - --events-addr=http://notification-controller.flux-system.svc.cluster.local./
