@@ -29,3 +29,31 @@ spec:
   dataFrom:
     - extract:
         key: discord/flux
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: discord-info
+  namespace: flux-system
+spec:
+  eventSeverity: info
+  eventSources:
+    - kind: HelmRelease
+      name: "*"
+      namespace: "*"
+    - kind: Kustomization
+      name: "*"
+      namespace: "*"
+    - kind: GitRepository
+      name: "*"
+      namespace: "*"
+  providerRef:
+    name: discord
+  eventMetadata:
+    summary: "FluxCD Info: {{ .Reason }} on {{ .Kind }}/{{ .Name }}"
+    description: |
+      Resource: {{ .Kind }}/{{ .Name }}
+      Namespace: {{ .Namespace }}
+      Reason: {{ .Reason }}
+      Message: {{ .Message }}
+      Time: {{ .Timestamp }}
