@@ -45,7 +45,7 @@ spec:
 
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false # for /var/cache/nginx/client_temp usage
             capabilities:
               drop: ["ALL"]
 
