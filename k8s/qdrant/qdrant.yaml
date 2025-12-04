@@ -118,8 +118,6 @@ spec:
       allowPrivilegeEscalation: false
       privileged: false
       readOnlyRootFilesystem: true
-      seccompProfile:
-        type: RuntimeDefault
       capabilities:
         drop: ["ALL"]
 
@@ -172,7 +170,7 @@ spec:
     serviceAccount:
       annotations: {}
 
-    priorityClassName: ""
+    priorityClassName: "critical-resilient"
 
     shareProcessNamespace: false
 

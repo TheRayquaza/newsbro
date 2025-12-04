@@ -31,11 +31,11 @@ spec:
     kind: Deployment
     name: redpanda-console
     namespace: kafka
-  - apiVersion: apps/v1
+  - apiVersion: v1
     kind: Service
     name: kafka-kafka-bootstrap
     namespace: kafka
-  - apiVersion: apps/v1
+  - apiVersion: v1
     kind: Service
     name: kafka-kafka-brokers
     namespace: kafka

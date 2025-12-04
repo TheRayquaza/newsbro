@@ -3,6 +3,7 @@ kind: PriorityClass
 metadata:
   name: critical-resilient
 value: 100000
+preemptionPolicy: PreemptLowerPriority
 globalDefault: false
 description: "Priority class for resilient components"
 ---
@@ -11,5 +12,6 @@ kind: PriorityClass
 metadata:
   name: critical-monitoring
 value: 50000
+preemptionPolicy: PreemptLowerPriority
 globalDefault: false
 description: "Priority class for monitoring components"

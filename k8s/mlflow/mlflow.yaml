@@ -147,11 +147,17 @@ spec:
     securityContext:
       runAsUser: 1003
       runAsNonRoot: true
+      privileged: false
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: RuntimeDefault
 
     podSecurityContext:
       fsGroup: 2003
       runAsUser: 1003
       runAsGroup: 3003
+      runAsNonRoot: true
       fsGroupChangePolicy: OnRootMismatch

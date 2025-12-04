@@ -101,9 +101,9 @@ spec:
       runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
-      fsGroup: 3000
+      fsGroup: 3003
 
-    priorityClassName: ""
+    priorityClassName: "critical-resilient"
 
     service:
       type: ClusterIP
@@ -122,7 +122,13 @@ spec:
 
     nodeSelector: {}
 
-    topologySpreadConstraints: []
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: cloudnative-pg
     tolerations: []
     affinity: {}
 

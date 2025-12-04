@@ -31,7 +31,7 @@ spec:
 
       commonLabels: {}
 
-      priorityClassName: ""
+      priorityClassName: "critical-resilient"
 
       rbac:
         create: true

@@ -47,19 +47,21 @@ spec:
         ports:
           http: 80
           https: 443
+      priorityClassName: "critical-resilient"
+
       hostNetwork: false
       replicaCount: 2
       logLevel: info
 
       podSecurityContext:
-        fsGroup: 1004
+        fsGroup: 3004
         seccompProfile:
           type: RuntimeDefault
-        fsGroupChangePolicy: Always
+        fsGroupChangePolicy: OnRootMismatch
 
       containerSecurityContext:
         runAsUser: 1004
-        runAsGroup: 1004
+        runAsGroup: 2004
         runAsNonRoot: true
         allowPrivilegeEscalation: false
         privileged: false
@@ -78,6 +80,7 @@ spec:
               app.kubernetes.io/name: ingress-nginx
               app.kubernetes.io/instance: ingress-nginx-public
               app.kubernetes.io/component: controller
+
       podLabels:
         app.kubernetes.io/name: ingress-nginx
         app.kubernetes.io/instance: ingress-nginx-public

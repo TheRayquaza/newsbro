@@ -22,18 +22,16 @@ spec:
     strategy:
       name: RetryOnFailure
       retryInterval: 5m0s
-    remediation:
-      retries: 3
   upgrade:
     crds: CreateReplace
     strategy:
       name: RetryOnFailure
       retryInterval: 5m0s
-    remediation:
-      retries: 3
   values:
     watchAnyNamespace: true
     tolerations: []
+    priorityClassName: "critical-resilient"
+
     resources:
       limits:
         memory: 384Mi
@@ -41,10 +39,11 @@ spec:
       requests:
         memory: 384Mi
         cpu: 200m
+
     securityContext:
       runAsNonRoot: true
       runAsUser: 1006
-      fsGroup: 2006
+      runAsGroup: 2006
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
@@ -52,9 +51,7 @@ spec:
       seccompProfile:
         type: RuntimeDefault
     podSecurityContext:
-      fsGroup: 2006
-      runAsUser: 1006
-      runAsGroup: 3006
+      fsGroup: 3006
       fsGroupChangePolicy: OnRootMismatch
     podAnnotations:
       ad.datadoghq.com/strimzi-cluster-operator.checks: |

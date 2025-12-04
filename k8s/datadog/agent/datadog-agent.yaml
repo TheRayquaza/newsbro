@@ -1,5 +1,5 @@
-kind: "DatadogAgent"
-apiVersion: "datadoghq.com/v2alpha1"
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
 metadata:
   name: "datadog-agent"
   namespace: "datadog"
@@ -74,3 +74,17 @@ spec:
       enabled: true
     orchestratorExplorer:
       enabled: true
+  override:
+    priorityClassName: "critical-monitoring"
+    securityContext:
+      fsGroup: 3015
+      runAsUser: 1015
+      runAsGroup: 2015
+      runAsNonRoot: true
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault

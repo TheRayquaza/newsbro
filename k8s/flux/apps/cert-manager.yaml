@@ -13,17 +13,17 @@ spec:
     name: flux-system
     namespace: flux-system
   dependsOn:
-    - name: external-secrets
+  - name: external-secrets
   healthChecks:
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cert-manager
-      namespace: cert-manager
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cert-manager-webhook
-      namespace: cert-manager
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: cert-manager-cainjector
-      namespace: cert-manager
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: cert-manager
+    namespace: cert-manager
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: cert-manager-webhook
+    namespace: cert-manager
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: cert-manager-cainjector
+    namespace: cert-manager

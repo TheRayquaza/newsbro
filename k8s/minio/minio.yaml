@@ -63,6 +63,8 @@ spec:
         memory: 1Gi
         cpu: 500m
 
+    priorityClassName: "critical-resilient"
+
     podSecurityContext:
       enabled: true
       sysctls: []

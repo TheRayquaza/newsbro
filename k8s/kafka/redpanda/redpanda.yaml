@@ -30,9 +30,20 @@ spec:
       retryInterval: 5m0s
   values:
     autoscaling:
-      enabled: true
-      minReplicas: 1
-      maxReplicas: 1
+      enabled: false
+
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: redpanda-console
+
+    podLabels:
+      app: redpanda-console
+
+    priorityClassName: "critical-monitoring"
 
     config:
       kafka:

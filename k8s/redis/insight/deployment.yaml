@@ -16,6 +16,7 @@ spec:
       labels:
         app: redisinsight
     spec:
+      priorityClassName: "critical-monitoring"
       securityContext:
         runAsUser: 1002
         runAsGroup: 2002
@@ -28,9 +29,6 @@ spec:
         image: redis/redisinsight:2.70.1
         imagePullPolicy: IfNotPresent
         securityContext:
-          runAsUser: 1002
-          runAsGroup: 2002
-          runAsNonRoot: true
           privileged: false
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: false

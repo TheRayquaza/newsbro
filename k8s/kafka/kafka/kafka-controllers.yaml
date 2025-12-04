@@ -20,3 +20,42 @@ spec:
     limits:
       memory: 2Gi
       cpu: 500m
+  template:
+    pod:
+      priorityClassName: critical-resilient
+      securityContext:
+        fsGroup: 3017
+        runAsUser: 1017
+        runAsGroup: 2017
+        privileged: false
+        readOnlyRootFilesystem: false
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              strimzi.io/cluster: kafka
+              strimzi.io/name: kafka-controller
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: strimzi.io/cluster
+                      operator: In
+                      values:
+                        - kafka
+                    - key: strimzi.io/name
+                      operator: In
+                      values:
+                        - kafka-broker
+                topologyKey: kubernetes.io/hostname
