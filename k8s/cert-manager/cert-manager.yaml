@@ -16,15 +16,8 @@ spec:
         namespace: cert-manager
   driftDetection:
     mode: enabled
-  install:
-    strategy:
-      name: RetryOnFailure
-      retryInterval: 5m0s
   upgrade:
     crds: CreateReplace
-    strategy:
-      name: RetryOnFailure
-      retryInterval: 5m0s
   values:
     global:
       imagePullSecrets: []
