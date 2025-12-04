@@ -57,7 +57,7 @@ spec:
               memory: "1Gi"
               cpu: "250m"
 
-          healthProbe:
+          readinessProbe:
             httpGet:
               path: /health
               port: 8080
