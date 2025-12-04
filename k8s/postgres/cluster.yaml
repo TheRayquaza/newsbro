@@ -11,6 +11,14 @@ spec:
   logLevel: info
   maxSyncReplicas: 0
   minSyncReplicas: 0
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        cnpg.io/cluster: postgres-cluster
+  priorityClassName: "critical-resilient"
   backup:
     barmanObjectStore:
       destinationPath: s3://postgres/

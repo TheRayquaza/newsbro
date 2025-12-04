@@ -85,6 +85,7 @@ spec:
       labels:
         app: notification-controller
     spec:
+      priorityClassName: system-cluster-critical
       containers:
       - args:
         - --watch-all-namespaces=true

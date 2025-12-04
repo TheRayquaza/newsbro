@@ -270,3 +270,9 @@ variable "datadog_app_key" {
   type      = string
   sensitive = true
 }
+
+# Discord Flux variables
+variable "discord_flux_webhook_url" {
+  type      = string
+  sensitive = true
+}

@@ -2,24 +2,15 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: qdrant
+  name: capacitor
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./k8s/qdrant
+  path: ./k8s/capacitor
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   dependsOn:
-  - name: metallb
-  healthChecks:
-  - apiVersion: apps/v1
-    kind: StatefulSet
-    name: qdrant
-    namespace: qdrant
-  - apiVersion: v1
-    kind: Service
-    name: qdrant
-    namespace: qdrant
+  - name: external-secrets

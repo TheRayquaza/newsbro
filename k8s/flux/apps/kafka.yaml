@@ -11,3 +11,31 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
+  dependsOn:
+  - name: cert-manager
+  healthChecks:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: kafka-entity-operator
+    namespace: kafka
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: kafka-kafka-exporter
+    namespace: kafka
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: strimzi-cluster-operator
+    namespace: kafka
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: redpanda-console
+    namespace: kafka
+  - apiVersion: v1
+    kind: Service
+    name: kafka-kafka-bootstrap
+    namespace: kafka
+  - apiVersion: v1
+    kind: Service
+    name: kafka-kafka-brokers
+    namespace: kafka

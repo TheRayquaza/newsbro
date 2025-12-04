@@ -10,7 +10,6 @@ metadata:
     tags.datadoghq.com/service: repo-feed
     tags.datadoghq.com/version: v1.2.2
 spec:
-  # replicas: 1 # managed by hpa
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -28,35 +27,56 @@ spec:
         tags.datadoghq.com/service: repo-feed
         tags.datadoghq.com/version: v1.2.2
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1012
+        runAsGroup: 2012
+        fsGroup: 3012
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+
       imagePullSecrets:
         - name: pull-secret
+
       volumes:
         - name: apmsocketpath
           hostPath:
             path: /var/run/datadog/
+
       containers:
         - name: repo-feed
           image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.2.2
           imagePullPolicy: IfNotPresent
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
           volumeMounts:
             - name: apmsocketpath
               mountPath: /var/run/datadog
+
           ports:
             - containerPort: 8080
               name: http
+
           envFrom:
             - configMapRef:
                 name: repo-feed-config
             - configMapRef:
-                name: redis-config # Redis master and sentinels
+                name: redis-config
             - configMapRef:
                 name: kafka-config
             - configMapRef:
                 name: oidc-config
             - secretRef:
-                name: repo-feed-secrets # Redis creds
+                name: repo-feed-secrets
             - secretRef:
-                name: oidc-secrets # JWT
+                name: oidc-secrets
+
           env:
             - name: DD_ENV
               valueFrom:
@@ -78,6 +98,7 @@ spec:
               value: "true"
             - name: DD_APPSEC_ENABLED
               value: "true"
+
           resources:
             requests:
               memory: "256Mi"
@@ -85,12 +106,14 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "250m"
+
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10
+
           readinessProbe:
             httpGet:
               path: /ready

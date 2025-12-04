@@ -16,10 +16,26 @@ spec:
       labels:
         app: redisinsight
     spec:
+      priorityClassName: "critical-monitoring"
+      securityContext:
+        runAsUser: 1002
+        runAsGroup: 2002
+        runAsNonRoot: true
+        fsGroup: 3002
+        supplementalGroups: []
+        fsGroupChangePolicy: "OnRootMismatch"
       containers:
       - name:  redisinsight
         image: redis/redisinsight:2.70.1
         imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop: ["ALL"]
         resources:
           requests:
             memory: "128Mi"

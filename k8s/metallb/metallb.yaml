@@ -15,18 +15,47 @@ spec:
         kind: HelmRepository
         name: metallb
         namespace: metallb-system
+  driftDetection:
+    mode: enabled
+  install:
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
+  upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
   values:
     controller:
+      enabled: true
       replicaCount: 1
       resources:
         requests:
           cpu: 100m
           memory: 128Mi
+      priorityClassName: "critical-resilient"
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
     speaker:
+      enabled: true
       resources:
         requests:
           cpu: 100m
           memory: 128Mi
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        capabilities:
+          drop:
+            - ALL
+          add:
+            - NET_ADMIN
+            - NET_RAW
+      priorityClassName: "system-node-critical"
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -36,6 +65,17 @@ metadata:
 spec:
   releaseName: metallb
   interval: 10m0s
+  driftDetection:
+    mode: enabled
+  install:
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
+  upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
   chart:
     spec:
       chart: crds

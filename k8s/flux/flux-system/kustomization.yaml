@@ -11,4 +11,6 @@ resources:
 - namespace.yaml
 - roles.yaml
 - source.yaml
+- alerts
+- system
 - ../apps

@@ -42,7 +42,11 @@ spec:
     securityContext:
       readOnlyRootFilesystem: true
       runAsNonRoot: true
-      runAsUser: 1000
+      runAsUser: 1019
+      runAsGroup: 2019
+      fsGroup: 3019
+
+    priorityClassName: "critical-resilient"
 
     resources:
       requests:

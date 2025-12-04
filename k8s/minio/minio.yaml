@@ -15,6 +15,17 @@ spec:
         kind: HelmRepository
         name: helm-repo
         namespace: minio
+  driftDetection:
+    mode: enabled
+  install:
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
+  upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
   values:
     # https://artifacthub.io/packages/helm/bitnami/minio?modal=values
     auth:
@@ -52,11 +63,26 @@ spec:
         memory: 1Gi
         cpu: 500m
 
-    securityContext:
+    priorityClassName: "critical-resilient"
+
+    podSecurityContext:
       enabled: true
-      runAsUser: 1001
-      runAsGroup: 1001
-      fsGroup: 1001
+      sysctls: []
+      fsGroup: 3005
+      fsGroupChangePolicy: "OnRootMismatch"
+
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1005
+      runAsGroup: 2005
+      runAsNonRoot: true
+      privileged: false
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: "RuntimeDefault"
 
     mode: distributed
 

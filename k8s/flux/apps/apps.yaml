@@ -12,3 +12,39 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  dependsOn:
+  - name: ingress-nginx
+  - name: minio
+  - name: redis
+  - name: qdrant
+  - name: kafka
+  - name: mlflow
+  healthChecks:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: port-front
+    namespace: apps
+  - apiVersion: apps/v1
+    kind: Deployment
+    namespace: apps
+    name: repo-account
+  - apiVersion: apps/v1
+    kind: Deployment
+    namespace: apps
+    name: repo-article
+  - apiVersion: apps/v1
+    kind: Deployment
+    namespace: apps
+    name: repo-feed
+  - apiVersion: batch/v1
+    kind: CronJob
+    namespace: apps
+    name: srvc-scrapping-job
+  - apiVersion: apps/v1
+    kind: Deployment
+    namespace: apps
+    name: srvc-inference-sbert
+  - apiVersion: apps/v1
+    kind: Deployment
+    namespace: apps
+    name: srvc-inference-tfidf

@@ -11,3 +11,13 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
+  healthChecks:
+  - apiVersion: apps/v1
+    kind: DaemonSet
+    name: metallb-speaker
+    namespace: metallb-system
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: metallb-controller
+    namespace: metallb-system

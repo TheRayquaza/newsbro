@@ -12,3 +12,15 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  healthChecks:
+  - apiVersion: apps/v1
+    kind: Deployment
+    name: mlflow
+    namespace: mlflow
+  - apiVersion: v1
+    kind: Service
+    name: mlflow
+    namespace: mlflow
+  dependsOn:
+  - name: minio
+  - name: postgres

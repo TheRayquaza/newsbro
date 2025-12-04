@@ -16,6 +16,17 @@ spec:
         kind: HelmRepository
         name: helm-repo
         namespace: postgres
+  driftDetection:
+    mode: enabled
+  install:
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
+  upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
   values:
     replicaCount: 1
 
@@ -77,8 +88,9 @@ spec:
     containerSecurityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
-      runAsUser: 10001
-      runAsGroup: 10001
+      runAsUser: 1002
+      privileged: false
+      runAsGroup: 2002
       seccompProfile:
         type: RuntimeDefault
       capabilities:
@@ -89,9 +101,9 @@ spec:
       runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
-      # fsGroup: 2000
+      fsGroup: 3003
 
-    priorityClassName: ""
+    priorityClassName: "critical-resilient"
 
     service:
       type: ClusterIP
@@ -110,7 +122,13 @@ spec:
 
     nodeSelector: {}
 
-    topologySpreadConstraints: []
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: cloudnative-pg
     tolerations: []
     affinity: {}
 

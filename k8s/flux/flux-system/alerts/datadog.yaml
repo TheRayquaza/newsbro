@@ -1,0 +1,61 @@
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: datadog-info
+  namespace: flux-system
+spec:
+  eventSeverity: info
+  eventSources:
+    - kind: HelmRelease
+      name: "*"
+      namespace: "*"
+    - kind: Kustomization
+      name: "*"
+      namespace: "*"
+    - kind: GitRepository
+      name: "*"
+      namespace: "*"
+  providerRef:
+    name: datadog
+  eventMetadata:
+    - key: summary
+      value: "FluxCD Info: {{ .Reason }} on {{ .Kind }}/{{ .Name }}"
+    - key: description
+      value: |
+        Resource: {{ .Kind }}/{{ .Name }}
+        Namespace: {{ .Namespace }}
+        Reason: {{ .Reason }}
+        Message: {{ .Message }}
+        Time: {{ .Timestamp }}
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: datadog
+  namespace: flux-system
+spec:
+  type: datadog
+  address: https://us5.datadoghq.com
+  secretRef:
+    name: datadog-secret
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: datadog-secret
+  namespace: flux-system
+spec:
+  refreshInterval: 10m
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault-backend
+  target:
+    name: datadog-secret
+    creationPolicy: Owner
+    template:
+      type: Opaque
+      data:
+        token: "{{ .api_key }}"
+  dataFrom:
+    - extract:
+        key: datadog

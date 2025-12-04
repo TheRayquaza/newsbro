@@ -1,5 +1,5 @@
-kind: "DatadogAgent"
-apiVersion: "datadoghq.com/v2alpha1"
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
 metadata:
   name: "datadog-agent"
   namespace: "datadog"
@@ -74,3 +74,5 @@ spec:
       enabled: true
     orchestratorExplorer:
       enabled: true
+  override:
+    priorityClassName: "critical-monitoring"

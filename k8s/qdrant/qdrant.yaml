@@ -15,6 +15,17 @@ spec:
         kind: HelmRepository
         name: helm-repo
         namespace: qdrant
+  driftDetection:
+    mode: enabled
+  install:
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
+  upgrade:
+    crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m0s
   values:
     replicaCount: 1
 
@@ -102,15 +113,19 @@ spec:
 
     containerSecurityContext:
       runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 2000
+      runAsUser: 1007
+      runAsGroup: 2007
       allowPrivilegeEscalation: false
       privileged: false
       readOnlyRootFilesystem: true
+      capabilities:
+        drop: ["ALL"]
 
     podSecurityContext:
-      fsGroup: 3000
-      fsGroupChangePolicy: Always
+      fsGroup: 3007
+      fsGroupChangePolicy: OnRootMismatch
+      seccompProfile:
+        type: RuntimeDefault
 
     lifecycle:
       preStop:
@@ -155,7 +170,7 @@ spec:
     serviceAccount:
       annotations: {}
 
-    priorityClassName: ""
+    priorityClassName: "critical-resilient"
 
     shareProcessNamespace: false
 
