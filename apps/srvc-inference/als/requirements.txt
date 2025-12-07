@@ -1,0 +1,20 @@
+# Core messaging, vector DB, redis
+kafka-python
+qdrant-client
+redis
+
+# ML stack (updated for Python 3.13)
+scikit-learn
+pandas
+numpy
+pyarrow
+
+# Environment & APIs
+python-dotenv
+fastapi
+uvicorn[standard]
+pydantic
+
+# Experiment tracking / AWS
+mlflow
+boto3
