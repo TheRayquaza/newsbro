@@ -46,23 +46,23 @@ spec:
       replicaCount: 2
       logLevel: info
 
-      podSecurityContext:
-        fsGroup: 3004
-        seccompProfile:
-          type: RuntimeDefault
-        fsGroupChangePolicy: OnRootMismatch
+      # podSecurityContext:
+      #   fsGroup: 3004
+      #   seccompProfile:
+      #     type: RuntimeDefault
+      #   fsGroupChangePolicy: OnRootMismatch
 
-      containerSecurityContext:
-        runAsUser: 1004
-        runAsGroup: 2004
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        privileged: false
-        readOnlyRootFilesystem: true
-        capabilities:
-          drop: ["ALL"]
-        seccompProfile:
-          type: RuntimeDefault
+      # containerSecurityContext:
+      #   runAsUser: 1004
+      #   runAsGroup: 2004
+      #   runAsNonRoot: true
+      #   allowPrivilegeEscalation: false
+      #   privileged: false
+      #   readOnlyRootFilesystem: true
+      #   capabilities:
+      #     drop: ["ALL"]
+      #   seccompProfile:
+      #     type: RuntimeDefault
 
       topologySpreadConstraints:
         - maxSkew: 1
