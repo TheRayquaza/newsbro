@@ -74,10 +74,6 @@ spec:
               app.kubernetes.io/instance: ingress-nginx-public
               app.kubernetes.io/component: controller
 
-      podLabels:
-        app.kubernetes.io/name: ingress-nginx
-        app.kubernetes.io/instance: ingress-nginx-public
-        app.kubernetes.io/component: controller
       resources:
         requests:
           memory: 256Mi
