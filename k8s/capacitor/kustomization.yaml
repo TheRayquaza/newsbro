@@ -6,3 +6,4 @@ resources:
   - service-account.yaml
   - secrets.yaml
   - ingress.yaml
+  - ghcr.yaml

@@ -1,0 +1,31 @@
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: ghcr-auth
+  namespace: flux-system
+spec:
+  refreshInterval: 10m
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault-backend
+  target:
+    name: ghcr-auth
+    creationPolicy: Owner
+    template:
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        labels:
+          reconcile.fluxcd.io/watch: Enabled
+      data:
+        .dockerconfigjson: |
+          {
+            "auths": {
+              "ghcr.io": {
+                "auth": "{{ .auth | toString }}"
+              }
+            }
+          }
+  dataFrom:
+    - extract:
+        key: docker/ghcr
