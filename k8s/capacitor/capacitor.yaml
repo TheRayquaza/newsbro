@@ -5,14 +5,10 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  chart:
-    spec:
-      chart: capacitor-next
-      version: 2025-11.2
-      sourceRef:
-        kind: OCIRepository
-        name: capacitor-next
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: capacitor-next
+    namespace: flux-system
   install:
     createNamespace: true
   values:
