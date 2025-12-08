@@ -538,21 +538,6 @@ const FeedPage = () => {
                 {/* Mobile Swipe View */}
                 {isMobile && (
                     <div className="flex flex-col items-center justify-center">
-                        <div
-                            style={{
-                                backgroundColor: 'var(--nav-hover-bg)',
-                                backdropFilter: 'blur(16px)'
-                            }}
-                            className="mb-6 px-4 py-2 rounded-full"
-                        >
-                            <span
-                                style={{ color: 'var(--nav-text)' }}
-                                className="font-medium text-sm"
-                            >
-                                {currentIndex + 1} / {articles.length}
-                            </span>
-                        </div>
-
                         <div className="relative w-full max-w-md h-[600px]">
                             <div
                                 ref={cardRef}

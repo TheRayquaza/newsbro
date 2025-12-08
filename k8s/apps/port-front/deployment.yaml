@@ -34,7 +34,7 @@ spec:
 
       containers:
         - name: port-front
-          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.6.1
+          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.6.2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
