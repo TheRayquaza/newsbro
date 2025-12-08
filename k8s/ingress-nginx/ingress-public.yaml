@@ -41,6 +41,8 @@ spec:
           http: 80
           https: 443
       priorityClassName: "critical-resilient"
+      networkPolicy:
+        enabled: true
 
       hostNetwork: false
       replicaCount: 2

@@ -13,6 +13,7 @@ resources:
   - pull-secrets.yaml
   - certificate.yaml
   - oidc-secrets.yaml
+  - service-account.yaml
 
 configMapGenerator:
   - name: redis-config

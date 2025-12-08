@@ -7,3 +7,4 @@ resources:
 - pvc.yaml
 - secrets.yaml
 - ingress.yaml
+- network.yaml

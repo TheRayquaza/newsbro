@@ -28,6 +28,8 @@ spec:
         tags.datadoghq.com/service: repo-article
         tags.datadoghq.com/version: v1.5.1
     spec:
+      serviceAccountName: apps
+
       securityContext:
         runAsNonRoot: true
         runAsUser: 1011

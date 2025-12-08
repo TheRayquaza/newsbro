@@ -42,10 +42,20 @@ spec:
     crds:
       enabled: true
       keep: true
+
     strategy: {}
+
+    webhook:
+      networkPolicy:
+        enabled: true
+
+    serviceAccount:
+      create: true
+      automountServiceAccountToken: true
 
     podDisruptionBudget:
       enabled: false
+
     featureGates: ""
 
     maxConcurrentChallenges: 60
@@ -87,8 +97,7 @@ spec:
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
-        drop:
-        - ALL
+        drop: ["ALL"]
       readOnlyRootFilesystem: true
 
     volumes: []
@@ -99,6 +108,7 @@ spec:
 
     tolerations: []
     topologySpreadConstraints: []
+
     livenessProbe:
       enabled: true
       initialDelaySeconds: 10
@@ -157,45 +167,23 @@ spec:
         pullPolicy: IfNotPresent
 
       rbac:
-        # annotations for the startup API Check job RBAC and PSP resources.
-        # +docs:property
         annotations:
           helm.sh/hook: post-install
           helm.sh/hook-weight: "-5"
           helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 
-      # Automounting API credentials for a particular pod.
-      # +docs:property
       # automountServiceAccountToken: true
 
       serviceAccount:
-        # Specifies whether a service account should be created.
         create: true
-
-        # The name of the service account to use.
-        # If not set and create is true, a name is generated using the fullname template.
-        # +docs:property
-        # name: ""
-
-        # Optional additional annotations to add to the Job's Service Account.
-        # +docs:property
         annotations:
           helm.sh/hook: post-install
           helm.sh/hook-weight: "-5"
           helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-
-        # Automount API credentials for a Service Account.
-        # +docs:property
         automountServiceAccountToken: true
 
-        # Optional additional labels to add to the startupapicheck's Service Account.
-        # +docs:property
-        # labels: {}
-
-      # Additional volumes to add to the cert-manager controller pod.
       volumes: []
 
-      # Additional volume mounts to add to the cert-manager controller container.
       volumeMounts: []
       enableServiceLinks: false
 

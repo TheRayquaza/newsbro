@@ -5,3 +5,4 @@ resources:
   - job.yaml
   - configmap.yaml
   - secrets.yaml
+  - network.yaml
