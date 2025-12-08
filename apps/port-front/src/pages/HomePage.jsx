@@ -318,7 +318,7 @@ const Home = () => {
   const isArticlesView = articles.length > 0;
 
   return (
-    <div style={{ padding: '2rem', marginLeft: '17%', marginRight: '17%' }}>
+    <div style={{ padding: '2rem', marginLeft: '10%', marginRight: '10%' }}>
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
