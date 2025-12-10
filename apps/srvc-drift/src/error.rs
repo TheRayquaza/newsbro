@@ -6,7 +6,7 @@ pub enum DriftError {
     Kafka(#[from] rdkafka::error::KafkaError),
 
     #[error("Database error: {0}")]
-    Database(#[from] sqlx::Error),
+    Database(#[from] diesel::result::Error),
 
     #[error("Redis error: {0}")]
     Redis(#[from] redis::RedisError),
@@ -28,6 +28,12 @@ pub enum DriftError {
 
     #[error("Service unavailable: {0}")]
     ServiceUnavailable(String),
+
+    #[error("Error: {0}")]
+    InvalidInput(String),
+
+    #[error("Embedding not found: {0}")]
+    EmbeddingNotFound(String),
 }
 
 pub type Result<T> = std::result::Result<T, DriftError>;

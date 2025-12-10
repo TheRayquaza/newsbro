@@ -39,16 +39,6 @@ impl DiscordReporter {
             0.0
         };
 
-        let avg_response_times: Vec<f64> = metrics
-            .iter()
-            .filter_map(|m| m.avg_response_time_ms)
-            .collect();
-        let avg_response_time = if !avg_response_times.is_empty() {
-            avg_response_times.iter().sum::<f64>() / avg_response_times.len() as f64
-        } else {
-            0.0
-        };
-
         let color = self.determine_color(like_ratio, drift_info.as_ref());
 
         let mut fields = vec![
@@ -70,11 +60,6 @@ impl DiscordReporter {
             json!({
                 "name": "📈 Like Ratio",
                 "value": format!("{:.2}%", like_ratio * 100.0),
-                "inline": true
-            }),
-            json!({
-                "name": "⚡ Avg Response Time",
-                "value": format!("{:.2}ms", avg_response_time),
                 "inline": true
             }),
         ];
@@ -127,9 +112,8 @@ impl DiscordReporter {
     }
 
     fn determine_color(&self, like_ratio: f64, drift: Option<&DriftReport>) -> u32 {
-        // Red, Yellow, Green color scheme
         if like_ratio < self.config.alert_thresholds.dislike_ratio_warning {
-            return 0xE74C3C; // Red
+            return 0xE74C3C;
         }
 
         if let Some(drift_info) = drift {

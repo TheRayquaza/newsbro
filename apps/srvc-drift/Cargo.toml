@@ -19,6 +19,8 @@ tower-http = { version = "0.5", features = ["trace"] }
 # Database
 sqlx = { version = "0.7", features = ["postgres", "runtime-tokio", "chrono", "uuid", "json"] }
 redis = { version = "0.24", features = ["tokio-comp", "connection-manager"] }
+diesel = { version = "2.1", features = ["postgres", "chrono", "serde_json", "r2d2"] }
+diesel-async = { version = "0.4", features = ["postgres", "deadpool"] }
 
 # Serialization
 serde = { version = "1", features = ["derive"] }
@@ -49,6 +51,7 @@ metrics-exporter-prometheus = "0.13"
 openssl-sys = "0.9.111"
 
 uuid = "1.19.0"
+qdrant-client = "1.16.0"
 
 [dev-dependencies]
 tokio-test = "0.4"

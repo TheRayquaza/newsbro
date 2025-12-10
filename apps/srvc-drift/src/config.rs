@@ -8,6 +8,7 @@ pub struct Config {
     pub database: DatabaseConfig,
     pub redis: Option<RedisConfig>,
     pub discord: DiscordConfig,
+    pub qdrant: QdrantConfig,
     pub drift: DriftConfig,
     pub server: ServerConfig,
     pub reporting: ReportingConfig,
@@ -47,6 +48,13 @@ pub struct DiscordConfig {
     #[serde(default = "default_discord_username")]
     pub username: String,
     pub alert_thresholds: AlertThresholds,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct QdrantConfig {
+    pub url: String,
+    pub collection_name: String,
+    pub api_key: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -143,8 +151,7 @@ impl Config {
         dotenvy::dotenv().ok();
 
         let config = config::Config::builder()
-            .add_source(config::File::with_name("config/default").required(false))
-            .add_source(config::File::with_name("config/production").required(false))
+            .add_source(config::File::with_name(".env").required(false))
             .add_source(config::Environment::with_prefix("DRIFT").separator("__"))
             .build()
             .context("Failed to build configuration")?;

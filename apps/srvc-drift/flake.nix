@@ -18,9 +18,11 @@
             cargo
             clippy
             rustfmt
+            rust-analyzer
             openssl_oqs
             openssl_3
             pkg-config
+            postgresql
           ];
         };
       }

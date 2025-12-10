@@ -4,15 +4,18 @@ mod error;
 mod health;
 mod kafka;
 mod reporting;
+mod schema;
 mod storage;
 
 use crate::config::Config;
 use crate::drift::calculator::DriftCalculator;
 use crate::health::{AppState, dependencies_handler, health_handler, ready_handler};
-use crate::kafka::consumer::KafkaConsumerManager;
+use crate::kafka::feedback_consumer::FeedbackConsumer;
+use crate::kafka::inference_consumer::InferenceConsumer;
 use crate::kafka::models::{FeedbackAggregate, InferenceCommand};
 use crate::reporting::discord::{AlertSeverity, DiscordReporter, DriftReport};
 use crate::storage::postgres::{DriftSnapshot, PostgresStorage};
+use crate::storage::qdrant::QdrantStorage;
 use crate::storage::redis::RedisCache;
 use axum::{Router, routing::get};
 use chrono::Utc;
@@ -53,41 +56,39 @@ async fn main() -> anyhow::Result<()> {
     // Initialize Discord reporter
     let discord = Arc::new(DiscordReporter::new(config.discord.clone()));
 
+    // Initialize Qdrant storage
+    let qdrant = QdrantStorage::new(&config.qdrant).await?;
+
     // Initialize Kafka consumers
-    let kafka_manager = KafkaConsumerManager::new(&config.kafka)?;
-    let (inference_consumer, feedback_consumer) = kafka_manager.split();
+    let inference_consumer = InferenceConsumer::new(&config.kafka)?;
+    let feedback_consumer = FeedbackConsumer::new(&config.kafka)?;
 
     // Create channels for communication
     let (inference_tx, inference_rx) = mpsc::channel::<InferenceCommand>(1000);
     let (feedback_tx, feedback_rx) = mpsc::channel::<FeedbackAggregate>(1000);
 
-    // Clone Arc'd values for tasks
-    let config_clone = config.clone();
-    let postgres_clone = postgres.clone();
-    let redis_clone = redis.clone();
-    let discord_clone = Arc::clone(&discord);
-
     // Spawn inference consumer task
     let inference_consumer_handle = tokio::spawn(async move {
-        let manager = KafkaConsumerManager {
-            inference_consumer,
-            feedback_consumer: feedback_consumer.clone(),
-        };
-        manager
-            .start_inference_consumer(inference_tx, config_clone.drift.embedding_dimension)
-            .await;
+        inference_consumer.start(inference_tx).await;
     });
 
     // Spawn feedback consumer task
     let feedback_consumer_handle = tokio::spawn(async move {
-        KafkaConsumerManager::start_feedback_consumer(feedback_consumer, feedback_tx).await;
+        feedback_consumer.start(feedback_tx).await;
     });
 
     // Spawn inference processor task
     let inference_postgres = postgres.clone();
     let inference_redis = redis.clone();
+    let inference_qdrant = qdrant.clone();
     let inference_processor_handle = tokio::spawn(async move {
-        process_inferences(inference_rx, inference_postgres, inference_redis).await;
+        process_inferences(
+            inference_rx,
+            inference_postgres,
+            inference_qdrant,
+            inference_redis,
+        )
+        .await;
     });
 
     // Spawn feedback processor task
@@ -172,21 +173,49 @@ async fn main() -> anyhow::Result<()> {
 async fn process_inferences(
     mut rx: mpsc::Receiver<InferenceCommand>,
     postgres: PostgresStorage,
+    qdrant: QdrantStorage,
     redis: Option<RedisCache>,
 ) {
     info!("Inference processor started");
 
     while let Some(inference) = rx.recv().await {
+        let article = inference.article.as_ref().map(|article| {
+            info!(
+                "Processing inference for user_id={}, article_id={}",
+                inference.user_id, article.id
+            );
+            article.clone()
+        });
+        if article.is_none() {
+            warn!(
+                "Inference missing article data for user_id={}, skipping",
+                inference.user_id
+            );
+            continue;
+        }
+        let article = article.unwrap();
+        // Retrieve from qdrant
+        let embedding = match qdrant.retrieve_embedding_by_id(article.id).await {
+            Ok(emb) => emb,
+            Err(e) => {
+                error!("Failed to retrieve embedding from Qdrant: {}", e);
+                continue;
+            }
+        }
+        .unwrap_or_else(|| {
+            warn!("No embedding found in Qdrant for article_id={}", article.id);
+            vec![]
+        });
         // Store in PostgreSQL
-        if let Err(e) = postgres.insert_inference(&inference).await {
+        if let Err(e) = postgres.insert_inference(&inference, &embedding).await {
             error!("Failed to insert inference: {}", e);
         }
 
         // Update Redis counters
-        if let Some(cache) = &redis {
-            if let Err(e) = cache.increment_inference_count().await {
-                error!("Failed to increment inference count: {}", e);
-            }
+        if let Some(cache) = &redis
+            && let Err(e) = cache.increment_inference_count().await
+        {
+            error!("Failed to increment inference count: {}", e);
         }
     }
 
@@ -202,10 +231,10 @@ async fn process_feedback(
 
     while let Some(feedback) = rx.recv().await {
         // Update Redis counters
-        if let Some(cache) = &redis {
-            if let Err(e) = cache.increment_feedback(&feedback.feedback_type).await {
-                error!("Failed to increment feedback: {}", e);
-            }
+        if let Some(cache) = &redis
+            && let Err(e) = cache.increment_feedback(&feedback.value).await
+        {
+            error!("Failed to increment feedback: {}", e);
         }
     }
 
@@ -323,9 +352,11 @@ async fn drift_calculation_loop(
             &config.discord.alert_thresholds,
         );
 
+        let embedding_json = serde_json::to_value(current_centroid).unwrap_or(serde_json::Value::Null);
+
         let snapshot = DriftSnapshot {
             snapshot_time: Utc::now(),
-            embedding_centroid: current_centroid,
+            embedding_centroid: embedding_json,
             psi_score,
             kl_divergence,
             cosine_distance_from_baseline: cosine_distance,

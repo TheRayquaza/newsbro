@@ -54,7 +54,7 @@ impl DriftCalculator {
         }
 
         let cosine_similarity = dot_product / (norm_a * norm_b);
-        Ok((1.0 - cosine_similarity as f64).max(0.0).min(2.0))
+        Ok((1.0 - cosine_similarity as f64).clamp(0.0, 2.0))
     }
 
     #[instrument(skip(current, baseline))]

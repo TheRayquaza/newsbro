@@ -7,7 +7,21 @@ pub struct InferenceCommand {
     pub model: String,
     pub score: f64,
     pub date: DateTime<Utc>,
-    pub article: Option<serde_json::Value>, // Placeholder for aggregate.ArticleAggregate
+    pub article: Option<ArticleAggregate>, // Placeholder for aggregate.ArticleAggregate
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArticleAggregate {
+    pub id: u32,
+    pub category: String,
+    pub subcategory: String,
+    pub title: String,
+    #[serde(rename = "abstract")]
+    pub abstract_text: String,
+    pub link: String,
+    pub rss_link: String,
+    pub published_at: DateTime<Utc>,
+    pub is_active: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -17,26 +31,4 @@ pub struct FeedbackAggregate {
     pub value: i32,      // 0 = dislike, 1 = like
     pub is_active: bool, // Remove feedback if false
     pub date: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
-pub enum FeedbackType {
-    Like,
-    Dislike,
-}
-
-impl InferenceCommand {
-    pub fn validate_embedding_dimension(
-        &self,
-        expected: usize,
-    ) -> Result<(), crate::error::DriftError> {
-        if self.embedding.len() != expected {
-            return Err(crate::error::DriftError::InvalidEmbeddingDimension {
-                expected,
-                actual: self.embedding.len(),
-            });
-        }
-        Ok(())
-    }
 }
