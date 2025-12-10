@@ -8,7 +8,7 @@ metadata:
     type: backends
     tags.datadoghq.com/env: prod
     tags.datadoghq.com/service: srvc-drift
-    tags.datadoghq.com/version: v0.1.0
+    tags.datadoghq.com/version: v0.1.1
 spec:
   strategy:
     type: RollingUpdate
@@ -25,7 +25,7 @@ spec:
         monitoring: "enabled"
         tags.datadoghq.com/env: prod
         tags.datadoghq.com/service: srvc-drift
-        tags.datadoghq.com/version: v0.1.0
+        tags.datadoghq.com/version: v0.1.1
     spec:
       securityContext:
         runAsNonRoot: true
@@ -46,7 +46,7 @@ spec:
 
       containers:
         - name: srvc-drift
-          image: ghcr.io/therayquaza/newsbro/srvc-drift:srvc-drift-v0.1.0
+          image: ghcr.io/therayquaza/newsbro/srvc-drift:srvc-drift-v0.1.1
           imagePullPolicy: IfNotPresent
 
           securityContext:

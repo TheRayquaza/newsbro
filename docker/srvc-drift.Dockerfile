@@ -1,25 +1,25 @@
 FROM rustlang/rust:nightly as builder
 
+RUN apt-get update && apt-get install -y musl-tools && \
+    rustup target add x86_64-unknown-linux-musl
+
 WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 
-ENV RUSTFLAGS=""
 ENV CARGO_UNSTABLE_EDITION2024=1
 
-RUN cargo +nightly build --release
+RUN cargo +nightly build --release --target x86_64-unknown-linux-musl
 
 FROM alpine:3.18
 
-# hadolint ignore=DL3018
 RUN apk add --no-cache \
     ca-certificates \
-    curl \
-    libssl3
+    curl
 
 WORKDIR /app
 
-COPY --from=builder /app/target/release/srvc-drift /app/srvc-drift
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/srvc-drift /app/srvc-drift
 
 RUN adduser -D -u 1000 driftuser && \
     chown -R driftuser:driftuser /app
