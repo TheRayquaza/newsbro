@@ -27,6 +27,8 @@ spec:
         tags.datadoghq.com/service: repo-feed
         tags.datadoghq.com/version: v1.2.2
     spec:
+      serviceAccountName: apps
+
       securityContext:
         runAsNonRoot: true
         runAsUser: 1012

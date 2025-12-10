@@ -28,7 +28,7 @@ spec:
     namespace: redis
 
     serviceAccount:
-      create: true
+      create: false
       annotations: {}
       name: ""
 

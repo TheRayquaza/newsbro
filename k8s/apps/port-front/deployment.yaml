@@ -20,6 +20,7 @@ spec:
       labels:
         app: port-front
     spec:
+      serviceAccountName: apps
       # securityContext:
       #   runAsNonRoot: true
       #   runAsUser: 1009

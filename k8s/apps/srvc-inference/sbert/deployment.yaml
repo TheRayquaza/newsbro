@@ -24,8 +24,8 @@ spec:
         app: srvc-inference-sbert
         monitoring: "enabled"
     spec:
-      imagePullSecrets:
-        - name: pull-secret
+      serviceAccountName: apps
+
       securityContext:
         runAsNonRoot: true
         runAsUser: 1013
@@ -34,6 +34,10 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
+
+      imagePullSecrets:
+        - name: pull-secret
+
       containers:
         - name: srvc-inference-sbert
           image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-sbert-v1.0.4

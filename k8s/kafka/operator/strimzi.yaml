@@ -21,7 +21,7 @@ spec:
   upgrade:
     crds: CreateReplace
   values:
-    watchAnyNamespace: true
+    watchAnyNamespace: false
     tolerations: []
     priorityClassName: "critical-resilient"
 
