@@ -7,7 +7,7 @@ metadata:
     app: srvc-drift
     type: backends
     tags.datadoghq.com/env: prod
-    tags.datadoghq.com/service: repo-feed
+    tags.datadoghq.com/service: srvc-drift
     tags.datadoghq.com/version: v0.1.0
 spec:
   strategy:

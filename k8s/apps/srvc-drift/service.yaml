@@ -2,14 +2,14 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: repo-feed
+  name: srvc-drift
   namespace: apps
   labels:
-    app: repo-feed
+    app: srvc-drift
 spec:
     type: ClusterIP
     selector:
-      app: repo-feed
+      app: srvc-drift
     ports:
       - protocol: TCP
         port: 80
