@@ -1,0 +1,119 @@
+name: Rust SVC Template
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      app_path:
+        required: true
+        type: string
+      dockerfile:
+        required: true
+        type: string
+      tag_prefix:
+        required: true
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/${{ inputs.app_name }}
+
+jobs:
+  lint:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Rust Format
+        run: cargo fmt --all -- --check
+        working-directory: ${{ inputs.app_path }}
+      - name: Rust Lint
+        run: cargo clippy --all-targets --all-features -- -D warnings
+        working-directory: ${{ inputs.app_path }}
+
+  build:
+    if: github.event_name == 'push'
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo fetch
+        working-directory: ${{ inputs.app_path }}
+      - run: cargo build --release
+        working-directory: ${{ inputs.app_path }}
+
+  test:
+    if: github.event_name == 'push'
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - run: cargo build --release
+        working-directory: ${{ inputs.app_path }}
+
+      - name: Start dependencies
+        working-directory: ${{ inputs.app_path }}
+        run: docker compose up -d
+
+      - name: Run API + Tests
+        working-directory: ${{ inputs.app_path }}
+        run: |
+          set +e
+          ./target/release/app &
+          API_PID=$!
+          cargo test --all
+          kill -9 ${API_PID} || true
+          set -e
+
+      - name: Stop dependencies
+        working-directory: ${{ inputs.app_path }}
+        run: docker compose down
+
+  build-docker:
+    if: startsWith(github.ref, format('refs/tags/{0}-v', inputs.tag_prefix))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.2.4'
+      - uses: docker/setup-buildx-action@v3
+      - name: Log into registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag,pattern=${{ inputs.tag_prefix }}-v{{version}}
+            type=sha
+      - id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.app_path }}
+          file: ${{ inputs.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Sign the published Docker image
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}

@@ -75,6 +75,16 @@ resource "vault_kv_secret_v2" "srvc_scrapping_postgres" {
   })
 }
 
+resource "vault_kv_secret_v2" "srvc_drift_postgres" {
+  mount = vault_mount.kv.path
+  name  = "srvc-drift/postgres"
+
+  data_json = jsonencode({
+    username = var.srvc_drift_postgres_username
+    password = var.srvc_drift_postgres_password
+  })
+}
+
 # ==========================================
 # Cloudflare Secrets
 # ==========================================
@@ -152,6 +162,7 @@ resource "vault_kv_secret_v2" "capacitor" {
 
   data_json = jsonencode({
     LICENSE_KEY = var.capacitor_token
+    "registry.yaml" = var.registry_yaml
   })
 }
 
@@ -244,6 +255,17 @@ resource "vault_kv_secret_v2" "srvc_inference_sbert_redis" {
   data_json = jsonencode({
     password = var.srvc_inference_sbert_redis_password
     db       = var.srvc_inference_sbert_redis_db
+  })
+}
+
+resource "vault_kv_secret_v2" "srvc_drift" {
+  mount = vault_mount.kv.path
+  name  = "srvc-drift"
+
+  data_json = jsonencode({
+    db_url                 = var.srvc_drift_db_url
+    qdrant_api_key         = var.srvc_drift_qdrant_api_key
+    discord_webhook_url    = var.srvc_drift_discord_webhook_url
   })
 }
 

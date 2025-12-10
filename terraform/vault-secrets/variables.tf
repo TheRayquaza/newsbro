@@ -143,6 +143,11 @@ variable "capacitor_token" {
   sensitive = true
 }
 
+variable "registry_yaml" {
+  type      = string
+  sensitive = true
+}
+
 # OIDC variables
 variable "oidc_jwt_secret" {
   type      = string
@@ -203,6 +208,32 @@ variable "srvc_inference_sbert_redis_password" {
 variable "srvc_inference_sbert_redis_db" {
   type    = string
   default = "0"
+}
+
+# Service Drift variables
+variable "srvc_drift_db_url" {
+  type      = string
+  sensitive = true
+}
+
+variable "srvc_drift_qdrant_api_key" {
+  type      = string
+  sensitive = true
+}
+
+variable "srvc_drift_discord_webhook_url" {
+  type      = string
+  sensitive = true
+}
+
+variable "srvc_drift_postgres_username" {
+  type      = string
+  sensitive = true
+}
+
+variable "srvc_drift_postgres_password" {
+  type      = string
+  sensitive = true
 }
 
 # Docker variables

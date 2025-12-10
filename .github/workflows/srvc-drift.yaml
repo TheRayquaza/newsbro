@@ -1,0 +1,21 @@
+name: srvc-drift
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - 'apps/srvc-drift/**'
+    tags:
+      - 'srvc-drift-v*.*.*'
+
+permissions:
+  write-all
+
+jobs:
+  srvc-drift:
+    uses: ./.github/workflows/rust-svc-workflow.yaml
+    with:
+      app_name: srvc-drift
+      app_path: apps/srvc-drift
+      dockerfile: docker/srvc-drift.Dockerfile
+      tag_prefix: srvc-drift

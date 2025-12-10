@@ -10,6 +10,7 @@ resources:
   - port-front
   - srvc-scrapping
   - srvc-inference
+  - srvc-drift
   - pull-secrets.yaml
   - certificate.yaml
   - oidc-secrets.yaml
