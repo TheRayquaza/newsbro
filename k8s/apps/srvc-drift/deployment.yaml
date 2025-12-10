@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: srvc-drift
+  namespace: apps
+  labels:
+    app: srvc-drift
+    type: backends
+    tags.datadoghq.com/env: prod
+    tags.datadoghq.com/service: srvc-drift
+    tags.datadoghq.com/version: v0.1.0
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 2
+  selector:
+    matchLabels:
+      app: srvc-drift
+  template:
+    metadata:
+      labels:
+        app: srvc-drift
+        monitoring: "enabled"
+        tags.datadoghq.com/env: prod
+        tags.datadoghq.com/service: srvc-drift
+        tags.datadoghq.com/version: v0.1.0
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1024
+        runAsGroup: 2024
+        fsGroup: 3024
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+
+      imagePullSecrets:
+        - name: pull-secret
+
+      volumes:
+        - name: apmsocketpath
+          hostPath:
+            path: /var/run/datadog/
+
+      containers:
+        - name: srvc-drift
+          image: ghcr.io/therayquaza/newsbro/srvc-drift:srvc-drift-v0.1.0
+          imagePullPolicy: IfNotPresent
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          volumeMounts:
+            - name: apmsocketpath
+              mountPath: /var/run/datadog
+
+          ports:
+            - containerPort: 8080
+              name: http
+
+          envFrom:
+            - configMapRef:
+                name: srvc-drift-config
+            - secretRef:
+                name: srvc-drift-secrets
+          env:
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_DATA_STREAMS_ENABLED
+              value: "true"
+            - name: DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED
+              value: "true"
+            - name: DD_APPSEC_ENABLED
+              value: "true"
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "125m"
+            limits:
+              memory: "1Gi"
+              cpu: "250m"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10

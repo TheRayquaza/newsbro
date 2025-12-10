@@ -124,6 +124,15 @@ path "kv/data/repo-feed/redis" {
   capabilities = ["read", "list"]
 }
 
+# Srvc Drift secrets
+path "kv/data/srvc-drift" {
+  capabilities = ["read", "list"]
+}
+
+path "kv/data/srvc-drift/postgres" {
+  capabilities = ["read", "list"]
+}
+
 # Service Scrapping secrets
 path "kv/data/srvc-scrapping/discord" {
   capabilities = ["read", "list"]

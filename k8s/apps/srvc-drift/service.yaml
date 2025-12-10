@@ -1,0 +1,16 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: srvc-drift
+  namespace: apps
+  labels:
+    app: srvc-drift
+spec:
+    type: ClusterIP
+    selector:
+      app: srvc-drift
+    ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 8080

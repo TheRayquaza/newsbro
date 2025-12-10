@@ -58,6 +58,11 @@ spec:
       login: true
       passwordSecret:
         name: srvc-scrapping-db-secret
+    - name: srvc-drift
+      ensure: present
+      login: true
+      passwordSecret:
+        name: srvc-drift-db-secret
   storage:
     size: 10Gi
     storageClass: local-path

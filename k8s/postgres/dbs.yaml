@@ -50,3 +50,16 @@ spec:
   owner: srvc-scrapping
   ensure: present
   extensions: []
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: srvc-drift-db
+  namespace: postgres
+spec:
+  cluster:
+    name: postgres-cluster
+  name: srvc-drift
+  owner: srvc-drift
+  ensure: present
+  extensions: []
