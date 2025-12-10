@@ -11,6 +11,7 @@ RUN cargo +nightly build --release
 
 FROM alpine:3.18
 
+# hadolint ignore=DL3018
 RUN apk add --no-cache \
     ca-certificates \
     curl \
@@ -28,6 +29,6 @@ USER driftuser
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD ["/usr/bin/curl", "-f", "http://localhost:8080/health"] || exit 1
+    CMD sh -c "/usr/bin/curl -f http://localhost:8080/health || exit 1"
 
 CMD ["/app/srvc-drift"]
