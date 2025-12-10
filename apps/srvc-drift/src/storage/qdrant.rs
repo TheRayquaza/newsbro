@@ -29,7 +29,11 @@ impl QdrantStorage {
     }
 
     #[instrument(skip(self))]
-    pub async fn retrieve_embedding_by_id(&self, collection_name: String, id: u32) -> Result<Option<Vec<f32>>> {
+    pub async fn retrieve_embedding_by_id(
+        &self,
+        collection_name: String,
+        id: u32,
+    ) -> Result<Option<Vec<f32>>> {
         let search_result = self
             .client
             .get_points(

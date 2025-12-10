@@ -92,7 +92,10 @@ pub async fn process_inferences(
         let article = article.unwrap();
         let collection_name = format!("{}_{}", qdrant.config.collection_prefix, inference.model);
         // Retrieve from qdrant
-        let embedding = match qdrant.retrieve_embedding_by_id(collection_name, article.id).await {
+        let embedding = match qdrant
+            .retrieve_embedding_by_id(collection_name, article.id)
+            .await
+        {
             Ok(emb) => emb,
             Err(e) => {
                 error!("Failed to retrieve embedding from Qdrant: {}", e);

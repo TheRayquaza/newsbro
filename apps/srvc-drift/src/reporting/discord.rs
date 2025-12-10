@@ -22,11 +22,12 @@ pub struct DriftReport {
     pub kl_divergence: Option<f64>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub enum AlertSeverity {
     Critical,
     Warning,
-    Info
+    Info,
 }
 
 impl DiscordReporter {
