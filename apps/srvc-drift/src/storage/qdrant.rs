@@ -10,7 +10,7 @@ use tracing::{info, instrument};
 #[derive(Clone)]
 pub struct QdrantStorage {
     client: Qdrant,
-    config: QdrantConfig,
+    pub config: QdrantConfig,
 }
 
 impl QdrantStorage {
@@ -29,12 +29,12 @@ impl QdrantStorage {
     }
 
     #[instrument(skip(self))]
-    pub async fn retrieve_embedding_by_id(&self, id: u32) -> Result<Option<Vec<f32>>> {
+    pub async fn retrieve_embedding_by_id(&self, collection_name: String, id: u32) -> Result<Option<Vec<f32>>> {
         let search_result = self
             .client
             .get_points(
                 GetPointsBuilder::new(
-                    &self.config.collection_name,
+                    collection_name,
                     vec![PointId {
                         point_id_options: Some(PointIdOptions::Num(id as u64)),
                     }],
@@ -49,6 +49,7 @@ impl QdrantStorage {
         {
             match vectors.vectors_options.as_ref().unwrap() {
                 VectorsOptions::Vector(vector) => {
+                    #[allow(deprecated)]
                     return Ok(Some(vector.data.clone()));
                 }
                 _ => {

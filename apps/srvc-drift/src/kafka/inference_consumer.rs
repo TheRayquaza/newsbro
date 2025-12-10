@@ -1,6 +1,9 @@
 use crate::config::KafkaConfig;
 use crate::error::{DriftError, Result};
 use crate::kafka::models::InferenceCommand;
+use crate::storage::postgres::PostgresStorage;
+use crate::storage::qdrant::QdrantStorage;
+use crate::storage::redis::RedisCache;
 use rdkafka::config::ClientConfig;
 use rdkafka::consumer::{Consumer, StreamConsumer};
 use rdkafka::message::Message;
@@ -61,4 +64,56 @@ impl InferenceConsumer {
             }
         }
     }
+}
+
+pub async fn process_inferences(
+    mut rx: mpsc::Receiver<InferenceCommand>,
+    postgres: PostgresStorage,
+    qdrant: QdrantStorage,
+    redis: Option<RedisCache>,
+) {
+    info!("Inference processor started");
+
+    while let Some(inference) = rx.recv().await {
+        let article = inference.article.as_ref().map(|article| {
+            info!(
+                "Processing inference for user_id={}, article_id={}",
+                inference.user_id, article.id
+            );
+            article.clone()
+        });
+        if article.is_none() {
+            warn!(
+                "Inference missing article data for user_id={}, skipping",
+                inference.user_id
+            );
+            continue;
+        }
+        let article = article.unwrap();
+        let collection_name = format!("{}_{}", qdrant.config.collection_prefix, inference.model);
+        // Retrieve from qdrant
+        let embedding = match qdrant.retrieve_embedding_by_id(collection_name, article.id).await {
+            Ok(emb) => emb,
+            Err(e) => {
+                error!("Failed to retrieve embedding from Qdrant: {}", e);
+                continue;
+            }
+        }
+        .unwrap_or_else(|| {
+            warn!("No embedding found in Qdrant for article_id={}", article.id);
+            vec![]
+        });
+        if let Err(e) = postgres.insert_inference(&inference, &embedding).await {
+            error!("Failed to insert inference: {}", e);
+        }
+
+        // Update Redis counters
+        if let Some(cache) = &redis
+            && let Err(e) = cache.increment_inference_count().await
+        {
+            error!("Failed to increment inference count: {}", e);
+        }
+    }
+
+    warn!("Inference processor stopped");
 }

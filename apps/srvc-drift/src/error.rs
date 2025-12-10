@@ -17,23 +17,14 @@ pub enum DriftError {
     #[error("HTTP error: {0}")]
     Http(#[from] reqwest::Error),
 
-    #[error("Configuration error: {0}")]
-    Config(String),
-
     #[error("Insufficient data: {0}")]
     InsufficientData(String),
 
     #[error("Invalid embedding dimension: expected {expected}, got {actual}")]
     InvalidEmbeddingDimension { expected: usize, actual: usize },
 
-    #[error("Service unavailable: {0}")]
-    ServiceUnavailable(String),
-
     #[error("Error: {0}")]
     InvalidInput(String),
-
-    #[error("Embedding not found: {0}")]
-    EmbeddingNotFound(String),
 }
 
 pub type Result<T> = std::result::Result<T, DriftError>;

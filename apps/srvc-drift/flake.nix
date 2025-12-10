@@ -23,6 +23,7 @@
             openssl_3
             pkg-config
             postgresql
+            rust-analyzer
           ];
         };
       }

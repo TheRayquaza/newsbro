@@ -20,8 +20,6 @@ pub struct KafkaConfig {
     pub inference_topic: String,
     pub feedback_topic: String,
     pub consumer_group: String,
-    #[serde(default = "default_batch_size")]
-    pub max_batch_size: usize,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -29,17 +27,11 @@ pub struct DatabaseConfig {
     pub url: String,
     #[serde(default = "default_max_connections")]
     pub max_connections: u32,
-    #[serde(default = "default_min_connections")]
-    pub min_connections: u32,
-    #[serde(default = "default_acquire_timeout")]
-    pub acquire_timeout_seconds: u64,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct RedisConfig {
     pub url: String,
-    #[serde(default = "default_redis_pool_size")]
-    pub pool_size: u32,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -53,7 +45,7 @@ pub struct DiscordConfig {
 #[derive(Debug, Deserialize, Clone)]
 pub struct QdrantConfig {
     pub url: String,
-    pub collection_name: String,
+    pub collection_prefix: String,
     pub api_key: String,
 }
 
@@ -77,8 +69,6 @@ pub struct DriftConfig {
     pub baseline_window_hours: u64,
     #[serde(default = "default_min_samples")]
     pub min_samples_for_drift: usize,
-    #[serde(default = "default_embedding_dim")]
-    pub embedding_dimension: usize,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -92,25 +82,11 @@ pub struct ServerConfig {
 #[derive(Debug, Deserialize, Clone)]
 pub struct ReportingConfig {
     pub interval_seconds: u64,
-    #[serde(default)]
-    pub include_embeddings_sample: bool,
 }
 
 // Default value functions
-fn default_batch_size() -> usize {
-    1000
-}
 fn default_max_connections() -> u32 {
     20
-}
-fn default_min_connections() -> u32 {
-    5
-}
-fn default_acquire_timeout() -> u64 {
-    30
-}
-fn default_redis_pool_size() -> u32 {
-    10
 }
 fn default_discord_username() -> String {
     "Drift Monitor".to_string()
@@ -125,7 +101,7 @@ fn default_dislike_ratio_warning() -> f64 {
     0.3
 }
 fn default_calculation_interval() -> u64 {
-    300
+    10
 }
 fn default_lookback_window() -> u64 {
     24
@@ -135,9 +111,6 @@ fn default_baseline_window() -> u64 {
 }
 fn default_min_samples() -> usize {
     100
-}
-fn default_embedding_dim() -> usize {
-    1536
 }
 fn default_host() -> String {
     "0.0.0.0".to_string()
@@ -151,7 +124,7 @@ impl Config {
         dotenvy::dotenv().ok();
 
         let config = config::Config::builder()
-            .add_source(config::File::with_name(".env").required(false))
+            //.add_source(config::File::with_name(".env").required(false))
             .add_source(config::Environment::with_prefix("DRIFT").separator("__"))
             .build()
             .context("Failed to build configuration")?;

@@ -1,6 +1,8 @@
 use crate::config::KafkaConfig;
 use crate::error::{DriftError, Result};
 use crate::kafka::models::FeedbackAggregate;
+use crate::storage::postgres::PostgresStorage;
+use crate::storage::redis::RedisCache;
 use rdkafka::config::ClientConfig;
 use rdkafka::consumer::{Consumer, StreamConsumer};
 use rdkafka::message::Message;
@@ -61,4 +63,23 @@ impl FeedbackConsumer {
             }
         }
     }
+}
+
+pub async fn process_feedback(
+    mut rx: mpsc::Receiver<FeedbackAggregate>,
+    _postgres: PostgresStorage,
+    redis: Option<RedisCache>,
+) {
+    info!("Feedback processor started");
+
+    while let Some(feedback) = rx.recv().await {
+        // Update Redis counters
+        if let Some(cache) = &redis
+            && let Err(e) = cache.increment_feedback(&feedback.value).await
+        {
+            error!("Failed to increment feedback: {}", e);
+        }
+    }
+
+    warn!("Feedback processor stopped");
 }

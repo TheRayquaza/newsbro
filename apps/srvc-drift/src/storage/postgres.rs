@@ -2,11 +2,7 @@ use crate::config::DatabaseConfig;
 use crate::error::{DriftError, Result};
 use crate::kafka::models::InferenceCommand;
 use crate::schema::{drift_snapshots, feedback_metrics, inference_log};
-pub use crate::storage::models::{
-    FeedbackMetrics,
-    InferenceLog,
-    DriftSnapshot,
-};
+pub use crate::storage::models::{DriftSnapshot, FeedbackMetrics, InferenceLog};
 use chrono::{Duration, Utc};
 use diesel::prelude::*;
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
@@ -73,7 +69,6 @@ impl PostgresStorage {
 
     #[instrument(skip(self, snapshot))]
     pub async fn insert_drift_snapshot(&self, snapshot: &DriftSnapshot) -> Result<()> {
-
         let new_snapshot = DriftSnapshot {
             snapshot_time: snapshot.snapshot_time,
             embedding_centroid: snapshot.embedding_centroid.clone(),
