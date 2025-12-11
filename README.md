@@ -12,6 +12,8 @@ from various sources. We also provide new recommendation based on your liked art
 
 Feel free to open issues if you see anything relevant that could be added.
 
+![presentation.pdf](./assets/presentation.pdf))
+
 ⚠ App will be down at the end of our project (~ January 2026)
 
 ## Table of Contents
