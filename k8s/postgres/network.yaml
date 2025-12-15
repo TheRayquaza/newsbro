@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-policy
+  namespace: postgres
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow ingress from apps and mlflow
+        - namespaceSelector:
+            matchLabels:
+              name: apps
+        - namespaceSelector:
+            matchLabels:
+              name: mlflow
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

@@ -9,12 +9,10 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
   ingressClassName: private
-  
   tls:
     - hosts:
         - redis.internal.newsbro.cc
       secretName: newsbro-wildcard-tls
-
   rules:
     - host: redis.internal.newsbro.cc
       http:

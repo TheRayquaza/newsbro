@@ -1,8 +1,7 @@
----
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
-- repo.yaml
-- datadog-operator.yaml
-- secrets.yaml
-- namespace.yaml
+  - repo.yaml
+  - datadog-operator.yaml
+  - secrets.yaml
+  - namespace.yaml

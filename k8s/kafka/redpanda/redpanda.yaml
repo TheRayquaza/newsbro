@@ -1,4 +1,3 @@
----
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -24,7 +23,6 @@ spec:
   values:
     autoscaling:
       enabled: false
-
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
@@ -32,16 +30,12 @@ spec:
         labelSelector:
           matchLabels:
             app: redpanda-console
-
     podLabels:
       app: redpanda-console
-
     priorityClassName: "critical-monitoring"
-
     config:
       kafka:
         brokers: ["kafka-kafka-bootstrap.kafka.svc:9092"]
-
     resources:
       limits:
         memory: 512Mi
@@ -49,8 +43,6 @@ spec:
       requests:
         memory: 256Mi
         cpu: 100m
-
     ingress:
       enabled: false
-
     replicaCount: 1

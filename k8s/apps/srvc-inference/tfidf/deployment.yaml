@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,8 +23,7 @@ spec:
         app: srvc-inference-tfidf
         monitoring: "enabled"
     spec:
-      imagePullSecrets:
-        - name: pull-secret
+      serviceAccountName: apps
       securityContext:
         runAsNonRoot: true
         runAsUser: 1014
@@ -34,6 +32,8 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
+      imagePullSecrets:
+        - name: pull-secret
       containers:
         - name: srvc-inference-tfidf
           image: ghcr.io/therayquaza/newsbro/srvc-inference:srvc-inference-tf_idf-v1.0.8

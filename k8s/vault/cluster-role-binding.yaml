@@ -7,6 +7,6 @@ roleRef:
   kind: ClusterRole
   name: system:auth-delegator
 subjects:
-- kind: ServiceAccount
-  name: vault-auth
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: vault-auth
+    namespace: kube-system

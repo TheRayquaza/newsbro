@@ -11,12 +11,10 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
 spec:
   ingressClassName: private
-  
   tls:
     - hosts:
         - mlflow.internal.newsbro.cc
       secretName: newsbro-wildcard-tls
-
   rules:
     - host: mlflow.internal.newsbro.cc
       http:

@@ -1,0 +1,143 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-nginx-private-network-policy
+  namespace: ingress-nginx
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: ingress-nginx-private
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow HTTP from private network
+        - ipBlock:
+            cidr: 10.0.0.0/16
+      ports:
+        - protocol: TCP
+          port: 80
+    - from: # Allow HTTPS from private network
+        - ipBlock:
+          cidr: 10.0.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to: # RedisInsight access
+        - namespaceSelector:
+            matchLabels:
+              name: redis
+          podSelector:
+            matchLabels:
+              app: redisinsight
+      ports:
+        - protocol: TCP
+          port: 5540
+    - to: # Redpanda
+        - namespaceSelector:
+            matchLabels:
+              name: kafka
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: redpanda-console
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to: # Minio console
+        - namespaceSelector:
+            matchLabels:
+              name: minio
+          podSelector:
+            matchLabels:
+              app: minio
+      ports:
+        - protocol: TCP
+          port: 9001 # console
+    - to: # Vault UI
+        - namespaceSelector:
+            matchLabels:
+              name: vault
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vault
+      ports:
+        - protocol: TCP
+          port: 8200 # UI external
+    - to: # Mlflow
+        - namespaceSelector:
+            matchLabels:
+              name: mlflow
+          podSelector:
+            matchLabels:
+              app: mlflow
+      ports:
+        - protocol: TCP
+          port: 5000
+    - to: # Qdrant
+        - namespaceSelector:
+            matchLabels:
+              name: qdrant
+          podSelector:
+            matchLabels:
+              app: qdrant
+      ports:
+        - protocol: TCP
+          port: 6333
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-nginx-public-network-policy
+  namespace: ingress-nginx
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: ingress-nginx-public
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow HTTP from NAT
+        - ipBlock:
+          cidr: 192.168.0.0/24
+      ports:
+        - protocol: TCP
+          port: 80
+    - from: # Allow HTTPS from NAT
+        - ipBlock:
+          cidr: 192.168.0.0/24
+      ports:
+        - protocol: TCP
+          port: 443
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to: # Only allow apps (exposed to public)
+        - namespaceSelector:
+            matchLabels:
+              name: apps
+          podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443

@@ -1,4 +1,3 @@
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -10,12 +9,10 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
   ingressClassName: private
-
   tls:
     - hosts:
         - capacitor.internal.newsbro.cc
       secretName: newsbro-wildcard-tls
-
   rules:
     - host: capacitor.internal.newsbro.cc
       http:

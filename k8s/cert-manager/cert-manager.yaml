@@ -1,4 +1,3 @@
----
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -21,82 +20,63 @@ spec:
   values:
     global:
       imagePullSecrets: []
-
       commonLabels: {}
-
       priorityClassName: "critical-resilient"
-
       rbac:
         create: true
         aggregateClusterRoles: true
-
       podSecurityPolicy:
         enabled: false
         useAppArmor: true
-
       logLevel: 2
-
       leaderElection:
         namespace: "kube-system"
-
     crds:
       enabled: true
       keep: true
     strategy: {}
-
-    podDisruptionBudget:
-      enabled: false
-    featureGates: ""
-
-    maxConcurrentChallenges: 60
-
-    image:
-      repository: quay.io/jetstack/cert-manager-controller
-      pullPolicy: IfNotPresent
-
-    clusterResourceNamespace: ""
-
-    namespace: "cert-manager"
-
+    webhook:
+      networkPolicy:
+        enabled: true
     serviceAccount:
       create: true
       automountServiceAccountToken: true
-
+    podDisruptionBudget:
+      enabled: false
+    featureGates: ""
+    maxConcurrentChallenges: 60
+    image:
+      repository: quay.io/jetstack/cert-manager-controller
+      pullPolicy: IfNotPresent
+    clusterResourceNamespace: ""
+    namespace: "cert-manager"
+    serviceAccount:
+      create: true
+      automountServiceAccountToken: true
     config: {}
-
     dns01RecursiveNameserversOnly: false
     disableAutoApproval: false
-
     approveSignerNames:
-    - issuers.cert-manager.io/*
-    - clusterissuers.cert-manager.io/*
+      - issuers.cert-manager.io/*
+      - clusterissuers.cert-manager.io/*
     extraArgs: []
-
     extraEnv: []
-
     resources:
       requests:
         cpu: 100m
         memory: 128Mi
-
     securityContext:
       runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
-
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
-        drop:
-        - ALL
+        drop: ["ALL"]
       readOnlyRootFilesystem: true
-
     volumes: []
-
     volumeMounts: []
-
     affinity: {}
-
     tolerations: []
     topologySpreadConstraints: []
     livenessProbe:
@@ -107,18 +87,14 @@ spec:
       successThreshold: 1
       failureThreshold: 8
     enableServiceLinks: false
-
     prometheus:
       enabled: true
-
     acmesolver:
       image:
         repository: quay.io/jetstack/cert-manager-acmesolver
         pullPolicy: IfNotPresent
-
     startupapicheck:
       enabled: true
-
       securityContext:
         runAsNonRoot: true
         seccompProfile:
@@ -127,79 +103,41 @@ spec:
         allowPrivilegeEscalation: false
         capabilities:
           drop:
-          - ALL
+            - ALL
         readOnlyRootFilesystem: true
-
       # Timeout for 'kubectl check api' command.
       timeout: 1m
-
       backoffLimit: 4
-
       extraEnv: []
-
       resources:
         requests:
           cpu: 10m
           memory: 32Mi
-
       nodeSelector:
         kubernetes.io/os: linux
-
       affinity: {}
-
       tolerations: []
-
       # Optional additional labels to add to the startupapicheck Pods.
       podLabels: {}
-
       image:
         repository: quay.io/jetstack/cert-manager-startupapicheck
         pullPolicy: IfNotPresent
-
       rbac:
-        # annotations for the startup API Check job RBAC and PSP resources.
-        # +docs:property
         annotations:
           helm.sh/hook: post-install
           helm.sh/hook-weight: "-5"
           helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-
-      # Automounting API credentials for a particular pod.
-      # +docs:property
       # automountServiceAccountToken: true
-
       serviceAccount:
-        # Specifies whether a service account should be created.
         create: true
-
-        # The name of the service account to use.
-        # If not set and create is true, a name is generated using the fullname template.
-        # +docs:property
-        # name: ""
-
-        # Optional additional annotations to add to the Job's Service Account.
-        # +docs:property
         annotations:
           helm.sh/hook: post-install
           helm.sh/hook-weight: "-5"
           helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-
-        # Automount API credentials for a Service Account.
-        # +docs:property
         automountServiceAccountToken: true
-
-        # Optional additional labels to add to the startupapicheck's Service Account.
-        # +docs:property
-        # labels: {}
-
-      # Additional volumes to add to the cert-manager controller pod.
       volumes: []
-
-      # Additional volume mounts to add to the cert-manager controller container.
       volumeMounts: []
       enableServiceLinks: false
-
     extraObjects: []
     creator: "helm"
-
     enabled: true

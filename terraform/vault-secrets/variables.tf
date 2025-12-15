@@ -143,11 +143,6 @@ variable "capacitor_token" {
   sensitive = true
 }
 
-variable "registry_yaml" {
-  type      = string
-  sensitive = true
-}
-
 # OIDC variables
 variable "oidc_jwt_secret" {
   type      = string

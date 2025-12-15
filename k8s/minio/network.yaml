@@ -1,0 +1,68 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: minio-network-policy
+  namespace: minio
+spec:
+  podSelector:
+    matchLabels:
+      app: minio
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow ingress from ingress-nginx-public
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: ingress-nginx-public
+      ports:
+        - protocol: TCP
+          port: 9001 # minio console
+    - from: # Allow MinIO cluster communication
+        - podSelector:
+            matchLabels:
+              app: minio
+          namespaceSelector:
+            matchLabels:
+              name: minio
+      ports:
+        - protocol: TCP
+          port: 9000
+        - protocol: TCP
+          port: 9001
+    - from: # Allow mlflow access
+        - namespaceSelector:
+            matchLabels:
+              name: mlflow
+          podSelector:
+            matchLabels:
+              app: mlflow
+      ports:
+        - protocol: TCP
+          port: 9000
+  egress:
+    - to: # Allow MinIO cluster communication
+        - podSelector:
+            matchLabels:
+              app: minio
+          namespaceSelector:
+            matchLabels:
+              name: minio
+      ports:
+        - protocol: TCP
+          port: 9000
+        - protocol: TCP
+          port: 9001
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

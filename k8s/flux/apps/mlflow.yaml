@@ -1,4 +1,3 @@
----
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -13,16 +12,16 @@ spec:
     name: flux-system
     namespace: flux-system
   healthChecks:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: mlflow
-    namespace: mlflow
-  - apiVersion: v1
-    kind: Service
-    name: mlflow
-    namespace: mlflow
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: mlflow
+      namespace: mlflow
+    - apiVersion: v1
+      kind: Service
+      name: mlflow
+      namespace: mlflow
   dependsOn:
-  - name: minio
-    namespace: minio
-  - name: postgres
-    namespace: postgres
+    - name: minio
+      namespace: minio
+    - name: postgres
+      namespace: postgres

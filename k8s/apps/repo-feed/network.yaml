@@ -1,0 +1,80 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: repo-feed-network-policy
+  namespace: apps
+spec:
+  podSelector:
+    matchLabels:
+      app: repo-feed
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow public ingress
+        - podSelector:
+            matchLabels:
+              kubernetes.io/instance: ingress-nginx-public
+          namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from: # Allow probe
+        - ipBlock:
+            cidr: 10.42.0.0/16
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              strimzi.io/broker-role: "true"
+              strimzi.io/cluster: kafka
+              strimzi.io/kind: Kafka
+              strimzi.io/name: kafka-kafka
+          namespaceSelector:
+            matchLabels:
+              name: kafka
+      ports:
+        - protocol: TCP
+          port: 9091
+        - protocol: TCP
+          port: 9092
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: sentinel
+              app.kubernetes.io/name: kv
+              app.kubernetes.io/part-of: redis-failover
+          namespaceSelector:
+            matchLabels:
+              name: redis
+      ports:
+        - protocol: TCP
+          port: 26379
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: redis
+              app.kubernetes.io/managed-by: redis-operator
+              app.kubernetes.io/name: kv
+              app.kubernetes.io/part-of: redis-failover
+          namespaceSelector:
+            matchLabels:
+              name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

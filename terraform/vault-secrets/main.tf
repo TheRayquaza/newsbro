@@ -162,7 +162,6 @@ resource "vault_kv_secret_v2" "capacitor" {
 
   data_json = jsonencode({
     LICENSE_KEY = var.capacitor_token
-    "registry.yaml" = var.registry_yaml
   })
 }
 

@@ -1,4 +1,3 @@
----
 # https://fluxcd.io/flux/components/helm/helmreleases/
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
@@ -27,18 +26,14 @@ spec:
       rootPasswordSecretKey: rootPassword
       forcePassword: true # force update on vault rotation
       useSecret: true
-
     usersExistingSecrets:
       - centralized-minio-users
-
     persistence:
       enabled: true
       size: 20Gi
       storageClass: local-path
-
     replicas: 2
     drivesPerNode: 1
-
     minioAPIPort: 9000
     minioConsolePort: 9001
     service:
@@ -47,7 +42,6 @@ spec:
     consoleService:
       type: ClusterIP
       port: 9001
-
     resources:
       requests:
         memory: 256Mi
@@ -55,21 +49,15 @@ spec:
       limits:
         memory: 1Gi
         cpu: 500m
-
     priorityClassName: "critical-resilient"
-
     securityContext:
       enabled: false
-
     mode: distributed
-
     buckets:
       - name: mlflow
         policy: none
         purge: false
-
     ingress:
       enabled: false
-
     consoleIngress:
       enabled: false

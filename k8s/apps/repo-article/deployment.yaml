@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,7 +5,6 @@ metadata:
   namespace: apps
   labels:
     app: repo-article
-    type: backends
     tags.datadoghq.com/env: prod
     tags.datadoghq.com/service: repo-article
     tags.datadoghq.com/version: v1.5.1
@@ -28,6 +26,7 @@ spec:
         tags.datadoghq.com/service: repo-article
         tags.datadoghq.com/version: v1.5.1
     spec:
+      serviceAccountName: apps
       securityContext:
         runAsNonRoot: true
         runAsUser: 1011
@@ -36,34 +35,27 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
-
       imagePullSecrets:
         - name: pull-secret
-
       volumes:
         - name: apmsocketpath
           hostPath:
             path: /var/run/datadog/
-
       containers:
         - name: repo-article
           image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.5.1
           imagePullPolicy: IfNotPresent
-
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-
           volumeMounts:
             - name: apmsocketpath
               mountPath: /var/run/datadog
-
           ports:
             - containerPort: 8080
               name: http
-
           envFrom:
             - configMapRef:
                 name: repo-article-config
@@ -75,7 +67,6 @@ spec:
                 name: oidc-config
             - secretRef:
                 name: repo-article-secrets
-
           env:
             - name: DD_ENV
               valueFrom:
@@ -97,7 +88,6 @@ spec:
               value: "true"
             - name: DD_APPSEC_ENABLED
               value: "true"
-
           resources:
             requests:
               memory: "256Mi"
@@ -105,14 +95,12 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "250m"
-
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10
-
           readinessProbe:
             httpGet:
               path: /ready

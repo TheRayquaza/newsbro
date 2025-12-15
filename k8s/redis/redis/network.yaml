@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-network-policy
+  namespace: redis
+spec:
+  podSelector:
+    matchLabels: # both Redis and Redis Sentinel pods
+      app.kubernetes.io/managed-by: redis-operator
+      app.kubernetes.io/part-of: redis-failover
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow ingress from apps
+        - namespaceSelector:
+            matchLabels:
+              name: apps
+  egress:
+    - to: # Redis and Redis Sentinel access
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: redis-operator
+          namespaceSelector:
+            matchLabels:
+              name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

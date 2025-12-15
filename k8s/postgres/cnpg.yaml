@@ -1,4 +1,3 @@
----
 # https://fluxcd.io/flux/components/helm/helmreleases/
 # https://github.com/cloudnative-pg/charts/tree/main/charts/cloudnative-pg
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
@@ -22,26 +21,20 @@ spec:
     crds: CreateReplace
   values:
     replicaCount: 1
-
     image:
       repository: ghcr.io/cloudnative-pg/cloudnative-pg
       pullPolicy: IfNotPresent
       tag: "1.26.0"
-
     imagePullSecrets: []
-
     hostNetwork: false
     dnsPolicy: ""
-
     updateStrategy:
       type: RollingUpdate
       rollingUpdate:
         maxUnavailable: 1
         maxSurge: 1
-
     crds:
       create: true
-
     webhook:
       port: 9443
       mutating:
@@ -57,7 +50,6 @@ spec:
       startupProbe:
         failureThreshold: 6
         periodSeconds: 5
-
     config:
       create: true
       name: cnpg-controller-manager-config
@@ -65,19 +57,15 @@ spec:
       clusterWide: true
       data: {}
       maxConcurrentReconciles: 10
-
     serviceAccount:
       create: true
       name: ""
-
     rbac:
       create: true
       aggregateClusterRoles: false
-
     commonAnnotations: {}
     podAnnotations: {}
     podLabels: {}
-
     containerSecurityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: true
@@ -89,22 +77,18 @@ spec:
       capabilities:
         drop:
           - "ALL"
-
     podSecurityContext:
       runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
       fsGroup: 3003
-
     priorityClassName: "critical-resilient"
-
     service:
       type: ClusterIP
       name: cnpg-webhook-service
       port: 443
       ipFamilyPolicy: ""
       ipFamilies: []
-
     resources:
       requests:
         memory: "256Mi"
@@ -112,9 +96,7 @@ spec:
       limits:
         memory: "1Gi"
         cpu: "250m"
-
     nodeSelector: {}
-
     topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
@@ -124,13 +106,11 @@ spec:
             app.kubernetes.io/name: cloudnative-pg
     tolerations: []
     affinity: {}
-
     monitoring:
       podMonitorEnabled: false
       podMonitorMetricRelabelings: []
       podMonitorRelabelings: []
       podMonitorAdditionalLabels: {}
-
       grafanaDashboard:
         create: false
         namespace: ""
@@ -139,7 +119,6 @@ spec:
         sidecarLabelValue: "1"
         labels: {}
         annotations: {}
-
     # Default monitoring queries
     monitoringQueriesConfigMap:
       name: cnpg-default-monitoring

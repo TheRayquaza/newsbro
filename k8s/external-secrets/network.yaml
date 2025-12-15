@@ -1,0 +1,117 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: external-secrets-network-policy
+  namespace: external-secrets
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: external-secrets
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow probe
+        - ipBlock:
+            cidr: 10.42.0.0/16
+      ports:
+        - protocol: TCP
+          port: 9403
+    - from: # Allow metrics
+        - ipBlock:
+            cidr: 10.42.0.0/16
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: external-secrets-webhook-network-policy
+  namespace: external-secrets
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: external-secrets-webhook
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow probe
+        - ipBlock:
+            cidr: 10.42.0.0/16
+      ports:
+        - protocol: TCP
+          port: 8081
+    - from: # Allow metrics
+        - ipBlock:
+            cidr: 10.42.0.0/16
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from: # Allow webhook calls from Kubernetes API server
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: TCP
+          port: 10250
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: external-secrets-cert-controller-network-policy
+  namespace: external-secrets
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: external-secrets-cert-controller
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow probe
+        - ipBlock:
+            cidr: 10.42.0.0/16
+      ports:
+        - protocol: TCP
+          port: 8081
+    - from: # Allow metrics
+        - ipBlock:
+            cidr: 10.42.0.0/16
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

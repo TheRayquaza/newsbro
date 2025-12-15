@@ -20,6 +20,7 @@ spec:
       labels:
         app: port-front
     spec:
+      serviceAccountName: apps
       # securityContext:
       #   runAsNonRoot: true
       #   runAsUser: 1009
@@ -31,7 +32,6 @@ spec:
 
       imagePullSecrets:
         - name: pull-secret
-
       containers:
         - name: port-front
           image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.6.2
@@ -42,13 +42,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: port-front-config
-
           # securityContext:
           #   allowPrivilegeEscalation: false
           #   readOnlyRootFilesystem: false # for /var/cache/nginx/client_temp usage
           #   capabilities:
           #     drop: ["ALL"]
-
           resources:
             requests:
               memory: "256Mi"
@@ -56,7 +54,6 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "250m"
-
           readinessProbe:
             httpGet:
               path: /health

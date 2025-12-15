@@ -41,12 +41,11 @@ spec:
           http: 80
           https: 443
       priorityClassName: "critical-resilient"
-
-
+      networkPolicy:
+        enabled: true
       hostNetwork: false
       replicaCount: 2
       logLevel: info
-
       # podSecurityContext:
       #   fsGroup: 3005
       #   fsGroupChangePolicy: OnRootMismatch
@@ -64,7 +63,6 @@ spec:
       #     drop: ["ALL"]
       #   seccompProfile:
       #     type: RuntimeDefault
-
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
@@ -74,7 +72,6 @@ spec:
               app.kubernetes.io/name: ingress-nginx
               app.kubernetes.io/instance: ingress-nginx-private
               app.kubernetes.io/component: controller
-
       resources:
         requests:
           memory: 256Mi

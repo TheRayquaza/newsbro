@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: strimzi-cluster-operator-policy
+  namespace: kafka
+spec:
+  podSelector:
+    matchLabels:
+      name: strimzi-cluster-operator
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: kafka
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to: # All Kafka components managed by Strimzi
+        - namespaceSelector:
+            matchLabels:
+              name: kafka
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: strimzi-cluster-operator
+      ports:
+        - protocol: TCP
+          port: 9092 # Kafka listener
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kafka
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - namespaceSelector: {} # API server
+      ports:
+        - protocol: TCP
+          port: 443

@@ -1,0 +1,23 @@
+name: k8s
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - 'k8s/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install yamlfmt
+        run: |
+          curl -sSL https://github.com/google/yamlfmt/releases/latest/download/yamlfmt_linux_amd64 -o /usr/local/bin/yamlfmt
+          chmod +x /usr/local/bin/yamlfmt
+
+      - name: Lint YAML files
+        run: |
+          /usr/local/bin/yamlfmt k8s

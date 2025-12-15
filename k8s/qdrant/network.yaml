@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: qdrant-network-policy
+  namespace: qdrant
+spec:
+  podSelector:
+    matchLabels:
+      app: qdrant
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow ingress from ingress-nginx-private
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/instance: ingress-nginx-private
+      ports:
+        - protocol: TCP
+          port: 6333 # qdrant service
+    - from: # Allow ingress from apps srvc-inference
+        - namespaceSelector:
+            matchLabels:
+              name: apps
+          podSelector:
+            matchLabels:
+              app: srvc-inference
+      ports:
+        - protocol: TCP
+          port: 6333
+        - protocol: TCP
+          port: 6334
+        - protocol: TCP
+          port: 6335
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

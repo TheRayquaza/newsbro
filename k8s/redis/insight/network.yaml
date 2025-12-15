@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redisinsight-network-policy
+  namespace: redis
+spec:
+  podSelector:
+    matchLabels:
+      app: redisinsight
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from: # Allow ingress from ingress-nginx-private
+        - podSelector:
+            matchLabels:
+              kubernetes.io/instance: ingress-nginx-private
+          namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 5540
+  egress:
+    - to: # Redis and Redis Sentinel access
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: redis-operator
+          namespaceSelector:
+            matchLabels:
+              name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

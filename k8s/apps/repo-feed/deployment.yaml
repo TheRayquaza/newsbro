@@ -5,7 +5,6 @@ metadata:
   namespace: apps
   labels:
     app: repo-feed
-    type: backends
     tags.datadoghq.com/env: prod
     tags.datadoghq.com/service: repo-feed
     tags.datadoghq.com/version: v1.2.2
@@ -27,6 +26,7 @@ spec:
         tags.datadoghq.com/service: repo-feed
         tags.datadoghq.com/version: v1.2.2
     spec:
+      serviceAccountName: apps
       securityContext:
         runAsNonRoot: true
         runAsUser: 1012
@@ -35,34 +35,27 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
-
       imagePullSecrets:
         - name: pull-secret
-
       volumes:
         - name: apmsocketpath
           hostPath:
             path: /var/run/datadog/
-
       containers:
         - name: repo-feed
           image: ghcr.io/therayquaza/newsbro/repo-feed:repo-feed-v1.2.2
           imagePullPolicy: IfNotPresent
-
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-
           volumeMounts:
             - name: apmsocketpath
               mountPath: /var/run/datadog
-
           ports:
             - containerPort: 8080
               name: http
-
           envFrom:
             - configMapRef:
                 name: repo-feed-config
@@ -76,7 +69,6 @@ spec:
                 name: repo-feed-secrets
             - secretRef:
                 name: oidc-secrets
-
           env:
             - name: DD_ENV
               valueFrom:
@@ -98,7 +90,6 @@ spec:
               value: "true"
             - name: DD_APPSEC_ENABLED
               value: "true"
-
           resources:
             requests:
               memory: "256Mi"
@@ -106,14 +97,12 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "250m"
-
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10
-
           readinessProbe:
             httpGet:
               path: /ready
