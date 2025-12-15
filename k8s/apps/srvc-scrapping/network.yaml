@@ -16,7 +16,12 @@ spec:
     - Egress
   
   ingress:
-    - {}
+    - from: # Allow probe
+        - ipBlock:
+            cidr: 10.42.0.0/16
+      ports:
+        - protocol: TCP
+          port: 8080
   
   egress:
     - to:
@@ -50,13 +55,3 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    
-    - to:
-        - namespaceSelector:
-            matchExpressions:
-              - key: name
-                operator: DoesNotExist
-          podSelector:
-            matchExpressions:
-              - key: name
-                operator: DoesNotExist

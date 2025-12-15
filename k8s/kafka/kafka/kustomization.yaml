@@ -6,3 +6,4 @@ resources:
 - kafka-controllers.yaml
 - kafka-topics.yaml
 - kafka.yaml
+- network.yaml

@@ -7,3 +7,4 @@ resources:
   - hpa.yaml
   - secrets.yaml
   - configmap.yaml
+  - network.yaml

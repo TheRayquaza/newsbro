@@ -29,3 +29,33 @@ spec:
                 name: port-front
                 port:
                   number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: port-front-redirect
+  namespace: apps
+  labels:
+    app: port-front
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns01
+    nginx.ingress.kubernetes.io/permanent-redirect: "https://app.newsbro.cc/$1"
+spec:
+  ingressClassName: public
+
+  tls:
+    - hosts:
+        - newsbro.cc
+      secretName: newsbro-wildcard-tls
+
+  rules:
+    - host: newsbro.cc
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: port-front
+                port:
+                  number: 80

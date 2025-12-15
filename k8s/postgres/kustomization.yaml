@@ -7,3 +7,4 @@ resources:
 - cluster.yaml
 - dbs.yaml
 - db-secrets.yaml
+- network.yaml

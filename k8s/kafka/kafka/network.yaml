@@ -1,0 +1,77 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-broker-policy
+  namespace: kafka
+spec:
+  podSelector:
+    matchLabels:
+      strimzi.io/name: kafka-kafka
+      strimzi.io/pool-name: broker
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: kafka-kafka
+              strimzi.io/pool-name: broker
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: kafka-kafka
+              strimzi.io/pool-name: controller
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: kafka-entity-operator
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: kafka-exporter
+      ports:
+        - protocol: TCP
+          port: 9092  # broker listener port
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: kafka-kafka
+              strimzi.io/pool-name: broker
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: kafka-kafka
+              strimzi.io/pool-name: controller
+      ports:
+        - protocol: TCP
+          port: 9092
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-controller-policy
+  namespace: kafka
+spec:
+  podSelector:
+    matchLabels:
+      strimzi.io/name: kafka-kafka
+      strimzi.io/pool-name: controller
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: kafka-kafka
+              strimzi.io/pool-name: broker
+      ports:
+        - protocol: TCP
+          port: 9092
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              strimzi.io/name: kafka-kafka
+              strimzi.io/pool-name: broker
+      ports:
+        - protocol: TCP
+          port: 9092

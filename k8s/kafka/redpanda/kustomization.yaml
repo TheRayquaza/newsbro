@@ -5,3 +5,4 @@ resources:
 - redpanda.yaml
 - repo.yaml
 - ingress.yaml
+- network.yaml

@@ -12,10 +12,37 @@ spec:
     - Egress
 
   ingress:
-    - {}
+    - from: # Allow ingress from ingress-nginx-public
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/instance: ingress-nginx-private
+      ports:
+        - protocol: TCP
+          port: 9001  # minio console
+
+    - from: # Allow MinIO cluster communication
+        - podSelector:
+            matchLabels:
+              app: minio
+      ports:
+        - protocol: TCP
+          port: 9000
+        - protocol: TCP
+          port: 9001
+
+    - from: # Allow mlflow access
+        - namespaceSelector:
+            matchLabels:
+              name: mlflow
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mlflow
+      ports:
+        - protocol: TCP
+          port: 9000
 
   egress:
-    - to:
+    - to: # Allow MinIO cluster communication
         - podSelector:
             matchLabels:
               app: minio
@@ -35,13 +62,3 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-
-    - to:
-        - namespaceSelector:
-            matchExpressions:
-              - key: name
-                operator: DoesNotExist
-          podSelector:
-            matchExpressions:
-              - key: name
-                operator: DoesNotExist

@@ -1,43 +1,37 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: mlflow-network-policy
-  namespace: mlflow
+  name: redisinsght-network-policy
+  namespace: redis
 spec:
   podSelector:
     matchLabels:
-      app: mlflow
+      app: redisinsight
   policyTypes:
     - Ingress
     - Egress
   
   ingress:
     - from: # Allow ingress from ingress-nginx-private
-        - namespaceSelector:
+        - podSelector:
             matchLabels:
               kubernetes.io/instance: ingress-nginx-private
       ports:
         - protocol: TCP
-          port: 5000  # mlflow service
-  
+          port: 5540
   egress:
-    - to:
+    - to: # Redis and Redis Sentinel access
         - podSelector:
             matchLabels:
-              cnpg.io/cluster: postgres-cluster
-      ports:
-        - protocol: TCP
-          port: 5432
-
-    - to:
-        - podSelector:
+              app.kubernetes.io/managed-by: redis-operator
+          namespaceSelector:
             matchLabels:
-              app: minio
+              name: redis
       ports:
         - protocol: TCP
-          port: 9000
+          port: 6379
         - protocol: TCP
-          port: 9001
+          port: 26379
 
     - to:
         - namespaceSelector: {}

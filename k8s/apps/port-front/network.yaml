@@ -1,12 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: repo-account-network-policy
+  name: port-front-network-policy
   namespace: apps
 spec:
   podSelector:
     matchLabels:
-      app: repo-account
+      app: port-front
   policyTypes:
     - Ingress
     - Egress
@@ -28,17 +28,6 @@ spec:
           port: 8080
 
   egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: databases
-          podSelector:
-            matchLabels:
-              cnpg.io/cluster: postgres-cluster
-      ports:
-        - protocol: TCP
-          port: 5432
-
     - to:
         - namespaceSelector: {}
           podSelector:

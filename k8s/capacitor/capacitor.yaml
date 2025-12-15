@@ -22,7 +22,7 @@ spec:
 
     authorization:
       impersonateSaRules: "noauth=flux-system:capacitor-next-builtin-editor"
-    
+
     clusters:
     - id: in-cluster
       name: In-cluster

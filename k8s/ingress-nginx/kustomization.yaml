@@ -5,3 +5,4 @@ resources:
 - ingress-private.yaml
 - ingress-public.yaml
 - repo.yaml
+- network.yaml

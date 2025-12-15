@@ -7,3 +7,4 @@ resources:
   - ingress.yaml
   - hpa.yaml
   - configmap.yaml
+  - network.yaml

@@ -1,25 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: repo-feed-network-policy
+  name: srvc-drift-network-policy
   namespace: apps
 spec:
   podSelector:
     matchLabels:
-      app: repo-feed
+      app: srvc-drift
   policyTypes:
     - Ingress
     - Egress
 
   ingress:
-    - from: # Allow public ingress
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/instance: ingress-nginx-public
-      ports:
-        - protocol: TCP
-          port: 8080
-
     - from: # Allow probe
         - ipBlock:
             cidr: 10.42.0.0/16
@@ -61,6 +53,18 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
+
+    - to:
+        - podSelector:
+            matchLabels:
+              app: qdrant
+      ports:
+        - protocol: TCP
+          port: 6333
+        - protocol: TCP
+          port: 6334
+        - protocol: TCP
+          port: 6335
 
     - to:
         - namespaceSelector: {}

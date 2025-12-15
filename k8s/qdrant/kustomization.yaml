@@ -6,3 +6,4 @@ resources:
 - qdrant.yaml
 - secrets.yaml
 - ingress.yaml
+- network.yaml

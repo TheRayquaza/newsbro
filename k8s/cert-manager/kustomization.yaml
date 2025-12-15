@@ -7,3 +7,4 @@ resources:
 - cluster-issuer.yaml
 - certificate.yaml
 - secret.yaml
+- network.yaml

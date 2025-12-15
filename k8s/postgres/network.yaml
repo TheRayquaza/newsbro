@@ -1,44 +1,29 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: repo-account-network-policy
-  namespace: apps
+  name: postgres-network-policy
+  namespace: postgres
 spec:
   podSelector:
     matchLabels:
-      app: repo-account
+      app: postgres
   policyTypes:
     - Ingress
     - Egress
-
+  
   ingress:
-    - from: # Allow public ingress
+    - from: # Allow ingress from apps and mlflow
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/instance: ingress-nginx-public
-      ports:
-        - protocol: TCP
-          port: 8080
-
-    - from: # Allow probe
-        - ipBlock:
-            cidr: 10.42.0.0/16
-      ports:
-        - protocol: TCP
-          port: 8080
-
-  egress:
-    - to:
+              name: apps
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: databases
-          podSelector:
-            matchLabels:
-              cnpg.io/cluster: postgres-cluster
+              name: mlflow
       ports:
         - protocol: TCP
           port: 5432
-
+  
+  egress:
     - to:
         - namespaceSelector: {}
           podSelector:
