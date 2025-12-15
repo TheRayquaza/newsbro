@@ -110,6 +110,7 @@ const Home = () => {
         end_date: endOfWeek.toISOString(),
         limit: ARTICLES_PER_PAGE,
         offset: (page - 1) * ARTICLES_PER_PAGE,
+        sort_by: 'date'
       })
         .then(response => {
           const newArticles = response.articles || [];

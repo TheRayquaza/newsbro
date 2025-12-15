@@ -7,7 +7,7 @@ metadata:
     app: repo-article
     tags.datadoghq.com/env: prod
     tags.datadoghq.com/service: repo-article
-    tags.datadoghq.com/version: v1.5.1
+    tags.datadoghq.com/version: v1.5.2
 spec:
   strategy:
     type: RollingUpdate
@@ -24,7 +24,7 @@ spec:
         monitoring: "enabled"
         tags.datadoghq.com/env: prod
         tags.datadoghq.com/service: repo-article
-        tags.datadoghq.com/version: v1.5.1
+        tags.datadoghq.com/version: v1.5.2
     spec:
       serviceAccountName: apps
       securityContext:
@@ -43,7 +43,7 @@ spec:
             path: /var/run/datadog/
       containers:
         - name: repo-article
-          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.5.1
+          image: ghcr.io/therayquaza/newsbro/repo-article:repo-article-v1.5.2
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

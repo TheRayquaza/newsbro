@@ -112,6 +112,7 @@ export default class ArticlesApi {
       'feed_name': opts['feed_name'],
       'search': opts['search'],
       'limit': opts['limit'],
+      'sort_by': opts['sort_by'],
       'offset': opts['offset'],
       'count': opts['count']
     };

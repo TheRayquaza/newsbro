@@ -12,4 +12,5 @@ type ArticleFilters struct {
 	Count       bool       `form:"count,default=false"`
 	Limit       uint       `form:"limit,default=10"`
 	Offset      uint       `form:"offset,default=0"`
+	SortBy      string     `form:"sort_by,default=none"`
 }

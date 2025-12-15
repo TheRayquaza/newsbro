@@ -34,7 +34,7 @@ spec:
         - name: pull-secret
       containers:
         - name: port-front
-          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.6.2
+          image: ghcr.io/therayquaza/newsbro/port-front:port-front-v1.6.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

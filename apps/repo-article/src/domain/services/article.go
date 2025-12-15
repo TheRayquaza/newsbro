@@ -211,6 +211,9 @@ func (as *ArticleService) GetArticles(userID uint, filters *dto.ArticleFilters) 
 	if filters.EndDate != nil {
 		query = query.Where("published_at <= ?", filters.EndDate)
 	}
+	if filters.SortBy == "date" {
+		query = query.Order("published_at DESC")
+	}
 	if filters.FeedName != "" {
 		query = query.Preload("RSS")
 		query = query.Where("rss_name = ?", filters.FeedName) // TODO: make something smarter here
