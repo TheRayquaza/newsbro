@@ -20,4 +20,4 @@ jobs:
 
       - name: Lint YAML files
         run: |
-          yamlfmt k8s
+          /usr/local/bin/yamlfmt k8s
