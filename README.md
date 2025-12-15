@@ -12,6 +12,8 @@ from various sources. We also provide new recommendation based on your liked art
 
 Feel free to open issues if you see anything relevant that could be added.
 
+![presentation.pdf](./assets/presentation.pdf))
+
 ⚠ App will be down at the end of our project (~ January 2026)
 
 ## Table of Contents
@@ -33,6 +35,7 @@ Feel free to open issues if you see anything relevant that could be added.
     - [repo-feed](./apps/repo-feed/README.md)
     - [srvc-inference](./apps/srvc-inference/README.md)
     - [srvc-scrapping](./apps/srvc-scrapping/README.md)
+    - [srvc-drift](./apps/srvc-drift/README.md)
 - [Deployment](#deployment)
     - [Deployment Specifications](#deployment-specifications)
 
@@ -57,6 +60,7 @@ All internal data will be securely erased once the project concludes.
 │   ├── port-front
 │   ├── srvc-scrapping
 │   ├── srvc-search
+│   ├── srvc-drift
 │   └── srvc-inference
 ├── docs
 ├── dev                          # dev folder for various dev operations
@@ -88,6 +92,7 @@ The project is built with a microservices architecture including the following c
 - `srvc-scrapping`: Scrapping for articles, ingest to kafka
 - `srvc-search`: Search service
 - `srvc-inference`: Inference service to provide update user feeds
+- `srvc-drift`: Drift service to provide insights on potential data drift
 - `repo-feed`: Service providing the user feed
 - `port-front`: main frontend
 
@@ -149,7 +154,3 @@ To deploy the whole stack, just use:
 ```bash
 kubectl apply -k k8s/flux/flux-system
 ```
-
-### Deployment Specifications
-
-TODO
