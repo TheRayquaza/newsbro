@@ -50,9 +50,6 @@ spec:
       pullPolicy: IfNotPresent
     clusterResourceNamespace: ""
     namespace: "cert-manager"
-    serviceAccount:
-      create: true
-      automountServiceAccountToken: true
     config: {}
     dns01RecursiveNameserversOnly: false
     disableAutoApproval: false
