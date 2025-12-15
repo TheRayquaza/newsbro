@@ -1,16 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- crds.yaml
-- source-controller.yaml
-- kustomize-controller.yaml
-- helm-controller.yaml
-- notification-controller.yaml
-- image-reflector-controller.yaml
-- image-automation-controller.yaml
-- namespace.yaml
-- roles.yaml
-- source.yaml
-- alerts
-- system
-- ../apps
+  - crds.yaml
+  - source-controller.yaml
+  - kustomize-controller.yaml
+  - helm-controller.yaml
+  - notification-controller.yaml
+  - image-reflector-controller.yaml
+  - image-automation-controller.yaml
+  - namespace.yaml
+  - roles.yaml
+  - source.yaml
+  - alerts
+  - system
+  - ../apps

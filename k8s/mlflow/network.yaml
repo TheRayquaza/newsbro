@@ -10,35 +10,40 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-  
   ingress:
     - from: # Allow ingress from ingress-nginx-private
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/instance: ingress-nginx-private
+              name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: ingress-nginx-private
       ports:
         - protocol: TCP
-          port: 5000  # mlflow service
-  
+          port: 5000 # mlflow service
   egress:
     - to:
         - podSelector:
             matchLabels:
               cnpg.io/cluster: postgres-cluster
+          namespaceSelector:
+            matchLabels:
+              name: postgres
       ports:
         - protocol: TCP
           port: 5432
-
     - to:
         - podSelector:
             matchLabels:
               app: minio
+          namespaceSelector:
+            matchLabels:
+              name: minio
       ports:
         - protocol: TCP
           port: 9000
         - protocol: TCP
           port: 9001
-
     - to:
         - namespaceSelector: {}
           podSelector:

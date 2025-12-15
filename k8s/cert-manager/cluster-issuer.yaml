@@ -10,9 +10,9 @@ spec:
     privateKeySecretRef:
       name: letsencrypt-dns01-key
     solvers:
-    - dns01:
-        cloudflare:
-          email: mateo.lelong@gmail.com
-          apiTokenSecretRef:
-            name: cloudflare
-            key: CLOUDFLARE_API_TOKEN
+      - dns01:
+          cloudflare:
+            email: mateo.lelong@gmail.com
+            apiTokenSecretRef:
+              name: cloudflare
+              key: CLOUDFLARE_API_TOKEN

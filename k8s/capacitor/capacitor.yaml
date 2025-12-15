@@ -17,7 +17,6 @@ spec:
       AUTH: noauth
       AUTH_DEBUG: "true"
       IMPERSONATE_SA_RULES: "noauth=flux-system:capacitor-next-preset-clusteradmin"
-
       SESSION_HASH_KEY: "base64:E3umY2bA87DmllnagrtcT6Uv2Ll6w1oQAY9DUgyUHCE="
       SESSION_BLOCK_KEY: "base64:E3umY2bA87DmllnagrtcT6Uv2Ll6w1oQAY9DUgyUHCE="
       registry.yaml: |
@@ -28,6 +27,5 @@ spec:
           certificateAuthorityFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
           serviceAccount:
             tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-
     existingSecrets:
       - name: capacitor-next

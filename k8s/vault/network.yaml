@@ -10,7 +10,6 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-  
   ingress:
     - from: # Allow ingress from external-secrets
         - namespaceSelector:

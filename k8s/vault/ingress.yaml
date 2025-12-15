@@ -11,12 +11,10 @@ metadata:
     nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
 spec:
   ingressClassName: private
-  
   tls:
     - hosts:
         - vault.internal.newsbro.cc
       secretName: newsbro-wildcard-tls
-
   rules:
     - host: vault.internal.newsbro.cc
       http:

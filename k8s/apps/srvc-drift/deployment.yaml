@@ -34,34 +34,27 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
-
       imagePullSecrets:
         - name: pull-secret
-
       volumes:
         - name: apmsocketpath
           hostPath:
             path: /var/run/datadog/
-
       containers:
         - name: srvc-drift
           image: ghcr.io/therayquaza/newsbro/srvc-drift:srvc-drift-v0.1.1
           imagePullPolicy: IfNotPresent
-
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-
           volumeMounts:
             - name: apmsocketpath
               mountPath: /var/run/datadog
-
           ports:
             - containerPort: 8080
               name: http
-
           envFrom:
             - configMapRef:
                 name: srvc-drift-config
@@ -88,7 +81,6 @@ spec:
               value: "true"
             - name: DD_APPSEC_ENABLED
               value: "true"
-
           resources:
             requests:
               memory: "256Mi"
@@ -96,14 +88,12 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "250m"
-
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10
-
           readinessProbe:
             httpGet:
               path: /health

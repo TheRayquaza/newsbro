@@ -1,20 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: srvc-inference-network-policy
+  name: srvc-scrapping-network-policy
   namespace: apps
 spec:
   podSelector:
-    matchExpressions:
-      - key: app
-        operator: In
-        values:
-          - srvc-inference-sbert
-          - srvc-inference-tfidf
+    matchLabels:
+      app: srvc-scrapping
   policyTypes:
     - Ingress
     - Egress
-  
   ingress:
     - from: # Allow probe
         - ipBlock:
@@ -22,16 +17,17 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
-  
   egress:
     - to:
         - podSelector:
             matchLabels:
               cnpg.io/cluster: postgres-cluster
+          namespaceSelector:
+            matchLabels:
+              name: postgres
       ports:
         - protocol: TCP
           port: 5432
-
     - to:
         - podSelector:
             matchLabels:
@@ -39,12 +35,14 @@ spec:
               strimzi.io/cluster: kafka
               strimzi.io/kind: Kafka
               strimzi.io/name: kafka-kafka
+          namespaceSelector:
+            matchLabels:
+              name: kafka
       ports:
         - protocol: TCP
           port: 9091
         - protocol: TCP
           port: 9092
-
     - to:
         - namespaceSelector: {}
           podSelector:

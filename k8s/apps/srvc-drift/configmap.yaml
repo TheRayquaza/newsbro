@@ -9,24 +9,20 @@ data:
   DRIFT__DATABASE__MAX_CONNECTIONS: "20"
   DRIFT__DATABASE__MIN_CONNECTIONS: "5"
   DRIFT__DATABASE__ACQUIRE_TIMEOUT_SECONDS: "30"
-
   # Kafka Configuration
   DRIFT__KAFKA__BOOTSTRAP_SERVERS: "kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
   DRIFT__KAFKA__INFERENCE_TOPIC: "inference-command"
   DRIFT__KAFKA__FEEDBACK_TOPIC: "feedback-aggregate"
   DRIFT__KAFKA__CONSUMER_GROUP: "srvc-drift-group"
-
   # Redis Configuration (optional)
   DRIFT__REDIS__URL: "redis://rfs-kv.redis.svc.cluster.local:26379"
   DRIFT__REDIS__POOL_SIZE: "10"
-
   # Discord Configuration
   # DRIFT__DISCORD__WEBHOOK_URL: "xxx"
   DRIFT__DISCORD__USERNAME: "Drift Monitor"
   DRIFT__DISCORD__ALERT_THRESHOLDS__DRIFT_WARNING: "0.1"
   DRIFT__DISCORD__ALERT_THRESHOLDS__DRIFT_CRITICAL: "0.3"
   DRIFT__DISCORD__ALERT_THRESHOLDS__DISLIKE_RATIO_WARNING: "0.3"
-
   # Qdrant Configuration
   DRIFT__QDRANT__URL: "http://qdrant.qdrant.svc.cluster.local:6334"
   DRIFT__QDRANT__COLLECTION_PREFIX: "articles"
@@ -38,14 +34,11 @@ data:
   DRIFT__DRIFT__BASELINE_WINDOW_HOURS: "168"
   DRIFT__DRIFT__MIN_SAMPLES_FOR_DRIFT: "100"
   DRIFT__DRIFT__EMBEDDING_DIMENSION: "1536"
-
   # Server Configuration
   DRIFT__SERVER__HOST: "0.0.0.0"
   DRIFT__SERVER__PORT: "8080"
-
   # Reporting Configuration
   DRIFT__REPORTING__INTERVAL_SECONDS: "3600"
   DRIFT__REPORTING__INCLUDE_EMBEDDINGS_SAMPLE: "false"
-
   # Logging Configuration
   RUST_LOG: "info,srvc_drift=debug"

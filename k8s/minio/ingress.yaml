@@ -10,12 +10,10 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "5G"
 spec:
   ingressClassName: private
-
   tls:
     - hosts:
         - minio.internal.newsbro.cc
       secretName: newsbro-wildcard-tls
-
   rules:
     - host: minio.internal.newsbro.cc
       http:

@@ -21,22 +21,18 @@ spec:
     log:
       level: info
       enabled: false
-
     ingress:
       enabled: false
-
     extraVolumes:
       - name: mlflow-volume
         persistentVolumeClaim:
           claimName: mlflow-pvc
-
     extraVolumeMounts:
       - name: mlflow-volume
         mountPath: /tmp
       - name: mlflow-volume
         mountPath: /mlflow/mlruns
         subPath: mlruns
-
     service:
       name: http
       port: 5000
@@ -44,14 +40,11 @@ spec:
       enabled: true
       containerPort: 5000
       containerPortName: mlflow
-
     strategy:
       type: RollingUpdate
-
     extraArgs:
       workers: "6"
       gunicorn-opts: "--timeout 300 --graceful-timeout 300 --log-level info"
-
     resources:
       limits:
         cpu: "1"
@@ -59,10 +52,8 @@ spec:
       requests:
         cpu: 500m
         memory: 1Gi
-
     telemetry:
       enabled: true
-
     autoscaling:
       enabled: true
       minReplicas: 1
@@ -74,7 +65,6 @@ spec:
             target:
               type: Utilization
               averageUtilization: 90
-
     artifactRoot:
       proxiedArtifactStorage: true
       s3:
@@ -84,7 +74,6 @@ spec:
           name: "mlflow-s3-secret"
           keyOfAccessKeyId: "username"
           keyOfSecretAccessKey: "password"
-
     backendStore:
       postgres:
         enabled: true
@@ -98,45 +87,36 @@ spec:
         name: "mlflow-db-secret"
         usernameKey: "username"
         passwordKey: "password"
-
     extraEnvVars:
       # S3 Configuration
       AWS_DEFAULT_REGION: "us-east-1"
       MLFLOW_S3_IGNORE_TLS: true
       MLFLOW_S3_ENDPOINT_URL: "http://minio-new-svc.minio.svc.cluster.local:9000"
-
       # Database Connection Pooling
-      MLFLOW_SQLALCHEMYSTORE_POOL_SIZE: "10"  # SQLAlchemy connection pool size
-      MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW: "20"  # SQLAlchemy max overflow connections
-      MLFLOW_SQLALCHEMYSTORE_POOL_RECYCLE: "3600"  # SQLAlchemy pool recycle time
-
+      MLFLOW_SQLALCHEMYSTORE_POOL_SIZE: "10" # SQLAlchemy connection pool size
+      MLFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW: "20" # SQLAlchemy max overflow connections
+      MLFLOW_SQLALCHEMYSTORE_POOL_RECYCLE: "3600" # SQLAlchemy pool recycle time
       # Logging and Monitoring
-      MLFLOW_LOGGING_LEVEL: "INFO"  # MLflow logging level
-      MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: "true"  # Enable system metrics logging
-      MLFLOW_SYSTEM_METRICS_SAMPLING_INTERVAL: "1.0"  # System metrics sampling interval
-
+      MLFLOW_LOGGING_LEVEL: "INFO" # MLflow logging level
+      MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING: "true" # Enable system metrics logging
+      MLFLOW_SYSTEM_METRICS_SAMPLING_INTERVAL: "1.0" # System metrics sampling interval
     extraFlags:
       - serveArtifacts
-
     replicaCount: 1
-
     livenessProbe:
       periodSeconds: 30
       timeoutSeconds: 3
       failureThreshold: 5
       initialDelaySeconds: 10
-
     readinessProbe:
       periodSeconds: 30
       timeoutSeconds: 3
       failureThreshold: 5
       initialDelaySeconds: 10
-
     serviceAccount:
       name: ""
       create: true
       automount: true
-
     securityContext:
       runAsUser: 1003
       runAsNonRoot: true
@@ -147,7 +127,6 @@ spec:
         drop: ["ALL"]
       seccompProfile:
         type: RuntimeDefault
-
     podSecurityContext:
       fsGroup: 2003
       runAsUser: 1003

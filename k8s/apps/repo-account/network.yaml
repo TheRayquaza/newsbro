@@ -10,35 +10,34 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-
   ingress:
     - from: # Allow public ingress
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/instance: ingress-nginx-public
+              name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: ingress-nginx-public
       ports:
         - protocol: TCP
           port: 8080
-
     - from: # Allow probe
         - ipBlock:
             cidr: 10.42.0.0/16
       ports:
         - protocol: TCP
           port: 8080
-
   egress:
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: databases
+              name: postgres
           podSelector:
             matchLabels:
               cnpg.io/cluster: postgres-cluster
       ports:
         - protocol: TCP
           port: 5432
-
     - to:
         - namespaceSelector: {}
           podSelector:

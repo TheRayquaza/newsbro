@@ -10,7 +10,6 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-
   ingress:
     - from: # Allow probe
         - ipBlock:
@@ -18,14 +17,12 @@ spec:
       ports:
         - protocol: TCP
           port: 9403
-
     - from: # Allow metrics
         - ipBlock:
             cidr: 10.42.0.0/16
       ports:
         - protocol: TCP
           port: 9402
-
   egress:
     - to:
         - namespaceSelector: {}
@@ -50,7 +47,6 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-
   ingress:
     - from: # Allow probe
         - ipBlock:
@@ -58,14 +54,12 @@ spec:
       ports:
         - protocol: TCP
           port: 9403
-
     - from: # Allow metrics
         - ipBlock:
             cidr: 10.42.0.0/16
       ports:
         - protocol: TCP
           port: 9402
-
     - from: # Allow webhook calls from Kubernetes API server
         - namespaceSelector:
             matchLabels:

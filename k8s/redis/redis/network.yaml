@@ -11,7 +11,6 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-  
   ingress:
     - from: # Allow ingress from apps
         - namespaceSelector:
@@ -30,7 +29,6 @@ spec:
           port: 6379
         - protocol: TCP
           port: 26379
-
     - to:
         - namespaceSelector: {}
           podSelector:

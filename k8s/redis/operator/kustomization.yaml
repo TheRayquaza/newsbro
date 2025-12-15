@@ -1,5 +1,5 @@
 kind: Kustomization
 resources:
-- operator.yaml
-- repo.yaml
-- namespace.yaml
+  - operator.yaml
+  - repo.yaml
+  - namespace.yaml

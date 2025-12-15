@@ -1,4 +1,3 @@
----
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -13,12 +12,12 @@ spec:
     name: flux-system
     namespace: flux-system
   healthChecks:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: helm-release-operator-redis-operator
-    namespace: redis
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: helm-release-operator-redis-operator
+      namespace: redis
   dependsOn:
-  - name: external-secrets
+    - name: external-secrets
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -34,20 +33,20 @@ spec:
     name: flux-system
     namespace: flux-system
   dependsOn:
-  - name: redis-operator
+    - name: redis-operator
   healthChecks:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: rfs-kv
-    namespace: redis
-  - apiVersion: v1
-    kind: Service
-    name: rfs-kv
-    namespace: redis
-  - apiVersion: apps/v1
-    kind: StatefulSet
-    name: rfr-kv
-    namespace: redis
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: rfs-kv
+      namespace: redis
+    - apiVersion: v1
+      kind: Service
+      name: rfs-kv
+      namespace: redis
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      name: rfr-kv
+      namespace: redis
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -63,14 +62,14 @@ spec:
     name: flux-system
     namespace: flux-system
   dependsOn:
-  - name: redis-operator
-  - name: redis
+    - name: redis-operator
+    - name: redis
   healthChecks:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: redisinsight
-    namespace: redis
-  - apiVersion: v1
-    kind: Service
-    name: redisinsight-service
-    namespace: redis
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: redisinsight
+      namespace: redis
+    - apiVersion: v1
+      kind: Service
+      name: redisinsight-service
+      namespace: redis

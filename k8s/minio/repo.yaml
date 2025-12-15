@@ -1,4 +1,3 @@
----
 # https://fluxcd.io/flux/components/source/helmrepositories/
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository

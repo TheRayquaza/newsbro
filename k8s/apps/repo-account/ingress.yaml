@@ -11,12 +11,10 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
   ingressClassName: public
-  
   tls:
     - hosts:
         - account.newsbro.cc
       secretName: newsbro-wildcard-tls
-
   rules:
     - host: account.newsbro.cc
       http:
@@ -25,20 +23,20 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: repo-account 
+                name: repo-account
                 port:
                   number: 80
           - path: /api/v1/auth
             pathType: Prefix
             backend:
               service:
-                name: repo-account 
+                name: repo-account
                 port:
                   number: 80
           - path: /complete/epita
             pathType: Prefix
             backend:
               service:
-                name: repo-account 
+                name: repo-account
                 port:
                   number: 80

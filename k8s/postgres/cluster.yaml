@@ -1,4 +1,3 @@
----
 # https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-ClusterSpec
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -12,12 +11,12 @@ spec:
   maxSyncReplicas: 0
   minSyncReplicas: 0
   topologySpreadConstraints:
-  - maxSkew: 1
-    topologyKey: kubernetes.io/hostname
-    whenUnsatisfiable: ScheduleAnyway
-    labelSelector:
-      matchLabels:
-        cnpg.io/cluster: postgres-cluster
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          cnpg.io/cluster: postgres-cluster
   priorityClassName: "critical-resilient"
   backup:
     barmanObjectStore:
@@ -32,37 +31,37 @@ spec:
           key: MINIO_SECRET_KEY
   managed:
     roles:
-    - name: admin
-      ensure: present
-      login: true
-      superuser: true
-      passwordSecret:
-        name: admin-db-secret
-    - name: mlflow
-      ensure: present
-      login: true
-      passwordSecret:
-        name: mlflow-db-secret
-    - name: repo-account
-      ensure: present
-      login: true
-      passwordSecret:
-        name: repo-account-db-secret
-    - name: repo-article
-      ensure: present
-      login: true
-      passwordSecret:
-        name: repo-article-db-secret
-    - name: srvc-scrapping
-      ensure: present
-      login: true
-      passwordSecret:
-        name: srvc-scrapping-db-secret
-    - name: srvc-drift
-      ensure: present
-      login: true
-      passwordSecret:
-        name: srvc-drift-db-secret
+      - name: admin
+        ensure: present
+        login: true
+        superuser: true
+        passwordSecret:
+          name: admin-db-secret
+      - name: mlflow
+        ensure: present
+        login: true
+        passwordSecret:
+          name: mlflow-db-secret
+      - name: repo-account
+        ensure: present
+        login: true
+        passwordSecret:
+          name: repo-account-db-secret
+      - name: repo-article
+        ensure: present
+        login: true
+        passwordSecret:
+          name: repo-article-db-secret
+      - name: srvc-scrapping
+        ensure: present
+        login: true
+        passwordSecret:
+          name: srvc-scrapping-db-secret
+      - name: srvc-drift
+        ensure: present
+        login: true
+        passwordSecret:
+          name: srvc-drift-db-secret
   storage:
     size: 10Gi
     storageClass: local-path

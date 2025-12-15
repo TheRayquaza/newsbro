@@ -29,7 +29,7 @@ spec:
               strimzi.io/name: kafka-exporter
       ports:
         - protocol: TCP
-          port: 9092  # broker listener port
+          port: 9092 # broker listener port
   egress:
     - to:
         - podSelector:

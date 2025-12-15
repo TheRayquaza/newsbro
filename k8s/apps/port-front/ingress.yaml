@@ -8,16 +8,13 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/limit-rpm: "300"
     nginx.ingress.kubernetes.io/limit-burst: "100"
-    
     cert-manager.io/cluster-issuer: letsencrypt-dns01
 spec:
   ingressClassName: public
-  
   tls:
     - hosts:
         - app.newsbro.cc
       secretName: newsbro-wildcard-tls
-
   rules:
     - host: app.newsbro.cc
       http:
@@ -42,12 +39,10 @@ metadata:
     nginx.ingress.kubernetes.io/permanent-redirect: "https://app.newsbro.cc/$1"
 spec:
   ingressClassName: public
-
   tls:
     - hosts:
         - newsbro.cc
       secretName: newsbro-wildcard-tls
-
   rules:
     - host: newsbro.cc
       http:

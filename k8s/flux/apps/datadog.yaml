@@ -1,4 +1,3 @@
----
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -13,12 +12,12 @@ spec:
     name: flux-system
     namespace: flux-system
   dependsOn:
-  - name: external-secrets
+    - name: external-secrets
   healthChecks:
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: datadog-operator
-    namespace: datadog
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: datadog-operator
+      namespace: datadog
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -34,13 +33,13 @@ spec:
     name: flux-system
     namespace: flux-system
   dependsOn:
-  - name: datadog-operator
+    - name: datadog-operator
   healthChecks:
-  - apiVersion: apps/v1
-    kind: DaemonSet
-    name: datadog-agent-agent
-    namespace: datadog
-  - apiVersion: apps/v1
-    kind: Deployment
-    name: datadog-agent-cluster-agent
-    namespace: datadog
+    - apiVersion: apps/v1
+      kind: DaemonSet
+      name: datadog-agent-agent
+      namespace: datadog
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: datadog-agent-cluster-agent
+      namespace: datadog

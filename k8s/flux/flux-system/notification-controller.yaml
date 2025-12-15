@@ -22,10 +22,10 @@ metadata:
   namespace: flux-system
 spec:
   ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: http
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
   selector:
     app: notification-controller
   type: ClusterIP
@@ -43,10 +43,10 @@ metadata:
   namespace: flux-system
 spec:
   ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: http-webhook
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http-webhook
   selector:
     app: notification-controller
   type: ClusterIP
@@ -87,69 +87,69 @@ spec:
     spec:
       priorityClassName: system-cluster-critical
       containers:
-      - args:
-        - --watch-all-namespaces=true
-        - --log-level=info
-        - --log-encoding=json
-        - --enable-leader-election
-        env:
-        - name: RUNTIME_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: GOMAXPROCS
-          valueFrom:
-            resourceFieldRef:
-              containerName: manager
-              resource: limits.cpu
-        - name: GOMEMLIMIT
-          valueFrom:
-            resourceFieldRef:
-              containerName: manager
-              resource: limits.memory
-        image: ghcr.io/fluxcd/notification-controller:v1.6.0
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: healthz
-        name: manager
-        ports:
-        - containerPort: 9090
-          name: http
-          protocol: TCP
-        - containerPort: 9292
-          name: http-webhook
-          protocol: TCP
-        - containerPort: 8080
-          name: http-prom
-          protocol: TCP
-        - containerPort: 9440
-          name: healthz
-          protocol: TCP
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: healthz
-        resources:
-          limits:
-            cpu: 1000m
-            memory: 1Gi
-          requests:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          seccompProfile:
-            type: RuntimeDefault
-        volumeMounts:
-        - mountPath: /tmp
-          name: temp
+        - args:
+            - --watch-all-namespaces=true
+            - --log-level=info
+            - --log-encoding=json
+            - --enable-leader-election
+          env:
+            - name: RUNTIME_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  containerName: manager
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: manager
+                  resource: limits.memory
+          image: ghcr.io/fluxcd/notification-controller:v1.6.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+          name: manager
+          ports:
+            - containerPort: 9090
+              name: http
+              protocol: TCP
+            - containerPort: 9292
+              name: http-webhook
+              protocol: TCP
+            - containerPort: 8080
+              name: http-prom
+              protocol: TCP
+            - containerPort: 9440
+              name: healthz
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: healthz
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: temp
       nodeSelector:
         kubernetes.io/os: linux
       securityContext:
@@ -157,8 +157,8 @@ spec:
       serviceAccountName: notification-controller
       terminationGracePeriodSeconds: 10
       volumes:
-      - emptyDir: {}
-        name: temp
+        - emptyDir: {}
+          name: temp
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -171,10 +171,10 @@ metadata:
   namespace: flux-system
 spec:
   ingress:
-  - from:
-    - namespaceSelector: {}
+    - from:
+        - namespaceSelector: {}
   podSelector:
     matchLabels:
       app: notification-controller
   policyTypes:
-  - Ingress
+    - Ingress

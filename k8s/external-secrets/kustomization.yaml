@@ -1,8 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- namespace.yaml
-- repo.yaml
-- external-secrets.yaml
-- https://raw.githubusercontent.com/external-secrets/external-secrets/refs/tags/v1.1.1/deploy/crds/bundle.yaml # fix crd bundle
-- network.yaml
+  - namespace.yaml
+  - repo.yaml
+  - external-secrets.yaml
+  - https://raw.githubusercontent.com/external-secrets/external-secrets/refs/tags/v1.1.1/deploy/crds/bundle.yaml # fix crd bundle
+  - network.yaml

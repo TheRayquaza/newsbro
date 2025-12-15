@@ -1,4 +1,3 @@
----
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 namespace: apps
@@ -15,35 +14,28 @@ resources:
   - certificate.yaml
   - oidc-secrets.yaml
   - service-account.yaml
-
 configMapGenerator:
   - name: redis-config
     literals:
       - REDIS_SENTINELS=rfs-kv.redis.svc.cluster.local:26379
       - REDIS_MASTER_NAME=mymaster
-
   - name: kafka-config
     literals:
       - KAFKA_BROKERS=kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
       - KAFKA_BOOTSTRAP_SERVERS=kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
-
       - KAFKA_ARTICLE_COMMAND_TOPIC=new-articles-command
       - KAFKA_INFERENCE_COMMAND_TOPIC=inference-command
-
       - KAFKA_ARTICLE_AGGREGATE_TOPIC=article-aggregate
       - KAFKA_FEEDBACK_AGGREGATE_TOPIC=feedback-aggregate
       - KAFKA_RSS_AGGREGATE_TOPIC=rss-aggregate
-  
   - name: postgres-config
     literals:
       - DATABASE_HOST=postgres-cluster-rw.postgres.svc.cluster.local:5432
       - DATABASE_RO_HOST=postgres-cluster-ro.postgres.svc.cluster.local:5432
-
   - name: qdrant-config
     literals:
       - QDRANT_URL=http://qdrant.qdrant.svc.cluster.local:6333
       # - QDRANT_ARTICLES_COLLECTION=articles
-
   - name: oidc-config
     literals:
       - LOGIN_REDIRECT_URL=https://app.newsbro.cc/login

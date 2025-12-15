@@ -1,4 +1,3 @@
----
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -20,16 +19,11 @@ spec:
     crds: CreateReplace
   values:
     replicaCount: 1
-
     apiKeyExistingSecret: datadog-secret
     appKeyExistingSecret: datadog-secret
-
     clusterName: kube
-
     site: us5.datadoghq.com
-
     env: []
-
     image:
       repository: gcr.io/datadoghq/operator
       tag: 1.20.0-rc.4
@@ -39,7 +33,6 @@ spec:
     nameOverride: ""
     fullnameOverride: ""
     logLevel: "info"
-
     introspection:
       enabled: false
     datadogAgentProfile:
@@ -64,10 +57,8 @@ spec:
       enabled: true
     remoteConfiguration:
       enabled: true
-
     deployment:
       annotations: {}
-
     rbac:
       create: true
     serviceAccount:
@@ -75,7 +66,6 @@ spec:
       name:
       annotations: {}
       automountServiceAccountToken: true
-
     resources:
       limits:
         cpu: 100m
@@ -83,13 +73,10 @@ spec:
       requests:
         cpu: 100m
         memory: 128Mi
-
     nodeSelector: {}
     tolerations: []
     affinity: {}
-
     installCRDs: true
-
     datadogCRDs:
       crds:
         datadogAgents: true
@@ -100,18 +87,14 @@ spec:
         datadogDashboards: true
         datadogGenericResources: true
         datadogAgentProfiles: true
-
     podAnnotations: {}
     podLabels: {}
-
     collectOperatorMetrics: true
-
     watchNamespaces: ["datadog"]
     watchNamespacesAgent: ["datadog"]
     watchNamespacesMonitor: []
     watchNamespacesSLO: []
     watchNamespacesAgentProfile: []
-
     containerSecurityContext:
       runAsUser: 1000
       runAsNonRoot: true
@@ -122,14 +105,11 @@ spec:
           - ALL
       seccompProfile:
         type: RuntimeDefault
-
     volumes: []
     volumeMounts: []
-
     livenessProbe:
       periodSeconds: 10
       initialDelaySeconds: 15
-
     clusterRole:
       allowReadAllResources: false
       allowCreatePodsExec: false

@@ -1,4 +1,3 @@
----
 # https://fluxcd.io/flux/components/helm/helmreleases/
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
@@ -17,37 +16,28 @@ spec:
         namespace: redis
   values:
     imageCredentials: {}
-
     updateStrategy:
       type: RollingUpdate
-
     replicas: 1
-
     nameOverride: ""
     fullnameOverride: ""
     namespace: redis
-
     serviceAccount:
       create: false
       annotations: {}
       name: ""
-
     service:
       type: ClusterIP
       port: 9710
-
     container:
       port: 9710
-
     securityContext:
       readOnlyRootFilesystem: true
       runAsNonRoot: true
       runAsUser: 1019
       runAsGroup: 2019
       fsGroup: 3019
-
     priorityClassName: "critical-resilient"
-
     resources:
       requests:
         cpu: 50m
@@ -55,4 +45,3 @@ spec:
       limits:
         cpu: 100m
         memory: 256Mi
-

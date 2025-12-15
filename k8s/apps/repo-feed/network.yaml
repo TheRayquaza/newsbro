@@ -10,23 +10,23 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-
   ingress:
     - from: # Allow public ingress
-        - namespaceSelector:
+        - podSelector:
             matchLabels:
               kubernetes.io/instance: ingress-nginx-public
+          namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
       ports:
         - protocol: TCP
           port: 8080
-
     - from: # Allow probe
         - ipBlock:
             cidr: 10.42.0.0/16
       ports:
         - protocol: TCP
           port: 8080
-
   egress:
     - to:
         - podSelector:
@@ -35,22 +35,26 @@ spec:
               strimzi.io/cluster: kafka
               strimzi.io/kind: Kafka
               strimzi.io/name: kafka-kafka
+          namespaceSelector:
+            matchLabels:
+              name: kafka
       ports:
         - protocol: TCP
           port: 9091
         - protocol: TCP
           port: 9092
-
     - to:
         - podSelector:
             matchLabels:
               app.kubernetes.io/component: sentinel
               app.kubernetes.io/name: kv
               app.kubernetes.io/part-of: redis-failover
+          namespaceSelector:
+            matchLabels:
+              name: redis
       ports:
         - protocol: TCP
           port: 26379
-
     - to:
         - podSelector:
             matchLabels:
@@ -58,10 +62,12 @@ spec:
               app.kubernetes.io/managed-by: redis-operator
               app.kubernetes.io/name: kv
               app.kubernetes.io/part-of: redis-failover
+          namespaceSelector:
+            matchLabels:
+              name: redis
       ports:
         - protocol: TCP
           port: 6379
-
     - to:
         - namespaceSelector: {}
           podSelector:

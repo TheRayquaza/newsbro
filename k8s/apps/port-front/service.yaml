@@ -1,4 +1,3 @@
----
 kind: Service
 apiVersion: v1
 metadata:
@@ -7,10 +6,10 @@ metadata:
   labels:
     app: port-front
 spec:
-    type: ClusterIP
-    selector:
-      app: port-front
-    ports:
-      - protocol: TCP
-        port: 80
-        targetPort: 80
+  type: ClusterIP
+  selector:
+    app: port-front
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
