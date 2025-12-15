@@ -8,6 +8,6 @@ spec:
   interval: 10m
   url: oci://ghcr.io/gimlet-io/charts/capacitor-next
   ref:
-    tag: "2025-11.2"
+    tag: "0.12.1"
   secretRef:
     name: ghcr-auth

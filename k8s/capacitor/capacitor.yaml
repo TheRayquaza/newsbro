@@ -12,23 +12,22 @@ spec:
   install:
     createNamespace: true
   values:
-    # licenseKey: "{{ .Values.capacitor_token }}" from environment variable via vault
-    session:
-      hashKey: "base64:E3umY2bA87DmllnagrtcT6Uv2Ll6w1oQAY9DUgyUHCE="
-      blockKey: "base64:E3umY2bA87DmllnagrtcT6Uv2Ll6w1oQAY9DUgyUHCE="
+    env:
+      LICENSE_KEY: "" # populated from secret
+      AUTH: noauth
+      AUTH_DEBUG: "true"
+      IMPERSONATE_SA_RULES: "noauth=flux-system:capacitor-next-preset-clusteradmin"
 
-    auth:
-      method: noauth
+      SESSION_HASH_KEY: "base64:E3umY2bA87DmllnagrtcT6Uv2Ll6w1oQAY9DUgyUHCE="
+      SESSION_BLOCK_KEY: "base64:E3umY2bA87DmllnagrtcT6Uv2Ll6w1oQAY9DUgyUHCE="
+      registry.yaml: |
+        clusters:
+        - id: in-cluster
+          name: In-cluster
+          apiServerURL: https://kubernetes.default.svc
+          certificateAuthorityFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          serviceAccount:
+            tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
 
-    authorization:
-      impersonateSaRules: "noauth=flux-system:capacitor-next-builtin-editor"
-
-    clusters:
-    - id: in-cluster
-      name: In-cluster
-      apiServerURL: https://kubernetes.default.svc
-      certificateAuthorityFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-      serviceAccount:
-        tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     existingSecrets:
       - name: capacitor-next
