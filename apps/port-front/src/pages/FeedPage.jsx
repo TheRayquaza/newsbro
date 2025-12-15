@@ -384,14 +384,14 @@ const FeedPage = () => {
                                     <div className="p-12">
                                         <h2
                                             style={{ color: 'var(--nav-text)' }}
-                                            className="text-4xl font-bold mb-6 leading-tight"
+                                            className="text-4xl font-bold mb-6 leading-tight line-clamp-2"
                                         >
                                             {articles[currentIndex].title}
                                         </h2>
 
                                         <p
                                             style={{ color: 'var(--nav-text-muted)' }}
-                                            className="text-xl mb-8 leading-relaxed"
+                                            className="text-xl mb-8 leading-relaxed line-clamp-6"
                                         >
                                             {articles[currentIndex].abstract}
                                         </p>
@@ -403,7 +403,8 @@ const FeedPage = () => {
                                                     borderColor: 'var(--nav-border)',
                                                     color: 'var(--nav-active-text)',
                                                     borderWidth: '1px',
-                                                    borderStyle: 'solid'
+                                                    borderStyle: 'solid',
+                                                    wordWrap: 'break-word'
                                                 }}
                                                 className="px-6 py-2 rounded-full text-sm font-semibold"
                                             >
@@ -416,7 +417,8 @@ const FeedPage = () => {
                                                         borderColor: 'var(--nav-border)',
                                                         color: 'var(--nav-active-text)',
                                                         borderWidth: '1px',
-                                                        borderStyle: 'solid'
+                                                        borderStyle: 'solid',
+                                                        wordWrap: 'break-word'
                                                     }}
                                                     className="px-6 py-2 rounded-full text-sm font-semibold"
                                                 >
@@ -447,7 +449,7 @@ const FeedPage = () => {
                                                     href={articles[currentIndex].link}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    style={{ color: 'var(--nav-active-text)' }}
+                                                    style={{ color: 'var(--nav-active-text)', wordWrap: 'break-word' }}
                                                     onMouseEnter={(e) => e.currentTarget.style.color = 'var(--nav-gradient-to)'}
                                                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--nav-active-text)'}
                                                     className="inline-flex items-center gap-2 px-8 py-3 rounded-full font-semibold transition-all hover:scale-105 hover:underline underline-offset-4"
@@ -600,15 +602,15 @@ const FeedPage = () => {
 
                                         <div className="flex-1 flex flex-col justify-center">
                                             <h2
-                                                style={{ color: 'var(--nav-text)' }}
-                                                className="text-2xl font-bold mb-4 leading-tight"
+                                                style={{ color: 'var(--nav-text)', 'word-wrap': 'break-word' }}
+                                                className="text-4xl font-bold mb-6 leading-tight line-clamp-2"
                                             >
                                                 {articles[currentIndex].title}
                                             </h2>
 
                                             <p
                                                 style={{ color: 'var(--nav-text-muted)' }}
-                                                className="text-base mb-6 leading-relaxed"
+                                                className="text-xl mb-8 leading-relaxed line-clamp-6"
                                             >
                                                 {articles[currentIndex].abstract}
                                             </p>
