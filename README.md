@@ -2,6 +2,10 @@
 
 Distributed resilient architecture for news recommendation
 
+⚠ App is now down (23/12/2025)
+
+---
+
 Feel free to have a look at our [website](https://app.newsbro.cc) to create your account
 and interact with 100k+ articles.
 
@@ -10,11 +14,9 @@ and interact with 100k+ articles.
 We provide automatic update everyday (9am / 6pm UTC), 1k articles ingested
 from various sources. We also provide new recommendation based on your liked articles.
 
-Feel free to open issues if you see anything relevant that could be added.
+![presentation.pdf](./assets/presentation.pdf)
 
-![presentation.pdf](./assets/presentation.pdf))
 
-⚠ App will be down at the end of our project (~ January 2026)
 
 ## Table of Contents
 - [Project Structure](#project-structure)
